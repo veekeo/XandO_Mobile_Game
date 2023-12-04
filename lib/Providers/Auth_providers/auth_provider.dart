@@ -7,23 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
 import 'package:xando/utils/routers.dart';
 
-enum Status {
-  notLoggedIn,
-  notRegistered,
-  loggedIn,
-  registered,
-  authenticating,
-  registering,
-  loggedOut
-}
-
 class AuthenticationProvider extends ChangeNotifier {
-  final Status _loggedInStatus = Status.notLoggedIn;
-  final Status _registeredInStatus = Status.notRegistered;
-
-  Status get loggedInStatus => _loggedInStatus;
-  Status get registeredInStatus => _registeredInStatus;
-
   // Base URL
   final String requestbaseUrl = 'https://tictac-production.up.railway.app';
 

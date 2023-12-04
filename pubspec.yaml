@@ -15,7 +15,7 @@ dependencies:
     sdk: flutter
 
   flutterflow_ui: ^0.2.0
-  
+  firebase_auth: ^4.15.0
   animated_custom_dropdown: ^2.0.0
   another_flushbar: ^1.12.30
   fl_country_code_picker: ^0.1.7+1
@@ -55,6 +55,7 @@ dependencies:
   url_launcher_android: 6.0.27
   url_launcher_ios: 6.1.4
   url_launcher_platform_interface: 2.1.2
+  firebase_core: ^2.24.0
 
 dev_dependencies:
   flutter_test:

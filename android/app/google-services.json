@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1751638104",
+    "project_id": "xando-b349c",
+    "storage_bucket": "xando-b349c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1751638104:android:6c72fa03c212d17f916a2d",
+        "android_client_info": {
+          "package_name": "com.example.xando"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIGMrIb94LAxT8GyOptFpa4lbK2oob1WU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
