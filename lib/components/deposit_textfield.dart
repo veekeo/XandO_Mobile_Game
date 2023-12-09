@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutterflow_ui/flutterflow_ui.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class DepositTextfield extends StatelessWidget {
   const DepositTextfield({
@@ -27,7 +25,7 @@ class DepositTextfield extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5),
               border: Border.all(
-                color: FlutterFlowTheme.of(context).primary,
+                color: const Color(0xFF3B4FFE),
                 width: 1,
               ),
             ),
@@ -40,29 +38,21 @@ class DepositTextfield extends StatelessWidget {
                   Row(
                     mainAxisSize: MainAxisSize.max,
                     children: [
-                      Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0, 0, 5, 0),
+                      const Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(0, 0, 5, 0),
                         child: Text(
                           '+234',
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                fontFamily: 'Plus Jakarta Sans',
-                                fontSize: 14,
-                                fontWeight: FontWeight.normal,
-                                useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                    FlutterFlowTheme.of(context)
-                                        .bodyMediumFamily),
-                              ),
+                          style: TextStyle(
+                            fontFamily: 'Medium',
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
+                          ),
                         ),
                       ),
-                      Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0, 0, 3, 0),
+                      const Padding(
+                        padding: EdgeInsetsDirectional.fromSTEB(0, 0, 3, 0),
                         child: Icon(
                           Icons.keyboard_arrow_down_sharp,
-                          color: FlutterFlowTheme.of(context).primaryText,
                           size: 24,
                         ),
                       ),
@@ -84,42 +74,29 @@ class DepositTextfield extends StatelessWidget {
                         autofocus: true,
                         textCapitalization: TextCapitalization.none,
                         obscureText: false,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           hintText: 'MiN. 100',
-                          hintStyle: FlutterFlowTheme.of(context)
-                              .titleMedium
-                              .override(
-                                fontFamily: 'Plus Jakarta Sans',
-                                color: const Color(0x75FFFFFF),
-                                fontSize: 14,
-                                useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                    FlutterFlowTheme.of(context)
-                                        .titleMediumFamily),
-                              ),
-                          errorStyle: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                fontFamily: 'Plus Jakarta Sans',
-                                color: FlutterFlowTheme.of(context).error,
-                                fontSize: 14,
-                                useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                    FlutterFlowTheme.of(context)
-                                        .bodyMediumFamily),
-                              ),
+                          hintStyle: TextStyle(
+                            fontFamily: 'Medium',
+                            color: Color(0x75FFFFFF),
+                            fontSize: 14,
+                          ),
+                          errorStyle: TextStyle(
+                            fontFamily: 'Medium',
+                            color: Colors.red,
+                            fontSize: 14,
+                          ),
                           enabledBorder: InputBorder.none,
                           focusedBorder: InputBorder.none,
                           errorBorder: InputBorder.none,
                           focusedErrorBorder: InputBorder.none,
                           contentPadding:
-                              const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 15),
+                              EdgeInsetsDirectional.fromSTEB(0, 0, 0, 15),
                         ),
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Plus Jakarta Sans',
-                              fontSize: 14,
-                              useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                  FlutterFlowTheme.of(context)
-                                      .bodyMediumFamily),
-                            ),
+                        style: const TextStyle(
+                          fontFamily: 'Medium',
+                          fontSize: 14,
+                        ),
                         textAlign: TextAlign.end,
                         maxLength: 11,
                         maxLengthEnforcement: MaxLengthEnforcement.enforced,
@@ -129,7 +106,7 @@ class DepositTextfield extends StatelessWidget {
                                 maxLength}) =>
                             null,
                         keyboardType: TextInputType.phone,
-                        cursorColor: FlutterFlowTheme.of(context).primary,
+                        cursorColor: const Color(0xFF3B4FFE),
                         // validator: _model.textControllerValidator
                         // .asValidator(context),
                         inputFormatters: [

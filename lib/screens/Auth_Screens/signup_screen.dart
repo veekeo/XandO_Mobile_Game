@@ -4,8 +4,11 @@ import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Auth_providers/auth_provider.dart';
+import 'package:xando/Providers/Auth_providers/google_auth_provider.dart';
+import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/reusable_widgets/check_password.dart';
+import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
 
 import 'package:xando/screens/Auth_Screens/signin_screen.dart';
 
@@ -57,6 +60,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final String _tryAgain = 'Please try again!';
   @override
   Widget build(BuildContext context) {
+    bool isLoading =
+        Provider.of<GoogleAuthenticationProvider>(context, listen: true)
+            .isLoading;
     return Scaffold(
       body: Center(
         child: ListView(
@@ -332,57 +338,60 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  0, 0, 5, 0),
-                              child: Container(
-                                width: 97,
-                                height: 55,
-                                decoration: BoxDecoration(
-                                  color: const Color.fromARGB(255, 32, 40, 73),
-                                  borderRadius: BorderRadius.circular(5),
-                                ),
-                                child: Align(
-                                  alignment:
-                                      const AlignmentDirectional(0.00, 0.00),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.asset(
-                                      'assets/images/Google.png',
-                                      width: 37,
-                                      height: 37,
-                                      fit: BoxFit.cover,
+                        InkWell(
+                          onTap: isLoading
+                              ? null
+                              : () {
+                                  handleGoogleSignIn();
+                                },
+                          child: Container(
+                            width: 200,
+                            height: 55,
+                            decoration: BoxDecoration(
+                              color: const Color.fromARGB(255, 32, 40, 73),
+                              borderRadius: BorderRadius.circular(5),
+                            ),
+                            child: Align(
+                              alignment: const AlignmentDirectional(0.00, 0.00),
+                              child: isLoading
+                                  ? SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: FlutterFlowTheme.of(context)
+                                            .primary,
+                                        value:
+                                            null, // Set to null for an indeterminate progress indicator
+                                        strokeWidth: 4.0,
+                                      ),
+                                    )
+                                  : Center(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            child: Image.asset(
+                                              'assets/images/Google.png',
+                                              width: 37,
+                                              height: 37,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                          const Text(
+                                            'Continue with Google',
+                                            style: TextStyle(
+                                              fontFamily: 'Medium',
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              ),
                             ),
-                            Container(
-                              width: 97,
-                              height: 55,
-                              decoration: BoxDecoration(
-                                color: const Color.fromARGB(255, 32, 40, 73),
-                                borderRadius: BorderRadius.circular(5),
-                              ),
-                              child: Align(
-                                alignment:
-                                    const AlignmentDirectional(0.00, 0.00),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: Image.asset(
-                                    'assets/images/facebook.png',
-                                    width: 32,
-                                    height: 32,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                         const SizedBox(height: 15),
                         Row(
@@ -454,6 +463,60 @@ class _SignUpScreenState extends State<SignUpScreen> {
         ),
       ),
     );
+  }
+
+//handling google sign in
+
+  Future handleGoogleSignIn() async {
+    final googleSignInProvider = context.read<GoogleAuthenticationProvider>();
+    //internet provider
+    final internetProvider = context.read<InternetProvider>();
+
+    await internetProvider.checkInternetConnection();
+
+    if (internetProvider.hasInternet == false) {
+      // ignore: use_build_context_synchronously
+      showErrorSnackBarMessage(
+        message: 'Please check your internet connection',
+        context: context,
+        status: false,
+      );
+    } else {
+      await googleSignInProvider.signInWithGoogle().then((value) {
+        if (googleSignInProvider.hasError == true) {
+          // ignore: use_build_context_synchronously
+          showErrorSnackBarMessage(
+            message: googleSignInProvider.errorCode.toString(),
+            context: context,
+            status: false,
+          );
+        } else {
+          //check wether user exists or not
+          googleSignInProvider.checkUserExists().then((value) async {
+            if (value == true) {
+              // user exists
+              await googleSignInProvider
+                  .getUserData(context)
+                  .then((value) => handleAfterSignIn());
+            } else {
+              // user does not exists
+              await googleSignInProvider
+                  .saveUserData(context)
+                  .then((value) => handleAfterSignIn());
+            }
+          });
+        }
+      });
+    }
+  }
+
+  //Handle after sign in
+  handleAfterSignIn() {
+    Future.delayed(const Duration(milliseconds: 1000)).then((value) {
+      Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (_) {
+        return const AddPhoneNumberScreen();
+      }));
+    });
   }
 
   InputDecoration customInputDecoration(

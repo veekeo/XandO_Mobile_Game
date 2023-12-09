@@ -12,7 +12,20 @@
           "package_name": "com.example.xando"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1751638104-g51t52mgrtuk0a054g36rdrrfn3k9sj2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.xando",
+            "certificate_hash": "7d23a77728fb48d1380b991347f87c6f50189829"
+          }
+        },
+        {
+          "client_id": "1751638104-61qqki34vl4a67euu7t2depchjalu0vo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAIGMrIb94LAxT8GyOptFpa4lbK2oob1WU"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1751638104-61qqki34vl4a67euu7t2depchjalu0vo.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1751638104-k9gbla8ne3mv8lh4098jb781m8j138cb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.xando"
+              }
+            }
+          ]
         }
       }
     }

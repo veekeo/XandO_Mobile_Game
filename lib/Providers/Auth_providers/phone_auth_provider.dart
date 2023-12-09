@@ -1,7 +1,15 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
+import 'package:xando/Providers/Database/db_provider.dart';
+import 'package:xando/main_page.dart';
 import 'package:xando/screens/Auth_Screens/otp_screen.dart';
+import 'package:xando/utils/routers.dart';
 import 'package:xando/utils/snackbar_message.dart';
+import 'package:http/http.dart' as http;
 
 class PhoneNumberAuthProvider extends ChangeNotifier {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -12,7 +20,13 @@ class PhoneNumberAuthProvider extends ChangeNotifier {
   String? get userId => _userId;
   bool get isLoading => _isLoading;
 
-  void signInWithPhone(BuildContext context, String phoneNumber) async {
+  bool _hasError = false;
+  bool get hasError => _hasError;
+
+  late String _errorCode;
+  String get errorCode => _errorCode;
+
+  Future signInWithPhone(BuildContext context, String phoneNumber) async {
     _isLoading = true;
     notifyListeners();
     try {
@@ -25,15 +39,19 @@ class PhoneNumberAuthProvider extends ChangeNotifier {
             await _firebaseAuth.signInWithCredential(phoneAuthCredential);
           },
           verificationFailed: (error) {
+            _hasError = true;
             _isLoading = false;
+            _errorCode = error.message.toString();
             notifyListeners();
             throw Exception(error.message);
           },
           codeSent: (verificationId, forceResendingToken) {
+            _hasError = false;
             _isLoading = false;
             notifyListeners();
             Navigator.push(context, CupertinoPageRoute(builder: (context) {
-              return OTPScreen(verificationId: verificationId);
+              return OTPScreen(
+                  verificationId: verificationId, phoneNumber: phoneNumber);
             }));
           },
           codeAutoRetrievalTimeout: (verificationId) {});
@@ -41,6 +59,11 @@ class PhoneNumberAuthProvider extends ChangeNotifier {
       // ignore: use_build_context_synchronously
       showErrorSnackBarMessage(
           message: e.message.toString(), context: context, status: true);
+
+      _isLoading = false;
+      _hasError = true;
+      _errorCode = e.message.toString();
+      notifyListeners();
     }
   }
 
@@ -61,6 +84,7 @@ class PhoneNumberAuthProvider extends ChangeNotifier {
       _userId = user.uid;
       onSuccess();
     } on FirebaseAuthException catch (e) {
+      _errorCode = e.message.toString();
       _isLoading = false;
       notifyListeners();
       // ignore: use_build_context_synchronously
@@ -69,64 +93,53 @@ class PhoneNumberAuthProvider extends ChangeNotifier {
     }
   }
 
-  // FirebaseAuth auth = FirebaseAuth.instance;
-  // String resendCodeText = 'RESEND CODE';
-  // bool isSending = false;
-  // String myVerificationId = '';
+  Future<void> saveUserPhoneNumber(BuildContext context, String? userId,
+      Map<String, dynamic> updatedData) async {
+    final dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
 
-  // // late Timer _codeTimer;
+    _isLoading = true;
+    notifyListeners();
+    String requestbaseUrl = 'https://tictac-production.up.railway.app';
+    String url = '$requestbaseUrl/tictac/sign-up/$userId/';
 
-  // // Timer get codeTimer => _codeTimer;
+    try {
+      http.Response req = await http.patch(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(updatedData),
+      );
 
-  // //verify Phone number
+      if (req.statusCode == 200 || req.statusCode == 201) {
+        final res = json.decode(req.body);
+        print(req.statusCode);
+        print('User Updated');
+        print(res);
 
-  // void verifyPhoneNumber(BuildContext context, String phone) async {
-  //   isSending = true;
-  //   notifyListeners();
+        dbProvider.saveUsercontact(res['contact']);
 
-  //   await auth.verifyPhoneNumber(
-  //     phoneNumber: phone,
-  //     verificationCompleted: (PhoneAuthCredential credential) async {
-  //       await auth.signInWithCredential(credential);
-  //       // ignore: use_build_context_synchronously
-  //       PageNavigator(ctx: context).nextPageOnly(page: MainPage());
-  //     },
-  //     timeout: const Duration(seconds: 60),
-  //     verificationFailed: (FirebaseException error) {
-  //       if (error.code == 'invalid-phone-number') {
-  //         isSending = false;
-  //         notifyListeners();
-  //         showErrorSnackBarMessage(
-  //             message: 'Invalid Phone number, try again',
-  //             context: context,
-  //             status: true);
-  //       } else {
-  //         isSending = false;
-  //         notifyListeners();
-  //         showErrorSnackBarMessage(
-  //             message: 'Error, something went wrong',
-  //             context: context,
-  //             status: true);
-  //       }
-  //     },
-  //     codeSent: (String verificationId, int? forceResendingToken) {
-  //       myVerificationId = verificationId;
-  //       notifyListeners();
-  //     },
-  //     codeAutoRetrievalTimeout: (String verificationId) {
-  //       myVerificationId = verificationId;
-  //       isSending = false;
-  //       notifyListeners();
-  //     },
-  //   );
-  // }
-
-  // //verify sms
-  // Future<bool> verifySmsCode(BuildContext context, String otp) async {
-  //   PhoneAuthCredential credential = PhoneAuthProvider.credential(
-  //       verificationId: myVerificationId, smsCode: otp);
-
-  //   var credentials = await auth.signInWithCredential(credential);
-  //   return credentials.user != null ? true : false;
-  // }
+        _hasError = false;
+        _isLoading = false;
+        notifyListeners();
+      } else {
+        final res = json.decode(req.body);
+        print(req.statusCode);
+        print(res);
+        _isLoading = false;
+        _hasError = true;
+        _errorCode = 'Sign in failed';
+        notifyListeners();
+      }
+    } on SocketException catch (_) {
+      _hasError = true;
+      _errorCode = 'Internet connection is not available';
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _hasError = true;
+      _errorCode = e.toString();
+      print(e.toString());
+      notifyListeners();
+    }
+  }
 }

@@ -20,6 +20,7 @@ class _NumericKeyboardState extends State<NumericKeyboard> {
   void _onKeyPressed(String value) {
     setState(() {
       widget.input += value;
+      print(value);
     });
   }
 
@@ -39,9 +40,7 @@ class _NumericKeyboardState extends State<NumericKeyboard> {
     });
   }
 
-  void _onDonePressed() {
-  
-  }
+  void _onDonePressed() {}
 
   @override
   Widget build(BuildContext context) {
@@ -112,26 +111,30 @@ class _NumericKeyboardState extends State<NumericKeyboard> {
   }
 
   Widget _buildButton(String text, VoidCallback onPressed) {
-    return GestureDetector(
+    return InkWell(
       onTap: onPressed,
       child: Padding(
         padding: const EdgeInsets.only(left: 12, right: 12, bottom: 10),
-        child: Text(
-          text,
-          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                fontFamily: 'Plus Jakarta Sans',
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                useGoogleFonts: GoogleFonts.asMap()
-                    .containsKey(FlutterFlowTheme.of(context).bodyMediumFamily),
-              ),
+        child: Container(
+          color: Colors.transparent,
+          child: Text(
+            text,
+            style: FlutterFlowTheme.of(context).bodyMedium.override(
+                  fontFamily: 'Plus Jakarta Sans',
+                  fontSize: 16,
+                  color: Colors.red,
+                  fontWeight: FontWeight.bold,
+                  useGoogleFonts: GoogleFonts.asMap().containsKey(
+                      FlutterFlowTheme.of(context).bodyMediumFamily),
+                ),
+          ),
         ),
       ),
     );
   }
 
   Widget _deleteButton(VoidCallback onPressed) {
-    return GestureDetector(
+    return InkWell(
       onTap: onPressed,
       child: Padding(
         padding: const EdgeInsets.all(10.0).copyWith(left: 25),

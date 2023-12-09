@@ -4,18 +4,43 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/components/currency_balance_container.dart';
 
 import 'package:xando/components/profile_avatar_screen.dart';
 import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 
-import 'package:xando/screens/Main_Screens/profile_screen.dart';
+import 'package:xando/screens/Main_Screens/profile/profile_screen.dart';
 import 'package:xando/screens/Main_Screens/search_screen.dart';
 
-class ReusableAppBar extends StatelessWidget {
-  const ReusableAppBar({
+// ignore: must_be_immutable
+class ReusableAppBar extends StatefulWidget {
+  ReusableAppBar({
+    required this.coin,
     super.key,
   });
+
+  int coin;
+
+  @override
+  State<ReusableAppBar> createState() => _ReusableAppBarState();
+}
+
+class _ReusableAppBarState extends State<ReusableAppBar> {
+  @override
+  void initState() {
+    super.initState();
+
+    widget.coin = 0;
+    _loadUserData();
+  }
+
+  _loadUserData() async {
+    int? coin = await DatabaseProvider().getCoin();
+    setState(() {
+      widget.coin = coin;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,8 +58,8 @@ class ReusableAppBar extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             ProfileAvatar(
-              image: 'assets/images/profile_pic.png',
-              imageSize: 45,
+              image: 'https://api.multiavatar.com/dc8d09961b64430bc4.png',
+              imageSize: 40,
               onTap: () {
                 Navigator.push(context, CupertinoPageRoute(builder: (contect) {
                   return ProfileScreen();
@@ -55,7 +80,46 @@ class ReusableAppBar extends StatelessWidget {
                   },
                   icon: Icon(Icons.search),
                 ),
-                CurrencyBalanceContainer(),
+                Container(
+                  width: 125,
+                  height: 29,
+                  padding: EdgeInsets.symmetric(horizontal: 3),
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 32, 40, 73),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                  child: Wrap(
+                    alignment: WrapAlignment.start,
+                    runAlignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.asset(
+                          'assets/images/naira_coin.png',
+                          width: 15,
+                          height: 15,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      Padding(
+                        padding:
+                            const EdgeInsetsDirectional.fromSTEB(2, 0, 0, 0),
+                        child: Text(
+                          widget.coin.toString(),
+                          style: const TextStyle(
+                            fontFamily: 'Medium',
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      // const Icon(
+                      //   Icons.keyboard_arrow_down,
+                      // ),
+                    ],
+                  ),
+                ),
                 SizedBox(width: 5),
                 FFButtonWidget(
                   onPressed: () {

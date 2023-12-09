@@ -1,7 +1,9 @@
 // ignore_for_file: prefer_const_constructors, sized_box_for_whitespace, library_private_types_in_public_api, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:xando/XandO/create_a_game.dart';
 import 'package:xando/screens/Main_Screens/chat_screen.dart';
 import 'package:xando/screens/Main_Screens/create_game_screen.dart';
 import 'package:xando/screens/Main_Screens/game_screen.dart';
@@ -261,7 +263,10 @@ class _MainPageState extends State<MainPage> {
                       size: 30,
                     ),
                     onPressed: () {
-                      showCreateGameBottomSheet(context);
+                      Navigator.push(context,
+                          CupertinoPageRoute(builder: (context) {
+                        return CreateGameScreen();
+                      }));
                     },
                   ),
                 ),

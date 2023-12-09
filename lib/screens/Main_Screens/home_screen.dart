@@ -3,6 +3,7 @@ import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/models/home_screen_model.dart';
 import 'package:xando/reusable_widgets/banner_pageview.dart';
 import 'package:xando/reusable_widgets/reusable_appbar.dart';
@@ -14,14 +15,24 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late int _coin;
   late HomePageModel _model;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
   late StreamSubscription<bool> _keyboardVisibilitySubscription;
 
+  _loadUserData() async {
+    int? coin = await DatabaseProvider().getCoin();
+    setState(() {
+      _coin = coin;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
+    _coin = 0;
+    _loadUserData();
     _model = createModel(context, () => HomePageModel());
   }
 
@@ -54,7 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
         key: scaffoldKey,
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(120), // Set this height
-          child: ReusableAppBar(),
+          child: ReusableAppBar(
+            coin: _coin,
+          ),
         ),
         body: SafeArea(
           top: true,

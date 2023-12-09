@@ -24,7 +24,7 @@ class ProfileAvatar extends StatelessWidget {
           color: FlutterFlowTheme.of(context).secondaryBackground,
           image: DecorationImage(
             fit: BoxFit.cover,
-            image: Image.asset(
+            image: Image.network(
               image,
             ).image,
           ),

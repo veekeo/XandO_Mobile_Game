@@ -1,6 +1,8 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xando/components/numeric_keyboard.dart';
@@ -24,6 +26,8 @@ class _SheetContent extends StatefulWidget {
 }
 
 class _SheetContentState extends State<_SheetContent> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _gameTitleController = TextEditingController();
   NumericKeyboard numericKeyboard = NumericKeyboard(input: '100');
 
   String stake = '100';
@@ -34,22 +38,12 @@ class _SheetContentState extends State<_SheetContent> {
     });
   }
 
-  bool _numericKeyboardVisibility = false;
-
-  void toggleNumericKeyboard() {
-    setState(() {
-      _numericKeyboardVisibility = !_numericKeyboardVisibility;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
-      constraints: BoxConstraints(
-        maxHeight: _numericKeyboardVisibility
-            ? 320.0 + 60
-            : 280, // Set the maximum height of the bottom sheet
-      ),
+      constraints: BoxConstraints(maxHeight: 450
+          // Set the maximum height of the bottom sheet
+          ),
       width: double.infinity,
       // Add your bottom sheet content here
       padding: EdgeInsets.all(0),
@@ -75,6 +69,68 @@ class _SheetContentState extends State<_SheetContent> {
                   ),
                 ),
               ),
+              SizedBox(height: 10),
+              Align(
+                alignment: AlignmentDirectional(-1.00, 0.00),
+                child: Padding(
+                  padding: EdgeInsetsDirectional.fromSTEB(15, 0, 15, 5),
+                  child: Text(
+                    'Game Title',
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          fontFamily: 'Plus Jakarta Sans',
+                          color: Color(0xB2FFFFFF),
+                          fontSize: 12,
+                          fontWeight: FontWeight.normal,
+                          useGoogleFonts: GoogleFonts.asMap().containsKey(
+                              FlutterFlowTheme.of(context).bodyMediumFamily),
+                        ),
+                  ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(15, 0, 15, 5),
+                child: Form(
+                  key: _formKey,
+                  child: TextFormField(
+                    controller: _gameTitleController,
+                    onChanged: (value) => EasyDebounce.debounce(
+                      '_gameTitleController',
+                      const Duration(milliseconds: 2000),
+                      () => setState(() {}),
+                    ),
+                    textCapitalization: TextCapitalization.none,
+                    decoration: customInputDecoration(
+                      context: context,
+                      hintText: 'Enter a Game Title',
+                    ),
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontSize: 16,
+                          useGoogleFonts: GoogleFonts.asMap().containsKey(
+                              FlutterFlowTheme.of(context).bodyMediumFamily),
+                        ),
+                    textAlign: TextAlign.start,
+                    maxLength: 15,
+                    maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                    buildCounter: (context,
+                            {required currentLength,
+                            required isFocused,
+                            maxLength}) =>
+                        null,
+                    keyboardType: TextInputType.text,
+                    textInputAction: TextInputAction.done,
+                    maxLines: 1,
+                    cursorColor: FlutterFlowTheme.of(context).primary,
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Failed!';
+                      }
+
+                      return null;
+                    },
+                  ),
+                ),
+              ),
               Align(
                 alignment: AlignmentDirectional(-1.00, 0.00),
                 child: Padding(
@@ -92,78 +148,71 @@ class _SheetContentState extends State<_SheetContent> {
                   ),
                 ),
               ),
-              GestureDetector(
-                onTap: () {
-                  toggleNumericKeyboard();
-                },
-                child: Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(15, 0, 15, 0),
-                  child: Container(
-                    width: double.infinity / 2,
-                    height: 45,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      border: Border.all(
-                        color: FlutterFlowTheme.of(context).primary,
-                      ),
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(15, 0, 15, 0),
+                child: Container(
+                  width: double.infinity / 2,
+                  height: 45,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(
+                      color: FlutterFlowTheme.of(context).primary,
                     ),
-                    child: Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.asset(
-                                  'assets/images/naira_coin.png',
-                                  width: 22,
-                                  height: 22,
-                                  fit: BoxFit.cover,
-                                ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.fromSTEB(10, 0, 10, 0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.max,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          mainAxisSize: MainAxisSize.max,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.asset(
+                                'assets/images/naira_coin.png',
+                                width: 22,
+                                height: 22,
+                                fit: BoxFit.cover,
                               ),
-                              Padding(
-                                padding:
-                                    EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
-                                child: Text(
-                                  numericKeyboard.input,
-                                  textAlign: TextAlign.start,
-                                  style: FlutterFlowTheme.of(context)
-                                      .bodyMedium
-                                      .override(
-                                        fontFamily: 'Plus Jakarta Sans',
-                                        fontWeight: FontWeight.bold,
-                                        useGoogleFonts: GoogleFonts.asMap()
-                                            .containsKey(
-                                                FlutterFlowTheme.of(context)
-                                                    .bodyMediumFamily),
-                                      ),
-                                ),
+                            ),
+                            Padding(
+                              padding:
+                                  EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
+                              child: Text(
+                                numericKeyboard.input,
+                                textAlign: TextAlign.start,
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: 'Plus Jakarta Sans',
+                                      fontWeight: FontWeight.bold,
+                                      useGoogleFonts: GoogleFonts.asMap()
+                                          .containsKey(
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMediumFamily),
+                                    ),
                               ),
-                            ],
-                          ),
-                          Icon(
-                            Icons.clear_outlined,
-                            color: Colors.white,
-                            size: 24,
-                          ),
-                        ],
-                      ),
+                            ),
+                          ],
+                        ),
+                        Icon(
+                          Icons.clear_outlined,
+                          color: Colors.white,
+                          size: 24,
+                        ),
+                      ],
                     ),
                   ),
                 ),
               ),
-              _numericKeyboardVisibility
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: NumericKeyboard(
-                        input: numericKeyboard.input,
-                      ),
-                    )
-                  : SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: NumericKeyboard(
+                  input: numericKeyboard.input,
+                ),
+              ),
               Align(
                 alignment: AlignmentDirectional(-1.00, 0.00),
                 child: Padding(
@@ -237,8 +286,91 @@ class _SheetContentState extends State<_SheetContent> {
                   ),
                 ),
               ),
-              SizedBox(height: 10),
-              // Padding(
+              Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(15, 5, 15, 10),
+                child: FFButtonWidget(
+                  onPressed: () {},
+                  text: 'Create Game',
+                  options: FFButtonOptions(
+                    width: double.infinity,
+                    height: 50,
+                    padding: EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
+                    iconPadding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
+                    color: FlutterFlowTheme.of(context).primary,
+                    textStyle: FlutterFlowTheme.of(context)
+                        .headlineSmall
+                        .override(
+                          fontFamily: 'Plus Jakarta Sans',
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          useGoogleFonts: GoogleFonts.asMap().containsKey(
+                              FlutterFlowTheme.of(context).headlineSmallFamily),
+                        ),
+                    elevation: 0,
+                    borderSide: BorderSide(
+                      color: Colors.transparent,
+                      width: 1,
+                    ),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+              ),
+            ],
+          )),
+    );
+  }
+
+  InputDecoration customInputDecoration({
+    required BuildContext context,
+    required String hintText,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: FlutterFlowTheme.of(context).labelMedium.override(
+            fontFamily: 'Plus Jakarta Sans',
+            color: const Color(0x84FFFFFF),
+            useGoogleFonts: GoogleFonts.asMap()
+                .containsKey(FlutterFlowTheme.of(context).labelMediumFamily),
+          ),
+      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8),
+      enabledBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: Color(0x85FFFFFF),
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: FlutterFlowTheme.of(context).primary,
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: FlutterFlowTheme.of(context).error,
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: FlutterFlowTheme.of(context).error,
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(5),
+      ),
+    );
+  }
+}
+
+
+
+
+
+
+       // Padding(
               //   padding: const EdgeInsets.only(left: 15, right: 15, bottom: 5),
               //   child: Row(
               //     mainAxisSize: MainAxisSize.max,
@@ -386,37 +518,3 @@ class _SheetContentState extends State<_SheetContent> {
               //     ],
               //   ),
               // ),
-              Padding(
-                padding: EdgeInsetsDirectional.fromSTEB(15, 5, 15, 10),
-                child: FFButtonWidget(
-                  onPressed: () {},
-                  text: 'Create Game',
-                  options: FFButtonOptions(
-                    width: double.infinity,
-                    height: 50,
-                    padding: EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
-                    iconPadding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-                    color: FlutterFlowTheme.of(context).primary,
-                    textStyle: FlutterFlowTheme.of(context)
-                        .headlineSmall
-                        .override(
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          useGoogleFonts: GoogleFonts.asMap().containsKey(
-                              FlutterFlowTheme.of(context).headlineSmallFamily),
-                        ),
-                    elevation: 0,
-                    borderSide: BorderSide(
-                      color: Colors.transparent,
-                      width: 1,
-                    ),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-              ),
-            ],
-          )),
-    );
-  }
-}

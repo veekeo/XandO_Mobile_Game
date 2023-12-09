@@ -1,19 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:flutterflow_ui/flutterflow_ui.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:xando/screens/Main_Screens/conversions_bottomsheet.dart';
 
 class CurrencyBalanceContainer extends StatelessWidget {
-  const CurrencyBalanceContainer({
-    super.key,
-  });
+  const CurrencyBalanceContainer({super.key, required this.coin});
+
+  final String coin;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        showConversionsBottomSheet(context);
-      },
+      // onTap: () {
+      //   showConversionsBottomSheet(context);
+      // },
       child: Container(
         width: 125,
         height: 29,
@@ -38,19 +35,17 @@ class CurrencyBalanceContainer extends StatelessWidget {
             Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(2, 0, 0, 0),
               child: Text(
-                '0.0000000',
-                style: FlutterFlowTheme.of(context).bodyMedium.override(
-                      fontFamily: 'Plus Jakarta Sans',
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      useGoogleFonts: GoogleFonts.asMap().containsKey(
-                          FlutterFlowTheme.of(context).bodyMediumFamily),
-                    ),
+                coin,
+                style: const TextStyle(
+                  fontFamily: 'Medium',
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            const Icon(
-              Icons.keyboard_arrow_down,
-            ),
+            // const Icon(
+            //   Icons.keyboard_arrow_down,
+            // ),
           ],
         ),
       ),

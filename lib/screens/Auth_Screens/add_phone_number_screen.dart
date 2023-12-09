@@ -1,5 +1,3 @@
-// ignore_for_file: prefer_const_constructors, library_private_types_in_public_api
-
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:easy_debounce/easy_debounce.dart';
@@ -7,14 +5,16 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Auth_providers/phone_auth_provider.dart';
+import 'package:xando/Providers/Database/db_provider.dart';
+import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/components/primary_button.dart';
-
 import 'package:xando/utils/snackbar_message.dart';
 
 class AddPhoneNumberScreen extends StatefulWidget {
   const AddPhoneNumberScreen({Key? key}) : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _AddPhoneNumberScreenState createState() => _AddPhoneNumberScreenState();
 }
 
@@ -32,7 +32,7 @@ class _AddPhoneNumberScreenState extends State<AddPhoneNumberScreen> {
         maintainBottomViewPadding: true,
         top: true,
         child: SingleChildScrollView(
-          physics: NeverScrollableScrollPhysics(),
+          physics: const NeverScrollableScrollPhysics(),
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.max,
@@ -48,9 +48,9 @@ class _AddPhoneNumberScreenState extends State<AddPhoneNumberScreen> {
                   ),
                 ),
                 Align(
-                  alignment: AlignmentDirectional(0.00, 0.00),
+                  alignment: const AlignmentDirectional(0.00, 0.00),
                   child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
+                    padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
                     child: Text(
                       'Verify Your \nPhone Number',
                       textAlign: TextAlign.center,
@@ -65,15 +65,15 @@ class _AddPhoneNumberScreenState extends State<AddPhoneNumberScreen> {
                   ),
                 ),
                 Align(
-                  alignment: AlignmentDirectional(0.00, 0.00),
+                  alignment: const AlignmentDirectional(0.00, 0.00),
                   child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
+                    padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
                     child: Text(
                       'Verify your phone number for enhanced \nsecurity and seamless\ncommunication during signup!',
                       textAlign: TextAlign.center,
                       style: FlutterFlowTheme.of(context).bodyLarge.override(
                             fontFamily: 'Plus Jakarta Sans',
-                            color: Color(0xB1FFFFFF),
+                            color: const Color(0xB1FFFFFF),
                             fontSize: 14,
                             fontWeight: FontWeight.normal,
                             useGoogleFonts: GoogleFonts.asMap().containsKey(
@@ -84,15 +84,16 @@ class _AddPhoneNumberScreenState extends State<AddPhoneNumberScreen> {
                 ),
                 const SizedBox(height: 5),
                 Align(
-                  alignment: AlignmentDirectional(0.00, 0.00),
+                  alignment: const AlignmentDirectional(0.00, 0.00),
                   child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(5, 5, 5, 5),
+                    padding: const EdgeInsetsDirectional.fromSTEB(5, 5, 5, 5),
                     child: Row(
                       mainAxisSize: MainAxisSize.max,
                       children: [
                         Expanded(
                           child: Padding(
-                            padding: EdgeInsetsDirectional.fromSTEB(8, 0, 8, 2),
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                8, 0, 8, 2),
                             child: Form(
                               key: _formKey,
                               child: TextFormField(
@@ -100,7 +101,7 @@ class _AddPhoneNumberScreenState extends State<AddPhoneNumberScreen> {
                                 controller: _phoneNumberController,
                                 onChanged: (_) => EasyDebounce.debounce(
                                   '_model.textController',
-                                  Duration(milliseconds: 2000),
+                                  const Duration(milliseconds: 2000),
                                   () => setState(() {}),
                                 ),
                                 textCapitalization: TextCapitalization.none,
@@ -115,7 +116,7 @@ class _AddPhoneNumberScreenState extends State<AddPhoneNumberScreen> {
                                             _phoneNumberController.clear();
                                             setState(() {});
                                           },
-                                          child: Icon(
+                                          child: const Icon(
                                             Icons.clear,
                                             color: Colors.white,
                                             size: 20,
@@ -169,13 +170,18 @@ class _AddPhoneNumberScreenState extends State<AddPhoneNumberScreen> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
                   child: PrimaryButton(
                     title: 'Send OTP',
                     width: 200,
                     height: 55,
                     onpressed: () {
                       if (_formKey.currentState?.validate() ?? false) {
+                        Provider.of<DatabaseProvider>(context, listen: false)
+                            .getUserId()
+                            .then(
+                              (value) {},
+                            );
                         sendPhoneNumber();
                       } else {
                         setState(() {
@@ -198,10 +204,25 @@ class _AddPhoneNumberScreenState extends State<AddPhoneNumberScreen> {
     );
   }
 
-  void sendPhoneNumber() {
+  void sendPhoneNumber() async {
     final ap = Provider.of<PhoneNumberAuthProvider>(context, listen: false);
+
+    //internet provider
+    final internetProvider = context.read<InternetProvider>();
+    await internetProvider.checkInternetConnection();
     String phoneNumber = _ngDailCode + _phoneNumberController.text.trim();
-    ap.signInWithPhone(context, phoneNumber);
+
+    if (internetProvider.hasInternet == false) {
+      // ignore: use_build_context_synchronously
+      showErrorSnackBarMessage(
+        message: 'Please check your internet connection',
+        context: context,
+        status: false,
+      );
+    } else {
+      // ignore: use_build_context_synchronously
+      ap.signInWithPhone(context, phoneNumber);
+    }
   }
 
   //input decoration
@@ -268,9 +289,9 @@ class _AddPhoneNumberScreenState extends State<AddPhoneNumberScreen> {
               fit: BoxFit.cover,
             ),
           ),
-          SizedBox(width: 3),
+          const SizedBox(width: 3),
           Padding(
-            padding: EdgeInsetsDirectional.fromSTEB(5, 0, 10, 0),
+            padding: const EdgeInsetsDirectional.fromSTEB(5, 0, 10, 0),
             child: Text(
               "+234",
               style: FlutterFlowTheme.of(context).bodyMedium.override(
@@ -287,7 +308,7 @@ class _AddPhoneNumberScreenState extends State<AddPhoneNumberScreen> {
             child: Container(
               width: 2,
               height: 20,
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 color: Colors.grey,
               ),
             ),

@@ -70,7 +70,9 @@ class _GameScreenState extends State<GameScreen> {
                                       .bodyMediumFamily),
                             ),
                       ),
-                      CurrencyBalanceContainer(),
+                      CurrencyBalanceContainer(
+                        coin: '2344',
+                      ),
                     ],
                   ),
                 ),

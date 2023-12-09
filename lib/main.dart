@@ -3,8 +3,14 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Auth_providers/auth_provider.dart';
+import 'package:xando/Providers/Auth_providers/google_auth_provider.dart';
 import 'package:xando/Providers/Auth_providers/phone_auth_provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:xando/Providers/Database/db_provider.dart';
+import 'package:xando/Providers/Game/create_game_provider.dart';
+import 'package:xando/Providers/Profile/edit_profile_provider.dart';
+import 'package:xando/Providers/avatar_provider.dart';
+import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/screens/splash_screen.dart';
 import 'firebase_options.dart';
 
@@ -23,6 +29,12 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthenticationProvider()),
         ChangeNotifierProvider(create: (_) => PhoneNumberAuthProvider()),
+        ChangeNotifierProvider(create: (_) => GoogleAuthenticationProvider()),
+        ChangeNotifierProvider(create: (_) => InternetProvider()),
+        ChangeNotifierProvider(create: (_) => DatabaseProvider()),
+        ChangeNotifierProvider(create: (_) => AvatarProvider()),
+        ChangeNotifierProvider(create: (_) => EditProfileProvider()),
+        ChangeNotifierProvider(create: (_) => CreateGameProvider()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,

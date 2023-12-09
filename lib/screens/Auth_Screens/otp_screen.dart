@@ -1,13 +1,13 @@
 // ignore_for_file: library_private_types_in_public_api, prefer_const_constructors
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterflow_ui/flutterflow_ui.dart';
 
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Auth_providers/phone_auth_provider.dart';
+import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/main_page.dart';
 import 'package:xando/utils/routers.dart';
@@ -15,7 +15,10 @@ import 'package:xando/utils/snackbar_message.dart';
 
 class OTPScreen extends StatefulWidget {
   final String verificationId;
-  const OTPScreen({Key? key, required this.verificationId}) : super(key: key);
+  final String phoneNumber;
+  const OTPScreen(
+      {Key? key, required this.verificationId, required this.phoneNumber})
+      : super(key: key);
 
   @override
   _OTPScreenState createState() => _OTPScreenState();
@@ -62,7 +65,7 @@ class _OTPScreenState extends State<OTPScreen> {
                     Padding(
                       padding: EdgeInsetsDirectional.fromSTEB(20, 0, 5, 0),
                       child: Text(
-                        'Enter OTP sent to your phone Number',
+                        'Enter OTP sent to: ${widget.phoneNumber}',
                         textAlign: TextAlign.center,
                         style: FlutterFlowTheme.of(context).bodySmall.override(
                               fontFamily: 'Plus Jakarta Sans',
@@ -215,13 +218,24 @@ class _OTPScreenState extends State<OTPScreen> {
 
   void verifyOtp(BuildContext context, userOtp) {
     final ap = Provider.of<PhoneNumberAuthProvider>(context, listen: false);
+    final dbProvider = context.read<DatabaseProvider>();
     ap.verifyOtp(
         context: context,
         verificationId: widget.verificationId,
         userOtp: userOtp,
-        onSuccess: () {
+        onSuccess: () async {
           //check DB
-          PageNavigator(ctx: context).nextPageOnly(page: MainPage());
+          ap.saveUserPhoneNumber(context, dbProvider.userId,
+              {'contact': widget.phoneNumber}).then((value) {
+            if (ap.hasError == true) {
+              print(dbProvider.userId);
+              showErrorSnackBarMessage(
+                  message: ap.errorCode, context: context, status: true);
+            } else {
+              PageNavigator(ctx: context).nextPageOnly(page: MainPage());
+            }
+          });
+          // ignore: use_build_context_synchronously
         });
   }
 }
