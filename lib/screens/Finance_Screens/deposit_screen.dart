@@ -1,290 +1,161 @@
+import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:flutter/services.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:xando/components/deposit_textfield.dart';
-import 'package:xando/screens/Finance_Screens/add_card_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:xando/Providers/Database/db_provider.dart';
+import 'package:xando/Providers/internet_provider.dart';
+import 'package:xando/Providers/paystack_provider.dart';
+import 'package:xando/components/primary_button.dart';
+import 'package:xando/screens/paystack_checkout_screen.dart';
+import 'package:xando/utils/snackbar_message.dart';
 
-class DepositScreen extends StatefulWidget {
-  const DepositScreen({super.key});
+class Deposit extends StatefulWidget {
+  const Deposit({super.key, required this.coin});
+
+  final int coin;
 
   @override
-  State<DepositScreen> createState() => _DepositScreenState();
+  State<Deposit> createState() => _DepositState();
 }
 
-class _DepositScreenState extends State<DepositScreen> {
-  bool _isSelected = false;
+class _DepositState extends State<Deposit> {
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _stakeAmountController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
-  void _updateSelectedCard() {
-    if (_isSelected == false) {
-      setState(() {
-        _isSelected = true;
-      });
-    }
+  _loadUserData() async {
+    String email = await DatabaseProvider().getEmail();
+    setState(() {
+      _emailController.text = email;
+    });
   }
 
   @override
   void initState() {
     super.initState();
+    _loadUserData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120), // Set this height
-        child: SizedBox(
-          width: MediaQuery.of(context).size.width,
-          child: Padding(
-            padding: const EdgeInsets.only(
-              right: 13.0,
-              left: 13,
-              top: 50,
-              bottom: 20,
-            ),
-            child: GestureDetector(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.chevron_left,
-                    size: 30,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Deposit',
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          useGoogleFonts: GoogleFonts.asMap().containsKey(
-                              FlutterFlowTheme.of(context).bodyMediumFamily),
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-      body: SafeArea(
-        child: ListView(
-          physics: const NeverScrollableScrollPhysics(),
-          children: [
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(13, 0, 13, 0),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.max,
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          'Deposit Currency',
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                fontFamily: 'Plus Jakarta Sans',
-                                color: const Color(0xB3FFFFFF),
-                                useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                    FlutterFlowTheme.of(context)
-                                        .bodyMediumFamily),
-                              ),
-                        ),
-                        Text(
-                          'Amount',
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                fontFamily: 'Plus Jakarta Sans',
-                                color: const Color(0xB3FFFFFF),
-                                useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                    FlutterFlowTheme.of(context)
-                                        .bodyMediumFamily),
-                              ),
-                        ),
-                      ],
+    return ListView(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(13, 0, 13, 0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 15),
+                  child: Container(
+                    width: double.infinity,
+                    height: 130,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          const Color(0xFF913BFE),
+                          FlutterFlowTheme.of(context).primary
+                        ],
+                        stops: const [0, 1],
+                        begin: const AlignmentDirectional(0, -1),
+                        end: const AlignmentDirectional(0, 1),
+                      ),
+                      borderRadius: BorderRadius.circular(20),
                     ),
-                  ),
-                  const DepositTextfield(),
-                  SavedCard(
-                    onTap: () {
-                      _updateSelectedCard();
-                    },
-                    cardType: 'assets/images/visa_card.png',
-                    cardNumTruncated: '****3456',
-                    isSelected: _isSelected,
-                  ),
-                  const UseNewCard(),
-                  Padding(
-                    padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 20),
-                    child: FFButtonWidget(
-                      onPressed: () {},
-                      text: 'Top up now',
-                      options: FFButtonOptions(
-                        width: 200,
-                        height: 45,
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(24, 0, 24, 0),
-                        iconPadding:
-                            const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 0),
-                        color: FlutterFlowTheme.of(context).primary,
-                        textStyle:
-                            FlutterFlowTheme.of(context).headlineSmall.override(
-                                  fontFamily: 'Plus Jakarta Sans',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  useGoogleFonts: GoogleFonts.asMap()
-                                      .containsKey(FlutterFlowTheme.of(context)
-                                          .headlineSmallFamily),
+                    child: Padding(
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(15, 10, 15, 10),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0, 0, 0, 8),
+                            child: Text(
+                              'Balance',
+                              style: FlutterFlowTheme.of(context)
+                                  .bodyMedium
+                                  .override(
+                                    fontFamily: 'Plus Jakarta Sans',
+                                    fontWeight: FontWeight.bold,
+                                    useGoogleFonts: GoogleFonts.asMap()
+                                        .containsKey(
+                                            FlutterFlowTheme.of(context)
+                                                .bodyMediumFamily),
+                                  ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0, 0, 0, 5),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                //Future Builder
+                                Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      0, 0, 0, 8),
+                                  child: Text(
+                                    '${widget.coin.toString()} NGN',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Plus Jakarta Sans',
+                                          fontSize: 32,
+                                          fontWeight: FontWeight.bold,
+                                          useGoogleFonts: GoogleFonts.asMap()
+                                              .containsKey(
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMediumFamily),
+                                        ),
+                                  ),
                                 ),
-                        elevation: 0,
-                        borderSide: const BorderSide(
-                          color: Colors.transparent,
-                          width: 1,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  color:
+                                      FlutterFlowTheme.of(context).primaryText,
+                                  size: 24,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const DepositInstruction(),
-                ],
-              ),
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class SavedCard extends StatelessWidget {
-  const SavedCard({
-    super.key,
-    required this.cardType,
-    required this.cardNumTruncated,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final String cardType;
-  final String cardNumTruncated;
-  final bool isSelected;
-  final Function()? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: isSelected
-          ? Padding(
-              padding: const EdgeInsets.only(bottom: 10.0),
-              child: Container(
-                width: double.infinity,
-                height: 45,
-                decoration: BoxDecoration(
-                  color: const Color(0x2F00DA5F),
-                  borderRadius: BorderRadius.circular(5),
-                  border: Border.all(
-                    color: const Color(0xF800DA5F),
-                  ),
                 ),
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(15, 0, 15, 0),
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                0, 0, 5, 0),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.asset(
-                                cardType,
-                                width: 43,
-                                height: 31,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                          ),
-                          Text(
-                            cardNumTruncated,
-                            style: FlutterFlowTheme.of(context)
-                                .bodyMedium
-                                .override(
-                                  fontFamily: 'Plus Jakarta Sans',
-                                  color:
-                                      FlutterFlowTheme.of(context).primaryText,
-                                  fontWeight: FontWeight.bold,
-                                  useGoogleFonts: GoogleFonts.asMap()
-                                      .containsKey(FlutterFlowTheme.of(context)
-                                          .bodyMediumFamily),
-                                ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisSize: MainAxisSize.max,
-                        children: [
-                          const Padding(
-                            padding:
-                                EdgeInsetsDirectional.fromSTEB(0, 0, 10, 0),
-                            child: Icon(
-                              Icons.check_sharp,
-                              color: Color(0xF800DA5F),
-                              size: 24,
-                            ),
-                          ),
-                          Icon(
-                            Icons.cancel_outlined,
-                            color: FlutterFlowTheme.of(context).primaryText,
-                            size: 20,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            )
-          : Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(15, 0, 15, 15),
-              child: Row(
-                mainAxisSize: MainAxisSize.max,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    mainAxisSize: MainAxisSize.max,
-                    children: [
-                      Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0, 0, 5, 0),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.asset(
-                            cardType,
-                            width: 43,
-                            height: 31,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
                       Text(
-                        cardNumTruncated,
+                        'Deposit Currency',
                         style: FlutterFlowTheme.of(context).bodyMedium.override(
                               fontFamily: 'Plus Jakarta Sans',
-                              color: FlutterFlowTheme.of(context).primaryText,
-                              fontWeight: FontWeight.bold,
+                              color: const Color(0xB3FFFFFF),
+                              useGoogleFonts: GoogleFonts.asMap().containsKey(
+                                  FlutterFlowTheme.of(context)
+                                      .bodyMediumFamily),
+                            ),
+                      ),
+                      Text(
+                        'Amount',
+                        style: FlutterFlowTheme.of(context).bodyMedium.override(
+                              fontFamily: 'Plus Jakarta Sans',
+                              color: const Color(0xB3FFFFFF),
                               useGoogleFonts: GoogleFonts.asMap().containsKey(
                                   FlutterFlowTheme.of(context)
                                       .bodyMediumFamily),
@@ -292,64 +163,268 @@ class SavedCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Icon(
-                    Icons.cancel_outlined,
-                    color: FlutterFlowTheme.of(context).primaryText,
-                    size: 20,
+                ),
+                //Deposit Texfied here
+
+                Align(
+                  alignment: const AlignmentDirectional(0.00, 0.00),
+                  child: Material(
+                    color: Colors.transparent,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(5),
+                    ),
+                    child: TextFormField(
+                      controller: _stakeAmountController,
+                      autofocus: true,
+                      textCapitalization: TextCapitalization.none,
+                      obscureText: false,
+                      decoration: InputDecoration(
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: const BorderSide(
+                            color: Color(0x85FFFFFF),
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: FlutterFlowTheme.of(context).primary,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: FlutterFlowTheme.of(context).error,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        focusedErrorBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: FlutterFlowTheme.of(context).error,
+                            width: 1,
+                          ),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        prefix: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Padding(
+                              padding:
+                                  EdgeInsetsDirectional.fromSTEB(0, 0, 5, 0),
+                              child: Text(
+                                'NGN',
+                                style: TextStyle(
+                                  fontFamily: 'Medium',
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.normal,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              width: 2,
+                              height: 20,
+                              decoration: const BoxDecoration(
+                                color: Color.fromARGB(255, 82, 82, 82),
+                              ),
+                            ),
+                          ],
+                        ),
+                        hintText: 'MIN. 100',
+                        hintStyle: const TextStyle(
+                          fontFamily: 'Medium',
+                          color: Color(0x75FFFFFF),
+                          fontSize: 14,
+                        ),
+                        errorStyle: const TextStyle(
+                          fontFamily: 'Medium',
+                          color: Colors.red,
+                          fontSize: 14,
+                        ),
+                        contentPadding:
+                            const EdgeInsetsDirectional.fromSTEB(15, 0, 15, 0),
+                      ),
+                      style: const TextStyle(
+                        fontFamily: 'Medium',
+                        fontSize: 14,
+                      ),
+                      textAlign: TextAlign.end,
+                      maxLength: 11,
+                      maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                      buildCounter: (context,
+                              {required currentLength,
+                              required isFocused,
+                              maxLength}) =>
+                          null,
+                      keyboardType: TextInputType.phone,
+                      cursorColor: const Color(0xFF3B4FFE),
+                      // validator: _model.textControllerValidator
+                      // .asValidator(context),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Stake cannot be empty';
+                        }
+                        if (value.length < 3 || value.startsWith('0')) {
+                          return 'Stake of that amount is not allowed';
+                        }
+
+                        return null;
+                      },
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp('[0-9]'))
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 10),
+                //Email Textfied here
+                TextFormField(
+                  autofocus: true,
+                  controller: _emailController,
+                  onChanged: (value) => EasyDebounce.debounce(
+                    '_emailController',
+                    const Duration(milliseconds: 2000),
+                    () => setState(() {}),
+                  ),
+                  textCapitalization: TextCapitalization.none,
+                  decoration: customInputDecoration(
+                    context: context,
+                    hintText: 'Email Address',
+                  ),
+                  style: FlutterFlowTheme.of(context).bodyMedium.override(
+                        fontFamily: 'Plus Jakarta Sans',
+                        fontSize: 16,
+                        useGoogleFonts: GoogleFonts.asMap().containsKey(
+                            FlutterFlowTheme.of(context).bodyMediumFamily),
+                      ),
+                  textAlign: TextAlign.start,
+                  maxLengthEnforcement: MaxLengthEnforcement.enforced,
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.done,
+                  maxLines: 1,
+                  cursorColor: FlutterFlowTheme.of(context).primary,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    // Use a regular expression for email validation
+                    // This is a basic example; you may want to use a more comprehensive one
+                    if (!RegExp(r'^[\w-]+(\.[\w-]+)*@[\w-]+(\.[\w-]+)+$')
+                        .hasMatch(value)) {
+                      return 'Please enter a valid email address';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 20),
+                  child: PrimaryButton(
+                    title: 'Top up now',
+                    width: 200,
+                    height: 55,
+                    onpressed: () {
+                      if (_formKey.currentState?.validate() ?? false) {
+                        handlePaystackDeposit();
+                      } else {
+                        showErrorSnackBarMessage(
+                          message: 'Please fill in the required fields!',
+                          context: context,
+                          status: false,
+                        );
+                      }
+                    },
+                    isLoading:
+                        Provider.of<PaystackProvider>(context, listen: true)
+                            .isLoading,
+                  ),
+                ),
+              ],
             ),
-    );
-  }
-}
-
-class DepositInstruction extends StatelessWidget {
-  const DepositInstruction({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Text(
-      '1. The Minimum deposit amount is NGN 100.00.\n2. The Maximum amount per transaction is NGN 9,999,999.00. If you want to deposit more than that, please make multiple payments.\n3. We take your security seriously. Your saved credit card information is encrypted and your CVV is not stored. You will be asked to enter your Security PIN every time you use your card.\n4. We use your payment information only to verify the transaction. We do not share your information with anyone.\n5. If you have any issues, please contact customer service. The use of multiple cards/bank accounts for multiple deposits may cause errors.\n6. There are no transaction fees, the deposit is free.',
-      textAlign: TextAlign.start,
-      style: FlutterFlowTheme.of(context).bodyMedium.override(
-            fontFamily: 'Plus Jakarta Sans',
-            color: const Color(0x82FFFFFF),
-            fontSize: 14,
-            useGoogleFonts: GoogleFonts.asMap()
-                .containsKey(FlutterFlowTheme.of(context).bodyMediumFamily),
           ),
+        ),
+      ],
     );
   }
-}
 
-class UseNewCard extends StatelessWidget {
-  const UseNewCard({
-    super.key,
-  });
+  // handle paystack deposit
+  Future handlePaystackDeposit() async {
+    final paystack = context.read<PaystackProvider>();
+    //internet provider
+    final internetProvider = context.read<InternetProvider>();
 
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(context, CupertinoPageRoute(builder: (context) {
-          return const AddCardScreen();
-        }));
-      },
-      child: Padding(
-        padding: const EdgeInsetsDirectional.fromSTEB(0, 25, 0, 25),
-        child: Text(
-          '+ Use New Card',
-          style: FlutterFlowTheme.of(context).bodyMedium.override(
-                fontFamily: 'Plus Jakarta Sans',
-                color: Colors.white70,
-                fontWeight: FontWeight.bold,
-                useGoogleFonts: GoogleFonts.asMap()
-                    .containsKey(FlutterFlowTheme.of(context).bodyMediumFamily),
-              ),
+    await internetProvider.checkInternetConnection();
+    if (internetProvider.hasInternet == false) {
+      // ignore: use_build_context_synchronously
+      showErrorSnackBarMessage(
+        message: 'Please check your internet connection',
+        context: context,
+        status: false,
+      );
+    } else {
+      await paystack
+          .getPaystackCheckoutUrl(
+              _emailController.text.trim(), _stakeAmountController.text.trim())
+          .then((value) {
+        if (paystack.hasError == true) {
+          // ignore: use_build_context_synchronously
+          showErrorSnackBarMessage(
+            message: paystack.resMessage,
+            context: context,
+            status: false,
+          );
+        } else {
+          Navigator.of(context)
+              .pushReplacement(CupertinoPageRoute(builder: (_) {
+            return PaystackCheckoutScreen(url: paystack.authorizationUrl);
+          }));
+        }
+      });
+    }
+  }
+
+  InputDecoration customInputDecoration({
+    required BuildContext context,
+    required String hintText,
+  }) {
+    return InputDecoration(
+      hintText: hintText,
+      hintStyle: FlutterFlowTheme.of(context).labelMedium.override(
+            fontFamily: 'Plus Jakarta Sans',
+            color: const Color(0x84FFFFFF),
+            useGoogleFonts: GoogleFonts.asMap()
+                .containsKey(FlutterFlowTheme.of(context).labelMediumFamily),
+          ),
+      contentPadding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 8),
+      enabledBorder: OutlineInputBorder(
+        borderSide: const BorderSide(
+          color: Color(0x85FFFFFF),
+          width: 1,
         ),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: FlutterFlowTheme.of(context).primary,
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: FlutterFlowTheme.of(context).error,
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      focusedErrorBorder: OutlineInputBorder(
+        borderSide: BorderSide(
+          color: FlutterFlowTheme.of(context).error,
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(5),
       ),
     );
   }

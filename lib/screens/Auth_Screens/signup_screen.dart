@@ -5,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Auth_providers/auth_provider.dart';
 import 'package:xando/Providers/Auth_providers/google_auth_provider.dart';
+import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/reusable_widgets/check_password.dart';
@@ -203,54 +204,6 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     _passwordAtleastHasOneNumber,
                               )
                             : const SizedBox(height: 10),
-                        Row(
-                          mainAxisSize: MainAxisSize.max,
-                          children: [
-                            Theme(
-                              data: ThemeData(
-                                checkboxTheme: CheckboxThemeData(
-                                  visualDensity: VisualDensity.compact,
-                                  materialTapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
-                                unselectedWidgetColor:
-                                    FlutterFlowTheme.of(context).secondaryText,
-                              ),
-                              child: Checkbox(
-                                value: true,
-                                onChanged: (newValue) async {
-                                  // setState(
-                                  //     () => _model.checkboxValue = newValue!);
-                                },
-                                activeColor:
-                                    FlutterFlowTheme.of(context).primary,
-                                checkColor: FlutterFlowTheme.of(context).info,
-                              ),
-                            ),
-                            Align(
-                              alignment: const AlignmentDirectional(0.00, 0.00),
-                              child: Text(
-                                'Remember me',
-                                textAlign: TextAlign.center,
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyLarge
-                                    .override(
-                                      fontFamily: 'Plus Jakarta Sans',
-                                      color: const Color(0xB1FFFFFF),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.normal,
-                                      useGoogleFonts: GoogleFonts.asMap()
-                                          .containsKey(
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyLargeFamily),
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ),
                         const SizedBox(height: 15),
                         Consumer<AuthenticationProvider>(
                           builder: (context, auth, child) {
@@ -342,7 +295,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           onTap: isLoading
                               ? null
                               : () {
-                                  handleGoogleSignIn();
+                                  // handleGoogleSignIn();
                                 },
                           child: Container(
                             width: 200,
@@ -469,6 +422,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
 
   Future handleGoogleSignIn() async {
     final googleSignInProvider = context.read<GoogleAuthenticationProvider>();
+
     //internet provider
     final internetProvider = context.read<InternetProvider>();
 
@@ -482,7 +436,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         status: false,
       );
     } else {
-      await googleSignInProvider.signInWithGoogle().then((value) {
+      // ignore: use_build_context_synchronously
+      await googleSignInProvider.signInWithGoogle(context).then((value) {
         if (googleSignInProvider.hasError == true) {
           // ignore: use_build_context_synchronously
           showErrorSnackBarMessage(
@@ -492,31 +447,9 @@ class _SignUpScreenState extends State<SignUpScreen> {
           );
         } else {
           //check wether user exists or not
-          googleSignInProvider.checkUserExists().then((value) async {
-            if (value == true) {
-              // user exists
-              await googleSignInProvider
-                  .getUserData(context)
-                  .then((value) => handleAfterSignIn());
-            } else {
-              // user does not exists
-              await googleSignInProvider
-                  .saveUserData(context)
-                  .then((value) => handleAfterSignIn());
-            }
-          });
         }
       });
     }
-  }
-
-  //Handle after sign in
-  handleAfterSignIn() {
-    Future.delayed(const Duration(milliseconds: 1000)).then((value) {
-      Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (_) {
-        return const AddPhoneNumberScreen();
-      }));
-    });
   }
 
   InputDecoration customInputDecoration(

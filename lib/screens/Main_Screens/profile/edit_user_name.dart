@@ -20,19 +20,36 @@ class EditUserNameScreen extends StatefulWidget {
 class _EditUserNameScreenState extends State<EditUserNameScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _userNameController = TextEditingController();
+  late String _userId;
+  late String userIdFromDB;
 
   @override
   void initState() {
     super.initState();
-    setState(() {
-      _userNameController.text = widget.username;
-    });
+    _userId = '';
+    userIdFromDB = '';
+    _userNameController.text = widget.username;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _getUserIdfromDB();
   }
 
   @override
   void dispose() {
     super.dispose();
-    _userNameController.text = widget.username;
+    _userNameController.dispose();
+  }
+
+  _getUserIdfromDB() async {
+    userIdFromDB = await DatabaseProvider().getUserId();
+    if (mounted) {
+      setState(() {
+        _userId = userIdFromDB;
+      });
+    }
   }
 
   @override
@@ -106,7 +123,7 @@ class _EditUserNameScreenState extends State<EditUserNameScreen> {
                               FlutterFlowTheme.of(context).bodyMediumFamily),
                         ),
                     textAlign: TextAlign.start,
-                    maxLength: 15,
+                    maxLength: 7,
                     maxLengthEnforcement: MaxLengthEnforcement.enforced,
                     buildCounter: (context,
                             {required currentLength,
@@ -134,10 +151,10 @@ class _EditUserNameScreenState extends State<EditUserNameScreen> {
                       width: 200,
                       height: 55,
                       onpressed: () {
-                        final dbProvider = context.read<DatabaseProvider>();
                         if (_formKey.currentState?.validate() ?? false) {
-                          editProfile.updateUsername(
-                              context, dbProvider.userId, {
+                          print(_userId);
+                          print(_userNameController.text);
+                          editProfile.updateUsername(context, _userId, {
                             'username': _userNameController.text.trim()
                           }).then((value) {
                             if (editProfile.hasError == true) {

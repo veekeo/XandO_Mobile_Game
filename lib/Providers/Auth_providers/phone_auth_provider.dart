@@ -137,7 +137,7 @@ class PhoneNumberAuthProvider extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       _hasError = true;
-      _errorCode = e.toString();
+      _errorCode = 'here!';
       print(e.toString());
       notifyListeners();
     }

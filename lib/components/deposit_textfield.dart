@@ -41,19 +41,12 @@ class DepositTextfield extends StatelessWidget {
                       const Padding(
                         padding: EdgeInsetsDirectional.fromSTEB(0, 0, 5, 0),
                         child: Text(
-                          '+234',
+                          'NGN',
                           style: TextStyle(
                             fontFamily: 'Medium',
                             fontSize: 14,
                             fontWeight: FontWeight.normal,
                           ),
-                        ),
-                      ),
-                      const Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(0, 0, 3, 0),
-                        child: Icon(
-                          Icons.keyboard_arrow_down_sharp,
-                          size: 24,
                         ),
                       ),
                       Container(
@@ -75,7 +68,7 @@ class DepositTextfield extends StatelessWidget {
                         textCapitalization: TextCapitalization.none,
                         obscureText: false,
                         decoration: const InputDecoration(
-                          hintText: 'MiN. 100',
+                          hintText: 'MiN. 10',
                           hintStyle: TextStyle(
                             fontFamily: 'Medium',
                             color: Color(0x75FFFFFF),

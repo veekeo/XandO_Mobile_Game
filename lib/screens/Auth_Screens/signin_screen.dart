@@ -174,16 +174,21 @@ class _SignInScreenState extends State<SignInScreen> {
                                         FlutterFlowTheme.of(context)
                                             .secondaryText,
                                   ),
-                                  child: Checkbox(
-                                    value: true,
-                                    onChanged: (newValue) async {
-                                      // setState(
-                                      //     () => _model.checkboxValue = newValue!);
+                                  child: Consumer<AuthenticationProvider>(
+                                    builder: (context, auth, child) {
+                                      return Checkbox(
+                                        value: auth.rememberUser,
+                                        onChanged: (newValue) async {
+                                          await auth.rememberMe(
+                                              context, newValue);
+                                        },
+                                        activeColor:
+                                            FlutterFlowTheme.of(context)
+                                                .primary,
+                                        checkColor:
+                                            FlutterFlowTheme.of(context).info,
+                                      );
                                     },
-                                    activeColor:
-                                        FlutterFlowTheme.of(context).primary,
-                                    checkColor:
-                                        FlutterFlowTheme.of(context).info,
                                   ),
                                 ),
                                 Align(
@@ -448,6 +453,7 @@ class _SignInScreenState extends State<SignInScreen> {
 
   Future handleGoogleSignIn() async {
     final googleSignInProvider = context.read<GoogleAuthenticationProvider>();
+
     //internet provider
     final internetProvider = context.read<InternetProvider>();
 
@@ -461,7 +467,8 @@ class _SignInScreenState extends State<SignInScreen> {
         status: false,
       );
     } else {
-      await googleSignInProvider.signInWithGoogle().then((value) {
+      // ignore: use_build_context_synchronously
+      await googleSignInProvider.signInWithGoogle(context).then((value) {
         if (googleSignInProvider.hasError == true) {
           // ignore: use_build_context_synchronously
           showErrorSnackBarMessage(
@@ -471,31 +478,9 @@ class _SignInScreenState extends State<SignInScreen> {
           );
         } else {
           //check wether user exists or not
-          googleSignInProvider.checkUserExists().then((value) async {
-            if (value == true) {
-              // user exists
-              await googleSignInProvider
-                  .getUserData(context)
-                  .then((value) => handleAfterSignIn());
-            } else {
-              // user does not exists
-              await googleSignInProvider
-                  .saveUserData(context)
-                  .then((value) => handleAfterSignIn());
-            }
-          });
         }
       });
     }
-  }
-
-  //Handle after sign in
-  handleAfterSignIn() {
-    Future.delayed(const Duration(milliseconds: 1000)).then((value) {
-      Navigator.of(context).pushReplacement(CupertinoPageRoute(builder: (_) {
-        return const AddPhoneNumberScreen();
-      }));
-    });
   }
 
   InputDecoration customInputDecoration(

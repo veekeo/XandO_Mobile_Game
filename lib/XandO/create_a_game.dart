@@ -336,7 +336,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                         creategame
                                             .createGame(
                                                 context,
-                                                dbProvider.userId,
+                                                dbProvider.userId.toString(),
                                                 _gameTitleController.text
                                                     .trim(),
                                                 _stake.toString().trim())

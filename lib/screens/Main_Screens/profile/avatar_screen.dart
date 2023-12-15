@@ -84,7 +84,9 @@ class _AvatarScreenState extends State<AvatarScreen> {
                         onPressed: () {
                           final dbProvider = context.read<DatabaseProvider>();
                           avatar
-                              .updateColor(context, dbProvider.userId,
+                              .updateColor(
+                                  context,
+                                  dbProvider.userId.toString(),
                                   avatar.avatars[index])
                               .then(
                                 (value) => {

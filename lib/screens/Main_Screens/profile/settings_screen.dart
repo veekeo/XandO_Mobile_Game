@@ -53,60 +53,33 @@ class SettingsScreen extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.max,
               children: [
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0, 15, 0, 15),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Change Password',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Plus Jakarta Sans',
-                              color: const Color(0xB2FFFFFF),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                  FlutterFlowTheme.of(context)
-                                      .bodyMediumFamily),
-                            ),
-                      ),
-                      const Icon(
-                        Icons.chevron_right,
-                        color: Color(0xB2FFFFFF),
-                        size: 24,
-                      ),
-                    ],
-                  ),
-                ),
-                divider(),
-                Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(0, 15, 0, 15),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Multifactor Authentication',
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Plus Jakarta Sans',
-                              color: const Color(0xB2FFFFFF),
-                              fontSize: 16,
-                              fontWeight: FontWeight.w500,
-                              useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                  FlutterFlowTheme.of(context)
-                                      .bodyMediumFamily),
-                            ),
-                      ),
-                      const Icon(
-                        Icons.chevron_right,
-                        color: Color(0xB2FFFFFF),
-                        size: 24,
-                      ),
-                    ],
-                  ),
-                ),
-                divider(),
+                // Padding(
+                //   padding: const EdgeInsetsDirectional.fromSTEB(0, 15, 0, 15),
+                //   child: Row(
+                //     mainAxisSize: MainAxisSize.max,
+                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //     children: [
+                //       Text(
+                //         'Multifactor Authentication',
+                //         style: FlutterFlowTheme.of(context).bodyMedium.override(
+                //               fontFamily: 'Plus Jakarta Sans',
+                //               color: const Color(0xB2FFFFFF),
+                //               fontSize: 16,
+                //               fontWeight: FontWeight.w500,
+                //               useGoogleFonts: GoogleFonts.asMap().containsKey(
+                //                   FlutterFlowTheme.of(context)
+                //                       .bodyMediumFamily),
+                //             ),
+                //       ),
+                //       const Icon(
+                //         Icons.chevron_right,
+                //         color: Color(0xB2FFFFFF),
+                //         size: 24,
+                //       ),
+                //     ],
+                //   ),
+                // ),
+                // divider(),
                 Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(0, 15, 0, 15),
                   child: Row(

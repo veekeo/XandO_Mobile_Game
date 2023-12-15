@@ -1,17 +1,21 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
+import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
 
 class GoogleAuthenticationProvider extends ChangeNotifier {
 //instance of Firebase Auth and google
   final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = GoogleSignIn();
+  final String userPassword = 'user@xando.game';
 
   bool _isLoading = false;
   String _resMessage = '';
@@ -41,7 +45,7 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
   String? get name => _name;
 
   // sign in with google
-  Future signInWithGoogle() async {
+  Future signInWithGoogle(BuildContext context) async {
     _isLoading = true;
     notifyListeners();
     final GoogleSignInAccount? googleSignInAccount =
@@ -71,6 +75,24 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
         _provider = 'GOOGLE';
         _isLoading = false;
         notifyListeners();
+
+        // ignore: use_build_context_synchronously
+        await isUserSignedUp(context).then((value) async {
+          if (value == true) {
+            await signInUserWithData(context).then((value) =>
+                Navigator.of(context)
+                    .pushReplacement(CupertinoPageRoute(builder: (_) {
+                  return const AddPhoneNumberScreen();
+                })));
+          } else {
+            await saveUserData(context, _email).then((value) =>
+                signInUserWithData(context).then((value) =>
+                    Navigator.of(context)
+                        .pushReplacement(CupertinoPageRoute(builder: (_) {
+                      return const AddPhoneNumberScreen();
+                    }))));
+          }
+        });
       } on FirebaseAuthException catch (e) {
         switch (e.code) {
           case "account-exists-with-different-credential":
@@ -106,53 +128,84 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
     }
   }
 
-  //check if user exists in our database
-  Future checkUserExists() async {
-    try {
-      User? user = await signInWithGoogle();
+  //check for user in DB
+  Future<bool> isUserSignedUp(BuildContext context) async {
+    _isLoading = true;
+    notifyListeners();
+    String userId = await DatabaseProvider().getUserId();
+    const String requestbaseUrl = 'https://tictac-production.up.railway.app';
+    String url = '$requestbaseUrl/tictac/sign-up/$userId/';
 
-      if (user != null) {
-        if (user.providerData
-            .any((userInfo) => userInfo.providerId == 'google.com')) {
-          print('User signed in with Google!');
-          return true;
-        } else {
-          print('User did not sign in with Google.');
-          return false;
-        }
+    try {
+      final response = await http.get(Uri.parse(url));
+
+      if (response.statusCode == 200) {
+        final user = json.decode(response.body);
+        print('i have checked user: $user');
+        _isLoading = false;
+        notifyListeners();
+        // User is signed up
+        return true;
+      } else if (response.statusCode == 404) {
+        _isLoading = false;
+        notifyListeners();
+        // User is not signed up
+        return false;
+      } else {
+        _isLoading = false;
+        notifyListeners();
+        // Handle other status codes if needed
+        print(
+            'Failed to check user signup status. Status code: ${response.statusCode}');
+        return false;
       }
     } catch (e) {
-      print('Error: $e');
-      rethrow;
+      // Handle network or other errors
+      print('Error checking user signup status: $e');
+      return false;
     }
   }
 
   //Get User Data from DB if user exists
-  Future getUserData(BuildContext context) async {
+  Future signInUserWithData(BuildContext context) async {
+    _isLoading = true;
+    notifyListeners();
+    String userEmail = await DatabaseProvider().getEmail();
+    // ignore: use_build_context_synchronously
     final dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
     const String requestbaseUrl = 'https://tictac-production.up.railway.app';
     String url = '$requestbaseUrl/gamer/sign-in';
+    print('i have checked user with email: $userEmail');
+
+    final body = {
+      "email": userEmail,
+      "password": userPassword,
+    };
 
     try {
-      http.Response req = await http
-          .get(Uri.parse(url), headers: {'Content-Type': 'application/json'});
+      http.Response req =
+          await http.post(Uri.parse(url), body: json.encode(body), headers: {
+        'Content-Type': 'application/json',
+      });
 
       if (req.statusCode == 200) {
         final data = json.decode(req.body);
-        _name = data['user_data']['first_name'];
-        _email = data['user_data']['email'];
-        _uid = data['user_data']['id'];
-        _imageURL = data['user_data']['imageURL'];
-        _provider = data['user_data']['provider'];
-        print('got user data');
-
+        print('yes we are here: $data');
+        _isLoading = false;
+        notifyListeners();
         //saving to shared pref.
-        dbProvider.saveUsername(data['user_data']['first_name']);
+        dbProvider.saveUsername(data['user_data']['username']);
         dbProvider.saveUserId(data['user_data']['id']);
         dbProvider.saveUseremail(data['user_data']['email']);
-
+        dbProvider.saveUserFirstName(data['user_data']['first_name']);
+        dbProvider.saveUserlastName(data['user_data']['last_name']);
+        dbProvider.saveUserDateOfBirth(data['user_data']['date_of_birth']);
+        dbProvider.saveUserCoin(data['user_data']['coin']);
+        print(data);
         notifyListeners();
       } else {
+        _isLoading = false;
+        notifyListeners();
         _hasError = true;
         notifyListeners();
       }
@@ -168,15 +221,16 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
   }
 
   //Register User if user doenst exists in the DB
-  Future saveUserData(BuildContext context) async {
+  Future saveUserData(BuildContext context, String? userEmail) async {
+    _isLoading = true;
+    notifyListeners();
     final dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
 
     const String requestbaseUrl = 'https://tictac-production.up.railway.app';
     String url = '$requestbaseUrl/tictac/sign-up/';
     final body = {
-      "name": _name,
-      "email": _email,
-      "uid": _uid,
+      "email": userEmail,
+      "password": userPassword,
     };
 
     try {
@@ -185,10 +239,17 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
           headers: {'Content-Type': 'application/json'});
 
       if (req.statusCode == 200 || req.statusCode == 201) {
+        _isLoading = false;
+        notifyListeners();
         final res = json.decode(req.body);
-        dbProvider.saveUsername(res['user_data']['name']);
-        dbProvider.saveUserId(res['user_data']['id']);
-        dbProvider.saveUseremail(res['user_data']['email']);
+        print(res);
+        dbProvider.saveUsername(res['username']);
+        dbProvider.saveUserId(res['id']);
+        dbProvider.saveUseremail(res['email']);
+        dbProvider.saveUserFirstName(res['first_name']);
+        dbProvider.saveUserlastName(res['last_name']);
+        dbProvider.saveUserDateOfBirth(res['date_of_birth']);
+        // dbProvider.saveUserCoin(res['coin']);
 
         print('saved user data');
         notifyListeners();
@@ -196,6 +257,8 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
         _resMessage = 'Account created';
         notifyListeners();
       } else {
+        _isLoading = false;
+        notifyListeners();
         _resMessage = 'User with this email already exists';
         _isLoading = false;
         notifyListeners();
@@ -223,3 +286,32 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
     //clear all storage data on local db
   }
 }
+
+
+
+  // User? user = firebaseAuth.currentUser;
+
+  // //check if user exists in our database
+  // Future<bool> checkUserExists(BuildContext context) async {
+  //   User? user = firebaseAuth.currentUser;
+  //   if (user == null) {
+  //     // User is signed out
+  //     print('User signed out');
+  //     _isLoading = false;
+  //     notifyListeners();
+  //     return false;
+  //   } else {
+  //     // User is signed in
+  //     print('User signed in with UID: ${user.uid}');
+  //     if (user.email != null) {
+  //       _email = user.email;
+  //       // await getUserData(context, _email)
+  //       _isLoading = false;
+  //       notifyListeners();
+  //       print('User email: ${user.email}');
+  //     } else {
+  //       print('User email not available');
+  //     }
+  //     return true;
+  //   }
+  // }

@@ -219,6 +219,7 @@ class _OTPScreenState extends State<OTPScreen> {
   void verifyOtp(BuildContext context, userOtp) {
     final ap = Provider.of<PhoneNumberAuthProvider>(context, listen: false);
     final dbProvider = context.read<DatabaseProvider>();
+    print('id is: ${dbProvider.userId}');
     ap.verifyOtp(
         context: context,
         verificationId: widget.verificationId,

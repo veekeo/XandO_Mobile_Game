@@ -20,19 +20,36 @@ class EditFirstNameScreen extends StatefulWidget {
 class _EditFirstNameScreenState extends State<EditFirstNameScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _firstNameController = TextEditingController();
+  late String _userId;
+  late String userIdFromDB;
 
   @override
   void initState() {
     super.initState();
-    setState(() {
-      _firstNameController.text = widget.firstname;
-    });
+    _userId = '';
+    userIdFromDB = '';
+    _firstNameController.text = widget.firstname;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _getUserIdfromDB();
   }
 
   @override
   void dispose() {
     super.dispose();
-    _firstNameController.text = widget.firstname;
+    _firstNameController.dispose();
+  }
+
+  _getUserIdfromDB() async {
+    userIdFromDB = await DatabaseProvider().getUserId();
+    if (mounted) {
+      setState(() {
+        _userId = userIdFromDB;
+      });
+    }
   }
 
   @override
@@ -133,11 +150,10 @@ class _EditFirstNameScreenState extends State<EditFirstNameScreen> {
                       title: 'Save',
                       width: 200,
                       height: 55,
-                      onpressed: () {
-                        final dbProvider = context.read<DatabaseProvider>();
+                      onpressed: () async {
                         if (_formKey.currentState?.validate() ?? false) {
-                          editProfile.updateFirstName(
-                              context, dbProvider.userId, {
+                          print(_userId);
+                          await editProfile.updateFirstName(context, _userId, {
                             'first_name': _firstNameController.text.trim()
                           }).then((value) {
                             if (editProfile.hasError == true) {

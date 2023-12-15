@@ -15,6 +15,8 @@ class DatabaseProvider extends ChangeNotifier {
   String _firstName = '';
   String _lastName = '';
   String _imageURL = '';
+  String _dateOfBirth = '';
+  bool? _rememberUser = false;
 
   String get userId => _userId;
   String get userName => _userName;
@@ -24,6 +26,8 @@ class DatabaseProvider extends ChangeNotifier {
   String get firstName => _firstName;
   String get lastName => _lastName;
   String get imageURL => _imageURL;
+  String get dateOfBirth => _dateOfBirth;
+  bool? get rememberUser => _rememberUser;
 
 //save user data starts here
 
@@ -69,7 +73,7 @@ class DatabaseProvider extends ChangeNotifier {
   }
   //.
 
-  void saveUserCoin(int? coin) async {
+  Future saveUserCoin(int? coin) async {
     SharedPreferences value = await _pref;
 
     value.setInt('coin', coin!);
@@ -80,6 +84,20 @@ class DatabaseProvider extends ChangeNotifier {
     SharedPreferences value = await _pref;
 
     value.setString('imageURL', imageURL!);
+  }
+
+  //.
+  void saveUserDateOfBirth(String dateOfBirth) async {
+    SharedPreferences value = await _pref;
+
+    value.setString('date_of_birth', dateOfBirth);
+  }
+
+  //.
+  void saveUserRemembrance(bool? rememberUser) async {
+    SharedPreferences value = await _pref;
+
+    value.setBool('remember_user', rememberUser!);
   }
   //.
 
@@ -203,12 +221,38 @@ class DatabaseProvider extends ChangeNotifier {
     }
   }
 
-  void logOut(BuildContext context) async {
-    final value = await _pref;
+  Future<String> getDateOfBirth() async {
+    SharedPreferences value = await _pref;
 
-    value.clear();
+    if (value.containsKey('date_of_birth')) {
+      String data = value.getString('date_of_birth')!;
+      _dateOfBirth = data;
+      notifyListeners();
+      return data;
+    } else {
+      _dateOfBirth = '';
+      notifyListeners();
+      return '';
+    }
+  }
 
-    // ignore: use_build_context_synchronously
-    PageNavigator(ctx: context).nextPageOnly(page: const SignInScreen());
+  Future<bool> getUserRemembrance() async {
+    SharedPreferences value = await _pref;
+
+    if (value.containsKey('remember_user')) {
+      bool data = value.getBool('remember_user')!;
+      _rememberUser = data;
+      notifyListeners();
+      return data;
+    } else {
+      _rememberUser = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<void> clearDatabase(BuildContext context) async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
   }
 }

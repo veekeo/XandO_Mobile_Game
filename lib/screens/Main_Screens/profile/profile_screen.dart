@@ -4,15 +4,21 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 
 import 'package:xando/Providers/Database/db_provider.dart';
+import 'package:xando/Providers/Profile/edit_profile_provider.dart';
+import 'package:xando/models/user_profile_model.dart';
 import 'package:xando/reusable_widgets/sections/profile_feature.dart';
+import 'package:xando/screens/Auth_Screens/signin_screen.dart';
 import 'package:xando/screens/Finance_Screens/transactions_screen.dart';
 import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/screens/Main_Screens/earn_screen.dart';
 import 'package:xando/screens/Main_Screens/game_screen.dart';
 import 'package:xando/screens/Main_Screens/profile/edit_profile_screen.dart';
 import 'package:xando/screens/Main_Screens/profile/settings_screen.dart';
+import 'package:xando/utils/routers.dart';
+import 'package:xando/utils/snackbar_message.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -70,22 +76,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           size: 30,
                         ),
                       ),
-                      FlutterFlowIconButton(
-                        borderRadius: 20,
-                        borderWidth: 1,
-                        buttonSize: 40,
-                        icon: Icon(
-                          Icons.settings_outlined,
-                          color: FlutterFlowTheme.of(context).primaryText,
-                          size: 30,
-                        ),
-                        onPressed: () {
-                          Navigator.push(context,
-                              CupertinoPageRoute(builder: (contect) {
-                            return SettingsScreen();
-                          }));
-                        },
-                      ),
+                      // FlutterFlowIconButton(
+                      //   borderRadius: 20,
+                      //   borderWidth: 1,
+                      //   buttonSize: 40,
+                      //   icon: Icon(
+                      //     Icons.settings_outlined,
+                      //     color: FlutterFlowTheme.of(context).primaryText,
+                      //     size: 30,
+                      //   ),
+                      //   onPressed: () {
+                      //     Navigator.push(context,
+                      //         CupertinoPageRoute(builder: (contect) {
+                      //       return SettingsScreen();
+                      //     }));
+                      //   },
+                      // ),
                     ],
                   ),
                 ),
@@ -148,18 +154,26 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 20),
-                  child: Text(
-                    _loadedUsername,
-                    style: FlutterFlowTheme.of(context).bodyMedium.override(
-                          fontFamily: 'Plus Jakarta Sans',
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          useGoogleFonts: GoogleFonts.asMap().containsKey(
-                              FlutterFlowTheme.of(context).bodyMediumFamily),
-                        ),
-                  ),
+                FutureBuilder<UserModel>(
+                  future: EditProfileProvider().getUserProfileData(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return UserNameTextWidget(
+                          loadedUsername: _loadedUsername);
+                    } else if (snapshot.hasError) {
+                      showErrorSnackBarMessage(
+                          message: 'Something went wrong!',
+                          context: context,
+                          status: true);
+                    } else {
+                      return UserNameTextWidget(
+                          loadedUsername:
+                              snapshot.data?.username ?? _loadedUsername);
+                    }
+                    return UserNameTextWidget(
+                        loadedUsername:
+                            snapshot.data?.username ?? _loadedUsername);
+                  },
                 ),
                 Padding(
                   padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
@@ -194,22 +208,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(0, 0, 5, 0),
-                        child: Text(
-                          _coin.toString(),
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                fontFamily: 'Plus Jakarta Sans',
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                    FlutterFlowTheme.of(context)
-                                        .bodyMediumFamily),
-                              ),
-                        ),
-                      ),
+                      FutureBuilder<UserModel>(
+                          future: EditProfileProvider().getUserProfileData(),
+                          builder: (context, snapshot) {
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return UserCoinBalanceTextWidget(coin: _coin);
+                            } else if (snapshot.hasError) {
+                              showErrorSnackBarMessage(
+                                  message: 'Something went wrong!',
+                                  context: context,
+                                  status: true);
+                            } else if (snapshot.hasData) {
+                              if (snapshot.data != null) {
+                                return UserCoinBalanceTextWidget(
+                                    coin: snapshot.data!.gamedata!.coin);
+                              } else {
+                                return UserCoinBalanceTextWidget(coin: _coin);
+                              }
+                            }
+                            return UserCoinBalanceTextWidget(coin: _coin);
+                          }),
                       Icon(
                         Icons.remove_red_eye_outlined,
                         color: Color(0xB5FFFFFF),
@@ -354,7 +373,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 divider(),
                 SizedBox(height: 20),
                 FFButtonWidget(
-                  onPressed: () {},
+                  onPressed: () async {
+                    final dbProvider = context.read<DatabaseProvider>();
+                    await dbProvider.clearDatabase(context).then((value) =>
+                        PageNavigator(ctx: context)
+                            .nextPageOnly(page: const SignInScreen()));
+                  },
                   text: 'Logout',
                   icon: Icon(
                     Icons.logout_rounded,
@@ -397,6 +421,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
       height: 2,
       decoration: BoxDecoration(
         color: Color.fromARGB(255, 35, 37, 60),
+      ),
+    );
+  }
+}
+
+class UserCoinBalanceTextWidget extends StatelessWidget {
+  const UserCoinBalanceTextWidget({
+    super.key,
+    required this.coin,
+  });
+
+  final int coin;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(0, 0, 5, 0),
+      child: Text(
+        coin.toString(),
+        style: FlutterFlowTheme.of(context).bodyMedium.override(
+              fontFamily: 'Plus Jakarta Sans',
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              useGoogleFonts: GoogleFonts.asMap()
+                  .containsKey(FlutterFlowTheme.of(context).bodyMediumFamily),
+            ),
+      ),
+    );
+  }
+}
+
+class UserNameTextWidget extends StatelessWidget {
+  const UserNameTextWidget({
+    super.key,
+    required this.loadedUsername,
+  });
+
+  final String loadedUsername;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 20),
+      child: Text(
+        loadedUsername,
+        style: FlutterFlowTheme.of(context).bodyMedium.override(
+              fontFamily: 'Plus Jakarta Sans',
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              useGoogleFonts: GoogleFonts.asMap()
+                  .containsKey(FlutterFlowTheme.of(context).bodyMediumFamily),
+            ),
       ),
     );
   }

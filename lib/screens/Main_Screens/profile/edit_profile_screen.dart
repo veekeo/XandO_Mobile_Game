@@ -8,6 +8,7 @@ import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/components/user_data_button.dart';
 import 'package:xando/models/user_profile_model.dart';
 import 'package:xando/screens/Main_Screens/profile/avatar_screen.dart';
+import 'package:xando/screens/Main_Screens/profile/deactivate_profile.dart';
 import 'package:xando/screens/Main_Screens/profile/edit_first_name.dart';
 import 'package:xando/screens/Main_Screens/profile/edit_last_name.dart';
 import 'package:xando/screens/Main_Screens/profile/edit_user_name.dart';
@@ -23,6 +24,8 @@ class _EditProfileState extends State<EditProfile> {
   late String _loadedUsername;
   late String _firstName;
   late String _lastName;
+  late String _userId;
+  late String userIdFromDB;
 
   @override
   void initState() {
@@ -30,8 +33,15 @@ class _EditProfileState extends State<EditProfile> {
     _loadedUsername = '';
     _firstName = '';
     _lastName = '';
+    _userId = '';
+    userIdFromDB = '';
+  }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     _loadUserData();
+    _getUserIdfromDB();
   }
 
   _loadUserData() async {
@@ -39,11 +49,22 @@ class _EditProfileState extends State<EditProfile> {
     String? firstName = await DatabaseProvider().getfirstName();
     String? lastName = await DatabaseProvider().getLastName();
 
-    setState(() {
-      _loadedUsername = username;
-      _firstName = firstName;
-      _lastName = lastName;
-    });
+    if (mounted) {
+      setState(() {
+        _loadedUsername = username;
+        _firstName = firstName;
+        _lastName = lastName;
+      });
+    }
+  }
+
+  _getUserIdfromDB() async {
+    userIdFromDB = await DatabaseProvider().getUserId();
+    if (mounted) {
+      setState(() {
+        _userId = userIdFromDB;
+      });
+    }
   }
 
   String date = '';
@@ -236,17 +257,24 @@ class _EditProfileState extends State<EditProfile> {
                           InkWell(
                             onTap: () {
                               _showDialog(
-                                CupertinoDatePicker(
-                                  // initialDateTime: ,
-                                  mode: CupertinoDatePickerMode.date,
-                                  use24hFormat: true,
-                                  // This is called when the user changes the date.
-                                  onDateTimeChanged: (DateTime newDate) {
-                                    setState(() {
-                                      getFormattedDate(newDate);
-                                    });
-                                  },
-                                ),
+                                Consumer<EditProfileProvider>(
+                                    builder: (context, editProfile, child) {
+                                  return CupertinoDatePicker(
+                                    // initialDateTime: ,
+                                    mode: CupertinoDatePickerMode.date,
+                                    use24hFormat: true,
+                                    // This is called when the user changes the date.
+                                    onDateTimeChanged: (DateTime newDate) {
+                                      setState(() {
+                                        getFormattedDate(newDate);
+                                      });
+                                      if (date != '') {
+                                        editProfile.updateDateOfBirth(context,
+                                            _userId, {"date_of_birth": date});
+                                      }
+                                    },
+                                  );
+                                }),
                               );
                             },
                             child: Padding(
@@ -275,7 +303,10 @@ class _EditProfileState extends State<EditProfile> {
                                   Row(
                                     children: [
                                       Text(
-                                        date,
+                                        snapshot.data?.dateOfBirth == null
+                                            ? ''
+                                            : snapshot.data!.dateOfBirth
+                                                .toString(),
                                         style: FlutterFlowTheme.of(context)
                                             .bodyMedium
                                             .override(
@@ -342,6 +373,73 @@ class _EditProfileState extends State<EditProfile> {
                                       ),
                                 ),
                               ],
+                            ),
+                          ),
+                          divider(),
+                          Padding(
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                0, 15, 0, 15),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.max,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Safety & Security',
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyMedium
+                                      .override(
+                                        fontFamily: 'Plus Jakarta Sans',
+                                        color: const Color(0xB2FFFFFF)
+                                            .withOpacity(0.5),
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        useGoogleFonts: GoogleFonts.asMap()
+                                            .containsKey(
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyMediumFamily),
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          divider(),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(context,
+                                  CupertinoPageRoute(builder: (contect) {
+                                return const DeactivateProfileScreen();
+                              }));
+                            },
+                            child: Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0, 15, 0, 15),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    'Deactivate',
+                                    style: FlutterFlowTheme.of(context)
+                                        .bodyMedium
+                                        .override(
+                                          fontFamily: 'Plus Jakarta Sans',
+                                          color: const Color(0xB2FFFFFF),
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w500,
+                                          useGoogleFonts: GoogleFonts.asMap()
+                                              .containsKey(
+                                                  FlutterFlowTheme.of(context)
+                                                      .bodyMediumFamily),
+                                        ),
+                                  ),
+                                  const Icon(
+                                    Icons.chevron_right,
+                                    color: Color(0xB2FFFFFF),
+                                    size: 24,
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                           divider(),

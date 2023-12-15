@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
+import 'package:xando/screens/Auth_Screens/signin_screen.dart';
 import 'package:xando/utils/routers.dart';
 import 'package:provider/provider.dart';
 
@@ -17,9 +18,11 @@ class AuthenticationProvider extends ChangeNotifier {
 
   bool _isLoading = false;
   String _resMessage = '';
+  bool? _rememberUser = false;
 
   bool get isLoading => _isLoading;
   String get resMessage => _resMessage;
+  bool? get rememberUser => _rememberUser;
 
   void registerUser({
     BuildContext? context,
@@ -45,19 +48,19 @@ class AuthenticationProvider extends ChangeNotifier {
 
       if (req.statusCode == 200 || req.statusCode == 201) {
         final res = json.decode(req.body);
-        dbProvider.saveUsername(res['user_data']['username']);
-        dbProvider.saveUserId(res['user_data']['id']);
-        dbProvider.saveUserCoin(res['user_data']['coin']);
-        dbProvider.saveUseremail(res['user_data']['email']);
-        dbProvider.saveUserFirstName(res['user_data']['first_name']);
-        dbProvider.saveUserlastName(res['user_data']['last_name']);
+
+        dbProvider.saveUsername(res['username']);
+        dbProvider.saveUserId(res['id']);
+        // dbProvider.saveUserCoin(res['coin']);
+        dbProvider.saveUseremail(res['email']);
+        dbProvider.saveUserFirstName(res['first_name']);
+        dbProvider.saveUserlastName(res['last_name']);
 
         _isLoading = false;
         _resMessage = 'Account created';
         notifyListeners();
         // ignore: use_build_context_synchronously
-        PageNavigator(ctx: context)
-            .nextPageOnly(page: const AddPhoneNumberScreen());
+        PageNavigator(ctx: context).nextPageOnly(page: const SignInScreen());
       } else {
         // final res = json.decode(req.body);
         // print(res);
@@ -146,6 +149,13 @@ class AuthenticationProvider extends ChangeNotifier {
       _resMessage = 'Please try again!';
       notifyListeners();
     }
+  }
+
+  Future<void> rememberMe(BuildContext context, bool? ischecked) async {
+    final dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
+    _rememberUser = ischecked;
+    dbProvider.saveUserRemembrance(rememberUser);
+    notifyListeners();
   }
 
   void clear() {

@@ -20,19 +20,36 @@ class EditLastNameScreen extends StatefulWidget {
 class _EditLastNameScreenState extends State<EditLastNameScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _lastNameController = TextEditingController();
+  late String _userId;
+  late String userIdFromDB;
 
   @override
   void initState() {
     super.initState();
-    setState(() {
-      _lastNameController.text = widget.lastname;
-    });
+    _userId = '';
+    userIdFromDB = '';
+    _lastNameController.text = widget.lastname;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _getUserIdfromDB();
   }
 
   @override
   void dispose() {
     super.dispose();
-    _lastNameController.text = widget.lastname;
+    _lastNameController.dispose();
+  }
+
+  _getUserIdfromDB() async {
+    userIdFromDB = await DatabaseProvider().getUserId();
+    if (mounted) {
+      setState(() {
+        _userId = userIdFromDB;
+      });
+    }
   }
 
   @override
@@ -134,10 +151,8 @@ class _EditLastNameScreenState extends State<EditLastNameScreen> {
                       width: 200,
                       height: 55,
                       onpressed: () {
-                        final dbProvider = context.read<DatabaseProvider>();
                         if (_formKey.currentState?.validate() ?? false) {
-                          editProfile.updateLastName(
-                              context, dbProvider.userId, {
+                          editProfile.updateLastName(context, _userId, {
                             'last_name': _lastNameController.text.trim()
                           }).then((value) {
                             if (editProfile.hasError == true) {

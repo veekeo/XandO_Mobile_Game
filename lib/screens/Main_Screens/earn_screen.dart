@@ -79,7 +79,7 @@ class _EarnScreenState extends State<EarnScreen> {
                                         .bodyMedium
                                         .override(
                                           fontFamily: 'Plus Jakarta Sans',
-                                          fontSize: 24,
+                                          fontSize: 20,
                                           fontWeight: FontWeight.bold,
                                           useGoogleFonts: GoogleFonts.asMap()
                                               .containsKey(
@@ -102,7 +102,7 @@ class _EarnScreenState extends State<EarnScreen> {
                                           .bodyMedium
                                           .override(
                                             fontFamily: 'Plus Jakarta Sans',
-                                            fontSize: 24,
+                                            fontSize: 20,
                                             fontWeight: FontWeight.bold,
                                             useGoogleFonts: GoogleFonts.asMap()
                                                 .containsKey(
@@ -153,15 +153,10 @@ class _EarnScreenState extends State<EarnScreen> {
                                   ),
                                 ],
                               ),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: SizedBox(
-                                  height: 160,
-                                  width: 90,
-                                  child: Image.asset(
-                                    'assets/images/coins.png',
-                                    fit: BoxFit.cover,
-                                  ),
+                              Expanded(
+                                child: Image.asset(
+                                  'assets/images/coins.png',
+                                  fit: BoxFit.contain,
                                 ),
                               ),
                             ],
@@ -173,7 +168,7 @@ class _EarnScreenState extends State<EarnScreen> {
                       padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
                       child: Container(
                         width: double.infinity,
-                        height: 165,
+                        height: 180,
                         decoration: BoxDecoration(
                           color: Color.fromARGB(255, 32, 40, 73),
                           borderRadius: BorderRadius.circular(5),
@@ -299,8 +294,8 @@ class _EarnScreenState extends State<EarnScreen> {
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.asset(
                                         'assets/images/Twitter.png',
-                                        width: 30,
-                                        height: 30,
+                                        width: 40,
+                                        height: 40,
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -312,8 +307,8 @@ class _EarnScreenState extends State<EarnScreen> {
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.asset(
                                         'assets/images/Telegram.png',
-                                        width: 30,
-                                        height: 30,
+                                        width: 40,
+                                        height: 40,
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -325,8 +320,8 @@ class _EarnScreenState extends State<EarnScreen> {
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.asset(
                                         'assets/images/Instagram.png',
-                                        width: 30,
-                                        height: 30,
+                                        width: 40,
+                                        height: 40,
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -338,8 +333,8 @@ class _EarnScreenState extends State<EarnScreen> {
                                       borderRadius: BorderRadius.circular(8),
                                       child: Image.asset(
                                         'assets/images/LinkedIn.png',
-                                        width: 30,
-                                        height: 30,
+                                        width: 40,
+                                        height: 40,
                                         fit: BoxFit.cover,
                                       ),
                                     ),
@@ -532,7 +527,7 @@ class _EarnScreenState extends State<EarnScreen> {
                       padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
                       child: Container(
                         width: double.infinity,
-                        height: 95,
+                        height: 105,
                         decoration: BoxDecoration(
                           color: Color.fromARGB(255, 32, 40, 73),
                           borderRadius: BorderRadius.circular(5),

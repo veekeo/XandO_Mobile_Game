@@ -2,9 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:xando/Providers/Auth_providers/auth_provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/main_page.dart';
 import 'package:xando/screens/Auth_Screens/onboarding_screen.dart';
+import 'package:xando/screens/Auth_Screens/signin_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -25,19 +27,26 @@ class _SplashScreenState extends State<SplashScreen>
     Future.delayed(
       const Duration(seconds: 2),
       () {
-        dbProvider.getUserId().then((value) {
+        dbProvider.getContact().then((value) async {
           if (value == '') {
-            print(value);
             Navigator.of(context)
                 .pushReplacement(CupertinoPageRoute(builder: (context) {
               return const OnboardingScreen();
             }));
           } else {
-            print(value);
-            Navigator.of(context)
-                .pushReplacement(CupertinoPageRoute(builder: (context) {
-              return MainPage();
-            }));
+            dbProvider.getUserRemembrance().then((value) {
+              if (value == true) {
+                Navigator.of(context)
+                    .pushReplacement(CupertinoPageRoute(builder: (context) {
+                  return MainPage();
+                }));
+              } else {
+                Navigator.of(context)
+                    .pushReplacement(CupertinoPageRoute(builder: (context) {
+                  return const SignInScreen();
+                }));
+              }
+            });
           }
         });
       },
