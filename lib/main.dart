@@ -13,7 +13,6 @@ import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/Providers/avatar_provider.dart';
 import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/Providers/paystack_provider.dart';
-// import 'package:xando/Providers/paystack/paystack_checkoutUrl_provider.dart';
 import 'package:xando/screens/splash_screen.dart';
 import 'firebase_options.dart';
 
@@ -48,7 +47,6 @@ class MyApp extends StatelessWidget {
           primaryColor: Color(0xFF3B4FFE),
           scaffoldBackgroundColor: Color.fromARGB(255, 0, 7, 38),
           cardColor: Color.fromARGB(255, 32, 40, 73),
-         
         ),
         home: SplashScreen(),
       ),

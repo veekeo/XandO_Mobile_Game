@@ -70,6 +70,7 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
 
         _name = userDetails.displayName;
         _email = userDetails.email;
+        print('Emailllll 000 $_email');
         _uid = userDetails.uid;
         _imageURL = userDetails.photoURL;
         _provider = 'GOOGLE';
@@ -141,6 +142,7 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
 
       if (response.statusCode == 200) {
         final user = json.decode(response.body);
+        print(user);
         print('i have checked user: $user');
         _isLoading = false;
         notifyListeners();
@@ -170,15 +172,14 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
   Future signInUserWithData(BuildContext context) async {
     _isLoading = true;
     notifyListeners();
-    String userEmail = await DatabaseProvider().getEmail();
     // ignore: use_build_context_synchronously
     final dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
     const String requestbaseUrl = 'https://tictac-production.up.railway.app';
     String url = '$requestbaseUrl/gamer/sign-in';
-    print('i have checked user with email: $userEmail');
+    print('i have checked user with email: $_email');
 
     final body = {
-      "email": userEmail,
+      "email": _email,
       "password": userPassword,
     };
 

@@ -13,10 +13,14 @@ class EditProfileProvider extends ChangeNotifier {
   bool _hasError = false;
   bool _isLoading = false;
   String _resMessage = '';
+  int _initialBalance = 0;
 
   bool get hasError => _hasError;
   bool get isLoading => _isLoading;
   String get resMessage => _resMessage;
+  int get initialBalance => _initialBalance;
+
+  //Update Profile Avatar
 
   Future<void> updateUsername(BuildContext context, String? userId,
       Map<String, String> usernameData) async {
@@ -256,6 +260,9 @@ class EditProfileProvider extends ChangeNotifier {
       );
 
       if (req.statusCode == 200 || req.statusCode == 201) {
+        final res = json.decode(req.body);
+        _initialBalance = res['gamedata']['coin'];
+        notifyListeners();
         if (json.decode(req.body) == null) {
           return UserModel();
         } else {

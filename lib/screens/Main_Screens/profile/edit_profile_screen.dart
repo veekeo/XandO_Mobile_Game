@@ -217,7 +217,7 @@ class _EditProfileState extends State<EditProfile> {
                           ),
                           UserDataButton(
                             leading: 'Username',
-                            trailing: _loadedUsername,
+                            trailing: snapshot.data?.username,
                             onPressed: () {
                               Navigator.push(context,
                                   CupertinoPageRoute(builder: (context) {
@@ -419,7 +419,7 @@ class _EditProfileState extends State<EditProfile> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
-                                    'Deactivate',
+                                    'Deactivate Account',
                                     style: FlutterFlowTheme.of(context)
                                         .bodyMedium
                                         .override(

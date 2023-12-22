@@ -9,10 +9,12 @@ import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
 import 'package:xando/screens/Auth_Screens/signin_screen.dart';
 import 'package:xando/utils/routers.dart';
 import 'package:provider/provider.dart';
+import 'package:email_otp/email_otp.dart';
 
 class AuthenticationProvider extends ChangeNotifier {
   // Base URL
   final String requestbaseUrl = 'https://tictac-production.up.railway.app';
+  EmailOTP emailAuth = EmailOTP();
 
   //Setter
 
@@ -96,11 +98,10 @@ class AuthenticationProvider extends ChangeNotifier {
 
   ///Login goes here
 
-  void loginUser({
-    BuildContext? context,
-    required String email,
-    required String password,
-  }) async {
+  void loginUser(
+      {BuildContext? context,
+      required String email,
+      required String password}) async {
     _isLoading = true;
     notifyListeners();
 
@@ -161,5 +162,111 @@ class AuthenticationProvider extends ChangeNotifier {
   void clear() {
     _resMessage = '';
     notifyListeners();
+  }
+
+  //Forgot Password-------------------------------------------------------------------------------------------------------------------]
+  Future<bool> sendEmailOTP(String userEmail) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      emailAuth.setConfig(
+          appEmail: "xo@animationhub.ng",
+          appName: "XandO Animation Hub",
+          userEmail: userEmail,
+          otpLength: 6,
+          otpType: OTPType.digitsOnly);
+      bool res = await emailAuth.sendOTP();
+
+      if (res) {
+        _isLoading = false;
+        notifyListeners();
+        return true;
+      } else {
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+    } on SocketException catch (_) {
+      _isLoading = false;
+      _resMessage = 'Internet Connection is not available';
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _resMessage = 'Please try again!';
+      notifyListeners();
+    }
+    return false;
+  }
+
+  ///...
+
+  Future verifyEmailOTP(dynamic otp) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      if (await emailAuth.verifyOTP(otp: otp.text) == true) {
+        _isLoading = false;
+        _resMessage = 'OTP verification successful.';
+        notifyListeners();
+        return true;
+      } else {
+        _isLoading = false;
+        _resMessage = 'OTP verification failed.';
+        notifyListeners();
+        return false;
+      }
+    } on SocketException catch (_) {
+      _isLoading = false;
+      _resMessage = 'Internet Connection is not available';
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _resMessage = 'Please try again!';
+      notifyListeners();
+    }
+  }
+
+  ///........................
+
+  Future<void> changePassword(
+    BuildContext? context,
+    String userEmail,
+    String password,
+  ) async {
+    _isLoading = true;
+    notifyListeners();
+
+    String url = '$requestbaseUrl/gamer/change_password/';
+
+    final body = {
+      "email": userEmail,
+      "new_password": password,
+    };
+
+    try {
+      http.Response req = await http.post(Uri.parse(url),
+          body: json.encode(body),
+          headers: {'Content-Type': 'application/json'});
+
+      if (req.statusCode == 200 || req.statusCode == 201) {
+        final res = json.decode(req.body);
+        print(res);
+        _isLoading = false;
+        _resMessage = 'Password changed!';
+        notifyListeners();
+      } else {
+        _resMessage = 'Something went wrong, try again.';
+        _isLoading = false;
+        notifyListeners();
+      }
+    } on SocketException catch (_) {
+      _isLoading = false;
+      _resMessage = 'Internet Connection is not available';
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _resMessage = 'Please try again!';
+      notifyListeners();
+    }
   }
 }

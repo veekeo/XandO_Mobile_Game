@@ -18,35 +18,38 @@ class CurrencyBalanceContainer extends StatelessWidget {
           color: const Color.fromARGB(255, 32, 40, 73),
           borderRadius: BorderRadius.circular(5),
         ),
-        child: Wrap(
-          alignment: WrapAlignment.center,
-          runAlignment: WrapAlignment.center,
-          crossAxisAlignment: WrapCrossAlignment.center,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                'assets/images/naira_coin.png',
-                width: 15,
-                height: 15,
-                fit: BoxFit.cover,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(2, 0, 0, 0),
-              child: Text(
-                coin,
-                style: const TextStyle(
-                  fontFamily: 'Medium',
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 8.0),
+          child: Wrap(
+            alignment: WrapAlignment.start,
+            runAlignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Image.asset(
+                  'assets/images/naira_coin.png',
+                  width: 15,
+                  height: 15,
+                  fit: BoxFit.cover,
                 ),
               ),
-            ),
-            // const Icon(
-            //   Icons.keyboard_arrow_down,
-            // ),
-          ],
+              Padding(
+                padding: const EdgeInsetsDirectional.fromSTEB(2, 0, 0, 0),
+                child: Text(
+                  coin,
+                  style: const TextStyle(
+                    fontFamily: 'Medium',
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              // const Icon(
+              //   Icons.keyboard_arrow_down,
+              // ),
+            ],
+          ),
         ),
       ),
     );

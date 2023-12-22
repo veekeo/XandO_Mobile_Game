@@ -8,7 +8,9 @@ import 'package:simple_gradient_text/simple_gradient_text.dart';
 import 'package:xando/models/earn_screen_model.dart';
 
 class EarnScreen extends StatefulWidget {
-  const EarnScreen({super.key});
+  const EarnScreen({super.key, required this.isFromExternalSource});
+
+  final bool isFromExternalSource;
 
   @override
   State<EarnScreen> createState() => _EarnScreenState();
@@ -33,6 +35,49 @@ class _EarnScreenState extends State<EarnScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: widget.isFromExternalSource
+          ? PreferredSize(
+              preferredSize: const Size.fromHeight(120), // Set this height
+              child: SizedBox(
+                width: MediaQuery.of(context).size.width,
+                child: Padding(
+                  padding: const EdgeInsets.only(
+                    right: 13.0,
+                    left: 13,
+                    top: 50,
+                    bottom: 20,
+                  ),
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.chevron_left,
+                          size: 30,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Refer & Earn',
+                          style: FlutterFlowTheme.of(context)
+                              .bodyMedium
+                              .override(
+                                fontFamily: 'Plus Jakarta Sans',
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                useGoogleFonts: GoogleFonts.asMap().containsKey(
+                                    FlutterFlowTheme.of(context)
+                                        .bodyMediumFamily),
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            )
+          : null,
       body: SafeArea(
           top: true,
           child: ListView(

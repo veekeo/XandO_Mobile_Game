@@ -75,8 +75,6 @@ class AvatarProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void resetOtherContainerColor(List<AvatarContainerModel> allContainers) {}
-
   List<AvatarContainerModel> avatars = [
     AvatarContainerModel(
       id: 1,

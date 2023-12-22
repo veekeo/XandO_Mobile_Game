@@ -5,7 +5,6 @@ import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xando/XandO/create_a_game.dart';
 import 'package:xando/screens/Main_Screens/chat_screen.dart';
-import 'package:xando/screens/Main_Screens/create_game_screen.dart';
 import 'package:xando/screens/Main_Screens/game_screen.dart';
 import 'package:xando/screens/Main_Screens/home_screen.dart';
 import 'package:xando/screens/Main_Screens/earn_screen.dart';
@@ -20,8 +19,10 @@ class _MainPageState extends State<MainPage> {
   final List<Widget> screens = [
     HomeScreen(),
     ChatScreen(),
-    GameScreen(),
-    EarnScreen(),
+    GameScreen(selectedTabFromExternalRoute: 0),
+    EarnScreen(
+      isFromExternalSource: false,
+    ),
   ];
 
   final scaffoldKey = GlobalKey<ScaffoldState>();

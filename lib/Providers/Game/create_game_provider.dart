@@ -9,11 +9,17 @@ class CreateGameProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _hasError = false;
   double _potentialWin = 0;
+  int _gameId = 0;
+  String _stake = '';
+  String _username = '';
 
   bool get hasError => _hasError;
   bool get isLoading => _isLoading;
   String get resMessage => _resMessage;
   double get potentialWin => _potentialWin;
+  int get gameId => _gameId;
+  String get stake => _stake;
+  String get username => _username;
 
   Future<void> createGame(
     BuildContext context,
@@ -42,7 +48,9 @@ class CreateGameProvider extends ChangeNotifier {
       if (req.statusCode == 200 || req.statusCode == 201) {
         final res = json.decode(req.body);
         print(res);
-        // dbProvider.saveUsercontact(res['username']);
+        _gameId = res['id'];
+        _stake = res['stake'];
+        _username = res['user']['username'];
         _resMessage = 'Game created successfully';
         _hasError = false;
         _isLoading = false;

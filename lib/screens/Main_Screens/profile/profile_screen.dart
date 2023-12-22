@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/models/user_profile_model.dart';
@@ -16,7 +15,6 @@ import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/screens/Main_Screens/earn_screen.dart';
 import 'package:xando/screens/Main_Screens/game_screen.dart';
 import 'package:xando/screens/Main_Screens/profile/edit_profile_screen.dart';
-import 'package:xando/screens/Main_Screens/profile/settings_screen.dart';
 import 'package:xando/utils/routers.dart';
 import 'package:xando/utils/snackbar_message.dart';
 
@@ -76,22 +74,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           size: 30,
                         ),
                       ),
-                      // FlutterFlowIconButton(
-                      //   borderRadius: 20,
-                      //   borderWidth: 1,
-                      //   buttonSize: 40,
-                      //   icon: Icon(
-                      //     Icons.settings_outlined,
-                      //     color: FlutterFlowTheme.of(context).primaryText,
-                      //     size: 30,
-                      //   ),
-                      //   onPressed: () {
-                      //     Navigator.push(context,
-                      //         CupertinoPageRoute(builder: (contect) {
-                      //       return SettingsScreen();
-                      //     }));
-                      //   },
-                      // ),
                     ],
                   ),
                 ),
@@ -243,7 +225,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: () {
                       Navigator.push(context,
                           CupertinoPageRoute(builder: (contect) {
-                        return WalletScreen();
+                        return WalletScreen(selectedTabFromExternalRoute: 0);
                       }));
                     },
                     text: 'Deposit',
@@ -279,7 +261,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onPressed: () {
                     Navigator.push(context,
                         CupertinoPageRoute(builder: (contect) {
-                      return WalletScreen();
+                      return WalletScreen(selectedTabFromExternalRoute: 1);
                     }));
                   },
                   text: 'Withdraw',
@@ -316,22 +298,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onTap: () {
                     Navigator.push(context,
                         CupertinoPageRoute(builder: (contect) {
-                      return GameScreen();
-                    }));
-                  },
-                  icon: Icons.receipt_outlined,
-                  feature: 'Bet History',
-                  rightSide: Icon(
-                    Icons.chevron_right,
-                    color: Color(0xB2FFFFFF),
-                    size: 24,
-                  ),
-                ),
-                divider(),
-                ProfileFeature(
-                  onTap: () {
-                    Navigator.push(context,
-                        CupertinoPageRoute(builder: (contect) {
                       return TransactionsScreen();
                     }));
                   },
@@ -348,7 +314,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   onTap: () {
                     Navigator.push(context,
                         CupertinoPageRoute(builder: (contect) {
-                      return EarnScreen();
+                      return EarnScreen(
+                        isFromExternalSource: true,
+                      );
                     }));
                   },
                   icon: Icons.auto_graph,

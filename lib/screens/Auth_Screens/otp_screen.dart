@@ -1,5 +1,3 @@
-// ignore_for_file: library_private_types_in_public_api, prefer_const_constructors
-
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 
@@ -21,6 +19,7 @@ class OTPScreen extends StatefulWidget {
       : super(key: key);
 
   @override
+  // ignore: library_private_types_in_public_api
   _OTPScreenState createState() => _OTPScreenState();
 }
 
@@ -34,7 +33,7 @@ class _OTPScreenState extends State<OTPScreen> {
 
     return Scaffold(
       body: isLoading
-          ? Center(
+          ? const Center(
               child: CircularProgressIndicator(color: Color(0xFF3B4FFE)),
             )
           : Column(
@@ -42,9 +41,9 @@ class _OTPScreenState extends State<OTPScreen> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Align(
-                  alignment: AlignmentDirectional(0.00, 0.00),
+                  alignment: const AlignmentDirectional(0.00, 0.00),
                   child: Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
+                    padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 10),
                     child: Text(
                       'Verification\n Code',
                       textAlign: TextAlign.center,
@@ -63,7 +62,8 @@ class _OTPScreenState extends State<OTPScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(20, 0, 5, 0),
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(20, 0, 5, 0),
                       child: Text(
                         'Enter OTP sent to: ${widget.phoneNumber}',
                         textAlign: TextAlign.center,
@@ -76,7 +76,8 @@ class _OTPScreenState extends State<OTPScreen> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsetsDirectional.fromSTEB(5, 0, 20, 0),
+                      padding:
+                          const EdgeInsetsDirectional.fromSTEB(5, 0, 20, 0),
                       child: Text(
                         '',
                         textAlign: TextAlign.center,
@@ -92,7 +93,7 @@ class _OTPScreenState extends State<OTPScreen> {
                   ],
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(13, 20, 13, 0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(13, 20, 13, 0),
                   child: PinCodeTextField(
                     autoDisposeControllers: false,
                     appContext: context,
@@ -122,10 +123,10 @@ class _OTPScreenState extends State<OTPScreen> {
                       borderRadius: BorderRadius.circular(12),
                       shape: PinCodeFieldShape.underline,
                       activeColor: FlutterFlowTheme.of(context).primary,
-                      inactiveColor: Color(0xFF3B4FFE),
+                      inactiveColor: const Color(0xFF3B4FFE),
                       selectedColor: FlutterFlowTheme.of(context).secondaryText,
                       activeFillColor: FlutterFlowTheme.of(context).primary,
-                      inactiveFillColor: Color(0xFF3B4FFE),
+                      inactiveFillColor: const Color(0xFF3B4FFE),
                       selectedFillColor:
                           FlutterFlowTheme.of(context).secondaryText,
                     ),
@@ -142,13 +143,14 @@ class _OTPScreenState extends State<OTPScreen> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
+                  padding: const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
                   child: Row(
                     mainAxisSize: MainAxisSize.max,
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Padding(
-                        padding: EdgeInsetsDirectional.fromSTEB(20, 0, 5, 5),
+                        padding:
+                            const EdgeInsetsDirectional.fromSTEB(20, 0, 5, 5),
                         child: Text(
                           'Didn\'t Recieve the OTP?',
                           textAlign: TextAlign.center,
@@ -170,7 +172,8 @@ class _OTPScreenState extends State<OTPScreen> {
                                 Navigator.pop(context);
                               },
                         child: Padding(
-                          padding: EdgeInsetsDirectional.fromSTEB(5, 0, 20, 5),
+                          padding:
+                              const EdgeInsetsDirectional.fromSTEB(5, 0, 20, 5),
                           child: Text(
                             'RESEND CODE',
                             textAlign: TextAlign.center,
@@ -194,7 +197,7 @@ class _OTPScreenState extends State<OTPScreen> {
                   ),
                 ),
                 Padding(
-                    padding: EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
+                    padding: const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
                     child: PrimaryButton(
                       title: 'Verify',
                       width: 200,

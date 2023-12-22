@@ -15,7 +15,9 @@ dependencies:
     sdk: flutter
 
   google_sign_in: ^6.1.6
-  pay_with_paystack: ^1.0.6
+  rive: 
+  email_otp:
+  cloud_firestore: ^4.13.6
   webview_flutter: ^4.4.2
   plugin_platform_interface: ^2.1.4
   flutterflow_ui: ^0.2.0+1

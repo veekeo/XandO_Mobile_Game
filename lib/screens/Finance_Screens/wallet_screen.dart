@@ -9,7 +9,8 @@ import 'package:xando/screens/Finance_Screens/transactions_screen.dart';
 import 'package:xando/screens/Finance_Screens/withdraw.dart';
 
 class WalletScreen extends StatefulWidget {
-  const WalletScreen({super.key});
+  const WalletScreen({super.key, required this.selectedTabFromExternalRoute});
+  final int selectedTabFromExternalRoute;
 
   @override
   State<WalletScreen> createState() => _WalletScreenState();
@@ -27,6 +28,12 @@ class _WalletScreenState extends State<WalletScreen> {
     });
   }
 
+  void _updateIfFromExternalRoute() {
+    setState(() {
+      _selectedIndex = widget.selectedTabFromExternalRoute;
+    });
+  }
+
   void _onTabSelected(int index) {
     setState(() {
       _selectedIndex = index;
@@ -36,8 +43,15 @@ class _WalletScreenState extends State<WalletScreen> {
   @override
   void initState() {
     super.initState();
+    _updateIfFromExternalRoute();
     _coin = 0;
     _loadUserData();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    widget.selectedTabFromExternalRoute;
   }
 
   @override

@@ -9,6 +9,7 @@ import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
+import 'package:xando/screens/Auth_Screens/forgot_password.dart';
 import 'package:xando/screens/Auth_Screens/signup_screen.dart';
 
 import 'package:xando/utils/snackbar_message.dart';
@@ -215,22 +216,30 @@ class _SignInScreenState extends State<SignInScreen> {
                             ),
                             Align(
                               alignment: const AlignmentDirectional(0.00, 0.00),
-                              child: Text(
-                                'Forgot Password?',
-                                textAlign: TextAlign.center,
-                                style: FlutterFlowTheme.of(context)
-                                    .bodyLarge
-                                    .override(
-                                      fontFamily: 'Plus Jakarta Sans',
-                                      color: FlutterFlowTheme.of(context)
-                                          .primaryText,
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      useGoogleFonts: GoogleFonts.asMap()
-                                          .containsKey(
-                                              FlutterFlowTheme.of(context)
-                                                  .bodyLargeFamily),
-                                    ),
+                              child: GestureDetector(
+                                onTap: () {
+                                  Navigator.push(context,
+                                      CupertinoPageRoute(builder: (context) {
+                                    return const ForgotPasswordScreen();
+                                  }));
+                                },
+                                child: Text(
+                                  'Forgot Password?',
+                                  textAlign: TextAlign.center,
+                                  style: FlutterFlowTheme.of(context)
+                                      .bodyLarge
+                                      .override(
+                                        fontFamily: 'Plus Jakarta Sans',
+                                        color: FlutterFlowTheme.of(context)
+                                            .primaryText,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        useGoogleFonts: GoogleFonts.asMap()
+                                            .containsKey(
+                                                FlutterFlowTheme.of(context)
+                                                    .bodyLargeFamily),
+                                      ),
+                                ),
                               ),
                             ),
                           ],

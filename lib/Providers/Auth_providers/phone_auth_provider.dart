@@ -5,9 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
-import 'package:xando/main_page.dart';
 import 'package:xando/screens/Auth_Screens/otp_screen.dart';
-import 'package:xando/utils/routers.dart';
 import 'package:xando/utils/snackbar_message.dart';
 import 'package:http/http.dart' as http;
 
@@ -137,7 +135,7 @@ class PhoneNumberAuthProvider extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       _hasError = true;
-      _errorCode = 'here!';
+      _errorCode = 'User with the given phone number already exists.';
       print(e.toString());
       notifyListeners();
     }

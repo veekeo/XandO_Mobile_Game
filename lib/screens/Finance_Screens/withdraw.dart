@@ -3,11 +3,13 @@ import 'package:flutter/services.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/Providers/get_banks_code_provider.dart';
 import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/Providers/paystack_provider.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/models/banks_code_model.dart';
+import 'package:xando/models/user_profile_model.dart';
 import 'package:xando/utils/snackbar_message.dart';
 
 class Withdraw extends StatefulWidget {
@@ -42,61 +44,50 @@ class _WithdrawState extends State<Withdraw> {
           children: [
             Padding(
               padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 15),
-              child: Container(
-                width: double.infinity,
-                height: 130,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      const Color(0xFF913BFE),
-                      FlutterFlowTheme.of(context).primary
-                    ],
-                    stops: const [0, 1],
-                    begin: const AlignmentDirectional(0, -1),
-                    end: const AlignmentDirectional(0, 1),
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Padding(
-                  padding: const EdgeInsetsDirectional.fromSTEB(15, 10, 15, 10),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.max,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 8),
-                        child: Text(
-                          'Balance',
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                fontFamily: 'Plus Jakarta Sans',
-                                fontWeight: FontWeight.bold,
-                                useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                    FlutterFlowTheme.of(context)
-                                        .bodyMediumFamily),
-                              ),
-                        ),
+              child: FutureBuilder<UserModel>(
+                future: EditProfileProvider().getUserProfileData(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF3B4FFE),
                       ),
-                      Padding(
-                        padding:
-                            const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 5),
-                        child: Row(
+                    );
+                  } else if (snapshot.hasError) {
+                    return Text('Error: ${snapshot.error}');
+                  } else {
+                    return Container(
+                      width: double.infinity,
+                      height: 130,
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          colors: [
+                            const Color(0xFF913BFE),
+                            FlutterFlowTheme.of(context).primary
+                          ],
+                          stops: const [0, 1],
+                          begin: const AlignmentDirectional(0, -1),
+                          end: const AlignmentDirectional(0, 1),
+                        ),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsetsDirectional.fromSTEB(
+                            15, 10, 15, 10),
+                        child: Column(
                           mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
                                   0, 0, 0, 8),
                               child: Text(
-                                'NGN 1,999,999',
+                                'Balance',
                                 style: FlutterFlowTheme.of(context)
                                     .bodyMedium
                                     .override(
                                       fontFamily: 'Plus Jakarta Sans',
-                                      fontSize: 32,
                                       fontWeight: FontWeight.bold,
                                       useGoogleFonts: GoogleFonts.asMap()
                                           .containsKey(
@@ -105,17 +96,49 @@ class _WithdrawState extends State<Withdraw> {
                                     ),
                               ),
                             ),
-                            Icon(
-                              Icons.arrow_forward_ios,
-                              color: FlutterFlowTheme.of(context).primaryText,
-                              size: 24,
+                            Padding(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  0, 0, 0, 5),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.max,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  //Future Builder
+                                  Padding(
+                                    padding:
+                                        const EdgeInsetsDirectional.fromSTEB(
+                                            0, 0, 0, 8),
+                                    child: Text(
+                                      '${snapshot.data!.gamedata?.coin} NGN',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            fontFamily: 'Plus Jakarta Sans',
+                                            fontSize: 32,
+                                            fontWeight: FontWeight.bold,
+                                            useGoogleFonts: GoogleFonts.asMap()
+                                                .containsKey(
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMediumFamily),
+                                          ),
+                                    ),
+                                  ),
+                                  Icon(
+                                    Icons.arrow_forward_ios,
+                                    color: FlutterFlowTheme.of(context)
+                                        .primaryText,
+                                    size: 24,
+                                  ),
+                                ],
+                              ),
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
+                    );
+                  }
+                },
               ),
             ),
             GestureDetector(

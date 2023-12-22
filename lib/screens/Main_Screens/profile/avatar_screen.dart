@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/avatar_provider.dart';
 import 'package:xando/components/avatar_container.dart';
-import 'package:xando/components/primary_button.dart';
 import 'package:xando/utils/snackbar_message.dart';
 
 class AvatarScreen extends StatefulWidget {

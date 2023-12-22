@@ -3,6 +3,7 @@ import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/Providers/paystack_provider.dart';
 
@@ -44,28 +45,27 @@ class _PaystackCheckoutScreenState extends State<PaystackCheckoutScreen> {
                 )
                 ..setNavigationDelegate(
                   NavigationDelegate(
-                      onNavigationRequest: (NavigationRequest request) async {
-                    final paystack = context.read<PaystackProvider>();
-                    final initialUserBalance = await context
-                        .read<EditProfileProvider>()
-                        .getUserProfileData()
-                        .then((value) {
-                      return value.gamedata?.coin;
-                    });
-                    //-----------------
-                    if (request.url.startsWith('https://google.com')) {
-                      // ignore: use_build_context_synchronously
-                      await paystack
-                          .verifyTransaction(context)
-                          .then((value) async {
+                    onNavigationRequest: (NavigationRequest request) async {
+                      final paystack = context.read<PaystackProvider>();
+                      int initialUserBalance = await DatabaseProvider()
+                          .getCoin()
+                          .then((value) => value);
+                      print('Initial balance: $initialUserBalance');
+                      //-----------------
+                      if (request.url.startsWith('https://google.com')) {
+                        // ignore: use_build_context_synchronously
                         await paystack
-                            .calcUserTotalAmount(context, initialUserBalance)
-                            .then((value) => Navigator.pop(context));
-                      });
-                    }
+                            .verifyTransaction(context)
+                            .then((value) async {
+                          await paystack
+                              .calcUserTotalAmount(context, initialUserBalance)
+                              .then((value) => Navigator.pop(context));
+                        });
+                      }
 
-                    return NavigationDecision.navigate;
-                  }),
+                      return NavigationDecision.navigate;
+                    },
+                  ),
                 ),
             ),
           ),

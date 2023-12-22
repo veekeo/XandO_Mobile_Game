@@ -7,7 +7,9 @@ import 'package:provider/provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Game/create_game_provider.dart';
 import 'package:xando/components/primary_button.dart';
+import 'package:xando/components/primary_button_outline.dart';
 import 'package:xando/utils/snackbar_message.dart';
+import 'package:rive/rive.dart';
 
 class CreateGameScreen extends StatefulWidget {
   const CreateGameScreen({super.key});
@@ -21,6 +23,9 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   final TextEditingController _gameTitleController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   double _stake = 0;
+
+  //Rive
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -328,15 +333,17 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                     title: 'Create Game',
                                     width: double.infinity,
                                     height: 55,
-                                    onpressed: () {
-                                      final dbProvider =
-                                          context.read<DatabaseProvider>();
+                                    onpressed: () async {
+                                      final userId =
+                                          await DatabaseProvider().getUserId();
                                       if (_formKey.currentState?.validate() ??
                                           false) {
+                                        print(userId);
+                                        // ignore: use_build_context_synchronously
                                         creategame
                                             .createGame(
                                                 context,
-                                                dbProvider.userId.toString(),
+                                                userId,
                                                 _gameTitleController.text
                                                     .trim(),
                                                 _stake.toString().trim())
@@ -348,6 +355,15 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                               status: false,
                                             );
                                           } else {
+                                            _showBottomSheet(
+                                              context: context,
+                                              potentialWin: creategame
+                                                  .potentialWin
+                                                  .toString(),
+                                              stake: creategame.stake,
+                                              gameId:
+                                                  creategame.gameId.toString(),
+                                            );
                                             showSuccessSnackBarMessage(
                                               message: creategame.resMessage,
                                               context: context,
@@ -356,6 +372,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                           }
                                         });
                                       } else {
+                                        // ignore: use_build_context_synchronously
                                         showErrorSnackBarMessage(
                                           message:
                                               'Please fill in the required fields!',
@@ -380,6 +397,142 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showBottomSheet({
+    required BuildContext context,
+    required String? stake,
+    required String? gameId,
+    required String? potentialWin,
+  }) {
+    showModalBottomSheet(
+      backgroundColor: const Color.fromARGB(255, 16, 20, 37),
+      context: context,
+      builder: (BuildContext context) {
+        return SizedBox(
+          width: double.infinity,
+          height: MediaQuery.of(context).size.height / 2.2,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 35,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 73, 84, 129),
+                    borderRadius: BorderRadius.circular(50),
+                  ),
+                ),
+                const SizedBox(height: 16.0),
+                const SizedBox(
+                  width: 130,
+                  height: 100,
+                  child: RiveAnimation.asset(
+                    'assets/images/success.riv',
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                const Text(
+                  'Bet Successful',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontFamily: 'Bold',
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Stake',
+                      style: TextStyle(
+                        fontFamily: 'Medium',
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.5),
+                      ),
+                    ),
+                    Text(
+                      'NGN ${stake!}',
+                      style: const TextStyle(
+                        fontFamily: 'Medium',
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Potential win',
+                      style: TextStyle(
+                        fontFamily: 'Medium',
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.5),
+                      ),
+                    ),
+                    Text(
+                      potentialWin!,
+                      style: const TextStyle(
+                        fontFamily: 'Medium',
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Game ID',
+                      style: TextStyle(
+                        fontFamily: 'Medium',
+                        fontSize: 14,
+                        color: Colors.white.withOpacity(0.5),
+                      ),
+                    ),
+                    Text(
+                      gameId!,
+                      style: const TextStyle(
+                        fontFamily: 'Medium',
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 20),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    SecondaryButton(
+                      title: 'Close',
+                      width: 140,
+                      height: 50,
+                      onpressed: () {
+                        Navigator.pop(context);
+                      },
+                      isLoading: false,
+                    ),
+                    PrimaryButton(
+                      title: 'Share',
+                      width: 140,
+                      height: 50,
+                      onpressed: () {},
+                      isLoading: false,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
