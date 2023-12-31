@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:xando/Providers/Database/db_provider.dart';
+import 'package:xando/models/affilaite_user_model.dart';
 import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
 import 'package:xando/screens/Auth_Screens/signin_screen.dart';
 import 'package:xando/utils/routers.dart';
@@ -21,15 +22,21 @@ class AuthenticationProvider extends ChangeNotifier {
   bool _isLoading = false;
   String _resMessage = '';
   bool? _rememberUser = false;
+  late AffliateUserModel _affliateUser = AffliateUserModel();
+
+  bool _alreadyRequested = false;
 
   bool get isLoading => _isLoading;
   String get resMessage => _resMessage;
   bool? get rememberUser => _rememberUser;
+  dynamic get affliateUser => _affliateUser;
+  bool get alreadyRequested => _alreadyRequested;
 
   void registerUser({
     BuildContext? context,
     required String email,
     required String password,
+    required String affliateCode,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -41,6 +48,7 @@ class AuthenticationProvider extends ChangeNotifier {
     final body = {
       "email": email,
       "password": password,
+      "affiliate_code": affliateCode,
     };
 
     try {
@@ -63,10 +71,14 @@ class AuthenticationProvider extends ChangeNotifier {
         notifyListeners();
         // ignore: use_build_context_synchronously
         PageNavigator(ctx: context).nextPageOnly(page: const SignInScreen());
+      } else if (req.statusCode == 400) {
+        _isLoading = false;
+        _resMessage = 'Invalid Affliate Code.';
+        notifyListeners();
       } else {
-        // final res = json.decode(req.body);
-        // print(res);
-        // print(req.statusCode);
+        final res = json.decode(req.body);
+        print(res);
+        print(req.statusCode);
         _resMessage = 'User with this email already exists';
         _isLoading = false;
         notifyListeners();
@@ -268,5 +280,49 @@ class AuthenticationProvider extends ChangeNotifier {
       _resMessage = 'Please try again!';
       notifyListeners();
     }
+  }
+
+  //Get An Afflitate
+  Future<AffliateUserModel> getAffliateUser(String userId) async {
+    AffliateUserModel affliateUser = AffliateUserModel();
+    _isLoading = true;
+    notifyListeners();
+    String requestbaseUrl = 'https://tictac-production.up.railway.app';
+    String url = '$requestbaseUrl/tictac/affiliate/$userId/';
+
+    try {
+      http.Response req = await http.get(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (req.statusCode == 200 || req.statusCode == 201) {
+        if (json.decode(req.body) == null) {
+          return affliateUser;
+        } else {
+          final affliateUserModel = affliateUserModelFromJson(req.body);
+          _affliateUser = affliateUserModel;
+          notifyListeners();
+          return affliateUserModel;
+        }
+      } else {
+        _isLoading = false;
+        notifyListeners();
+      }
+    } on SocketException catch (_) {
+      _resMessage = 'Internet connection is not available';
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _resMessage = e.toString();
+      notifyListeners();
+    }
+    return affliateUser;
+  }
+
+  void switchAleadyRequested() {
+    _alreadyRequested = true;
+    notifyListeners();
   }
 }

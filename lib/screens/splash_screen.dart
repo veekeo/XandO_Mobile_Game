@@ -7,6 +7,8 @@ import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/main_page.dart';
 import 'package:xando/screens/Auth_Screens/onboarding_screen.dart';
 import 'package:xando/screens/Auth_Screens/signin_screen.dart';
+import 'package:xando/screens/Auth_Screens/signup_screen.dart';
+import 'package:xando/utils/dynamic_links.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,8 +22,9 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     final dbProvider = context.read<DatabaseProvider>();
+
     super.initState();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
+    // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
     // print(dbProvider.usr);
 
     Future.delayed(
@@ -58,6 +61,24 @@ class _SplashScreenState extends State<SplashScreen>
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: SystemUiOverlay.values);
     super.dispose();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final dynamicLinksProvider = context.read<DynamicLinksProvider>();
+    final affliateRefCode = dynamicLinksProvider.affliateRefCode;
+
+    dynamicLinksProvider.initializeDynamicLink().then((value) {
+      if (value == true) {
+        Navigator.of(context)
+            .pushReplacement(CupertinoPageRoute(builder: (context) {
+          return SignUpScreen(
+            affliateCode: affliateRefCode,
+          );
+        }));
+      }
+    });
   }
 
   @override

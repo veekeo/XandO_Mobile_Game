@@ -1,4 +1,4 @@
-package com.example.xando
+package xando.app
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -48,6 +48,7 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
   Future signInWithGoogle(BuildContext context) async {
     _isLoading = true;
     notifyListeners();
+
     final GoogleSignInAccount? googleSignInAccount =
         await googleSignIn.signIn();
 
@@ -287,32 +288,3 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
     //clear all storage data on local db
   }
 }
-
-
-
-  // User? user = firebaseAuth.currentUser;
-
-  // //check if user exists in our database
-  // Future<bool> checkUserExists(BuildContext context) async {
-  //   User? user = firebaseAuth.currentUser;
-  //   if (user == null) {
-  //     // User is signed out
-  //     print('User signed out');
-  //     _isLoading = false;
-  //     notifyListeners();
-  //     return false;
-  //   } else {
-  //     // User is signed in
-  //     print('User signed in with UID: ${user.uid}');
-  //     if (user.email != null) {
-  //       _email = user.email;
-  //       // await getUserData(context, _email)
-  //       _isLoading = false;
-  //       notifyListeners();
-  //       print('User email: ${user.email}');
-  //     } else {
-  //       print('User email not available');
-  //     }
-  //     return true;
-  //   }
-  // }

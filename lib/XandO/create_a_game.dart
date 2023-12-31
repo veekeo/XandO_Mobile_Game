@@ -4,10 +4,12 @@ import 'package:flutter/services.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Game/create_game_provider.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/components/primary_button_outline.dart';
+import 'package:xando/utils/dynamic_links.dart';
 import 'package:xando/utils/snackbar_message.dart';
 import 'package:rive/rive.dart';
 
@@ -330,6 +332,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 15),
                                   child: PrimaryButton(
+                                    backgroundColor: const Color(0xFF3B4FFE),
                                     title: 'Create Game',
                                     width: double.infinity,
                                     height: 55,
@@ -519,13 +522,21 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                       },
                       isLoading: false,
                     ),
-                    PrimaryButton(
-                      title: 'Share',
-                      width: 140,
-                      height: 50,
-                      onpressed: () {},
-                      isLoading: false,
-                    ),
+                    Consumer<DynamicLinksProvider>(
+                        builder: (context, link, child) {
+                      return PrimaryButton(
+                        backgroundColor: const Color(0xFF3B4FFE),
+                        title: 'Share',
+                        width: 140,
+                        height: 50,
+                        onpressed: () {
+                          link.createGameLink(gameId).then((value) {
+                            Share.share(value);
+                          });
+                        },
+                        isLoading: false,
+                      );
+                    }),
                   ],
                 ),
               ],

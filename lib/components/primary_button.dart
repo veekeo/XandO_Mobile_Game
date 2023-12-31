@@ -10,6 +10,7 @@ class PrimaryButton extends StatelessWidget {
     required this.height,
     required this.onpressed,
     required this.isLoading,
+    required this.backgroundColor,
   });
 
   final String title;
@@ -17,6 +18,7 @@ class PrimaryButton extends StatelessWidget {
   final double height;
   final Function()? onpressed;
   final bool isLoading;
+  final Color backgroundColor;
 
   @override
   Widget build(BuildContext context) {
@@ -26,8 +28,7 @@ class PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: isLoading ? null : onpressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor:
-              FlutterFlowTheme.of(context).primary, // Background color
+          backgroundColor: backgroundColor, // Background color
           foregroundColor: Colors.white, // Text color
           // padding: EdgeInsets.symmetric(horizontal: width, vertical: height),
           shape: RoundedRectangleBorder(

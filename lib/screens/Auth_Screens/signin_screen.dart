@@ -282,6 +282,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               }
                             });
                             return PrimaryButton(
+                              backgroundColor: const Color(0xFF3B4FFE),
                               title: 'Sign in',
                               width: 200,
                               height: 55,
@@ -302,7 +303,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   );
                                 }
                               },
-                              isLoading: auth.isLoading,
+                              isLoading: false,
                             );
                           },
                         ),

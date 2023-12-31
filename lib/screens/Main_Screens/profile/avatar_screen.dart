@@ -15,6 +15,24 @@ class AvatarScreen extends StatefulWidget {
 }
 
 class _AvatarScreenState extends State<AvatarScreen> {
+  late String _userId;
+
+  _loadUserData() async {
+    String? userId = await DatabaseProvider().getUserId();
+    if (mounted) {
+      setState(() {
+        _userId = userId;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _userId = '';
+    _loadUserData();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,32 +99,26 @@ class _AvatarScreenState extends State<AvatarScreen> {
                         isSelected: avatar.avatars[index].isSelected,
                         selectedColor: avatar.avatars[index].selectedColor,
                         onPressed: () {
-                          final dbProvider = context.read<DatabaseProvider>();
+                          print('user id: $_userId');
                           avatar
                               .updateColor(
-                                  context,
-                                  dbProvider.userId.toString(),
-                                  avatar.avatars[index])
-                              .then(
-                                (value) => {
-                                  if (avatar.hasError == true)
-                                    {
-                                      showErrorSnackBarMessage(
-                                        message: avatar.resMessage,
-                                        context: context,
-                                        status: false,
-                                      ),
-                                    }
-                                  else
-                                    {
-                                      showSuccessSnackBarMessage(
-                                        message: avatar.resMessage,
-                                        context: context,
-                                        status: true,
-                                      ),
-                                    }
-                                },
+                                  context, _userId, avatar.avatars[index])
+                              .then((value) {
+                            print(_userId);
+                            if (avatar.hasError == true) {
+                              showErrorSnackBarMessage(
+                                message: avatar.resMessage,
+                                context: context,
+                                status: false,
                               );
+                            } else {
+                              showSuccessSnackBarMessage(
+                                message: avatar.resMessage,
+                                context: context,
+                                status: true,
+                              );
+                            }
+                          });
                         },
                       );
                     },

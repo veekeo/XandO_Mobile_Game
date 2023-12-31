@@ -58,16 +58,21 @@ class _ReusableAppBarState extends State<ReusableAppBar> {
               runAlignment: WrapAlignment.center,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                ProfileAvatar(
-                  image: 'https://api.multiavatar.com/dc8d09961b64430bc4.png',
-                  imageSize: 40,
-                  onTap: () {
-                    Navigator.push(context,
-                        CupertinoPageRoute(builder: (contect) {
-                      return const ProfileScreen();
-                    }));
-                  },
-                ),
+                FutureBuilder<UserModel>(
+                    future: EditProfileProvider().getUserProfileData(),
+                    builder: (context, snapshot) {
+                      return ProfileAvatar(
+                        image: snapshot.data?.avatar ??
+                            'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                        imageSize: 40,
+                        onTap: () {
+                          Navigator.push(context,
+                              CupertinoPageRoute(builder: (contect) {
+                            return const ProfileScreen();
+                          }));
+                        },
+                      );
+                    }),
                 Wrap(
                   alignment: WrapAlignment.center,
                   runAlignment: WrapAlignment.center,
@@ -105,24 +110,30 @@ class _ReusableAppBarState extends State<ReusableAppBar> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsetsDirectional.fromSTEB(
-                                2, 0, 0, 0),
-                            child: FutureBuilder<UserModel>(
+                              padding: const EdgeInsetsDirectional.fromSTEB(
+                                  2, 0, 0, 0),
+                              child: FutureBuilder<UserModel>(
                                 future:
                                     EditProfileProvider().getUserProfileData(),
                                 builder: (context, snapshot) {
-                                  return Text(
-                                    snapshot.data?.gamedata?.coin == null
-                                        ? '0'
-                                        : '${snapshot.data?.gamedata?.coin}',
-                                    style: const TextStyle(
-                                      fontFamily: 'Medium',
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  );
-                                }),
-                          ),
+                                  if (snapshot.hasData) {
+                                    return Text(
+                                      snapshot.data!.gamedata?.coin == null
+                                          ? '0'
+                                          : '${snapshot.data!.gamedata!.coin}',
+                                      style: const TextStyle(
+                                        fontFamily: 'Medium',
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    );
+                                  } else {
+                                    return const Text('0');
+                                  }
+
+                                  // Rest of the code for displaying data
+                                },
+                              )),
                           // const Icon(
                           //   Icons.keyboard_arrow_down,
                           // ),

@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -6,14 +7,19 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Game/get_available_games_provider.dart';
+import 'package:xando/Providers/Profile/edit_profile_provider.dart';
+import 'package:xando/Providers/firestore_service.dart';
 import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/components/game_card.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/components/primary_button_outline.dart';
 import 'package:xando/models/available_games_model.dart';
 import 'package:xando/models/home_screen_model.dart';
+import 'package:xando/models/user_profile_model.dart';
 import 'package:xando/reusable_widgets/banner_pageview.dart';
 import 'package:xando/reusable_widgets/reusable_appbar.dart';
+import 'package:xando/screens/Main_Screens/game_details_screen.dart';
+import 'package:xando/utils/game_requests_enums.dart';
 import 'package:xando/utils/snackbar_message.dart';
 import 'package:rive/rive.dart';
 
@@ -33,6 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
   late HomePageModel _model;
   late Timer _timer;
   late String _userId;
+  late String _username;
+  late String _deviceToken;
   double potentialWin = 0;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
@@ -40,10 +48,14 @@ class _HomeScreenState extends State<HomeScreen> {
   _loadUserData() async {
     int? coin = await DatabaseProvider().getCoin();
     String? userId = await DatabaseProvider().getUserId();
+    String? deviceToken = await DatabaseProvider().getDeviceToken();
+    String? username = await DatabaseProvider().getUserName();
     if (mounted) {
       setState(() {
         _userId = userId;
         _coin = coin;
+        _deviceToken = deviceToken;
+        _username = username;
       });
     }
   }
@@ -52,6 +64,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _userId = '';
+    _deviceToken = '';
+    _username = '';
     _coin = 0;
     _loadUserData();
     _model = createModel(context, () => HomePageModel());
@@ -82,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
     if (internetProvider.hasInternet == false) {
       // ignore: use_build_context_synchronously
       showErrorSnackBarMessage(
-        message: 'You seem to be offline',
+        message: 'Internet connection not available.',
         context: context,
         status: false,
       );
@@ -119,6 +133,8 @@ class _HomeScreenState extends State<HomeScreen> {
     return potentialWin;
   }
 
+  //Firebase Cloud Messaging for Push Notifications
+
   @override
   Widget build(BuildContext context) {
     if (isiOS) {
@@ -137,13 +153,12 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         key: scaffoldKey,
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(140), // Set this height
+          preferredSize: const Size.fromHeight(136), // Set this height
           child: ReusableAppBar(
             coin: _coin,
           ),
         ),
         body: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
               child: SizedBox(
@@ -263,7 +278,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               'No Available Games Yet',
                               style: TextStyle(
                                 fontFamily: 'Regular',
-                                fontSize: 15,
+                                fontSize: 12,
                               ),
                             ),
                           ],
@@ -276,21 +291,90 @@ class _HomeScreenState extends State<HomeScreen> {
                         (context, index) {
                           return Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 13),
-                            child: GameCard(
-                              image: 'assets/images/scott_brown.png',
-                              username: filteredGames[index].user?.username,
-                              price: filteredGames[index].stake,
-                              buttonText: 'Join',
-                              onTap: () {
-                                _showCustomDialog(
-                                  context: context,
-                                  stake: filteredGames[index].stake,
-                                  gameId: filteredGames[index].id.toString(),
-                                  username: filteredGames[index].user?.username,
-                                );
-                              },
-                              cardColor: const Color.fromARGB(255, 15, 22, 44),
-                            ),
+                            child: FutureBuilder<UserModel>(
+                                future:
+                                    EditProfileProvider().getUserProfileData(),
+                                builder: (context, snapshot) {
+                                  return GameCard(
+                                    onCardTap: () {
+                                      Navigator.push(
+                                          context,
+                                          CupertinoPageRoute(
+                                              builder: (context) =>
+                                                  GameDetailsScreen(
+                                                    receiverAvatar:
+                                                        filteredGames[index]
+                                                            .user
+                                                            ?.avatar,
+                                                    senderAvatar:
+                                                        snapshot.data?.avatar,
+                                                    receiverDeviceToken:
+                                                        filteredGames[index]
+                                                            .user
+                                                            ?.deviceToken,
+                                                    senderUsername: _username,
+                                                    senderDeviceToken:
+                                                        _deviceToken,
+                                                    state: filteredGames[index]
+                                                        .state,
+                                                    receiverId:
+                                                        filteredGames[index]
+                                                            .user
+                                                            ?.id,
+                                                    senderId: _userId,
+                                                    stake: filteredGames[index]
+                                                        .stake,
+                                                    potentialWin:
+                                                        filteredGames[index]
+                                                            .stake!,
+                                                    gameTitle:
+                                                        filteredGames[index]
+                                                            .title,
+                                                    gameId: filteredGames[index]
+                                                        .gameId,
+                                                    username:
+                                                        filteredGames[index]
+                                                            .user
+                                                            ?.username,
+                                                  )));
+                                    },
+                                    image: filteredGames[index].user?.avatar ??
+                                        'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                    username:
+                                        filteredGames[index].user?.username,
+                                    price: filteredGames[index].stake,
+                                    buttonText: filteredGames[index].state!
+                                        ? 'Join'
+                                        : 'Unavailble',
+                                    state: filteredGames[index].state!,
+                                    onTap: () {
+                                      _showCustomDialog(
+                                        context: context,
+                                        stake: filteredGames[index].stake,
+                                        gameId: filteredGames[index].gameId,
+                                        username:
+                                            filteredGames[index].user?.username,
+                                        receiverId:
+                                            filteredGames[index].user?.id,
+                                        senderId: _userId,
+                                        senderUsername: _username,
+                                        senderDeviceToken: _deviceToken,
+                                        receiverDeviceToken:
+                                            filteredGames[index]
+                                                .user
+                                                ?.deviceToken,
+                                        receiverAvatar: filteredGames[index]
+                                                .user
+                                                ?.avatar ??
+                                            'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                        senderAvatar: snapshot.data?.avatar ??
+                                            'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                      );
+                                    },
+                                    cardColor:
+                                        const Color.fromARGB(255, 15, 22, 44),
+                                  );
+                                }),
                           );
                         },
                         childCount: filteredGames.length > 10
@@ -314,6 +398,13 @@ class _HomeScreenState extends State<HomeScreen> {
     required String? stake,
     required String? gameId,
     required String? username,
+    required String? senderUsername,
+    required String? receiverId,
+    required String? senderId,
+    required String? receiverDeviceToken,
+    required String? receiverAvatar,
+    required String? senderAvatar,
+    required String? senderDeviceToken,
   }) {
     showDialog(
       context: context,
@@ -437,23 +528,61 @@ class _HomeScreenState extends State<HomeScreen> {
                               },
                               isLoading: false,
                             ),
-                            PrimaryButton(
-                              title: 'Proceed',
-                              width: 110,
-                              height: 35,
-                              onpressed: () {
-                                Navigator.pop(context);
-                                _showJoinGameBottomSheet(
-                                  context: context,
-                                  stake: stake,
-                                  gameId: gameId,
-                                  potentialWin:
-                                      calculateDiscount(double.parse(stake))
-                                          .toString(),
-                                );
-                              },
-                              isLoading: false,
-                            ),
+                            Consumer<FireStoreServiceProvider>(
+                                builder: (context, firestoreService, child) {
+                              final game =
+                                  Provider.of<GetAvailableGamesProvider>(
+                                      context,
+                                      listen: false);
+                              return PrimaryButton(
+                                backgroundColor: const Color(0xFF3B4FFE),
+                                title: 'Proceed',
+                                width: 110,
+                                height: 35,
+                                onpressed: () async {
+                                  print('receiver $receiverId');
+                                  await game
+                                      .updateGameState(false, receiverId)
+                                      .then((value) async {
+                                    await firestoreService
+                                        .addGameRequest(
+                                      senderId,
+                                      receiverId,
+                                      senderDeviceToken,
+                                      receiverDeviceToken,
+                                      username,
+                                      gameId,
+                                      stake,
+                                      senderUsername,
+                                      receiverAvatar,
+                                      senderAvatar,
+                                      RequestStatus.pending,
+                                    )
+                                        .then((value) async {
+                                      await firestoreService
+                                          .sendNotification(
+                                        receiverDeviceToken,
+                                        'Game Request',
+                                        '$username wants to join your game',
+                                        senderAvatar,
+                                      )
+                                          .then((value) {
+                                        Navigator.pop(context);
+                                        _showJoinGameBottomSheet(
+                                          context: context,
+                                          stake: stake,
+                                          gameId: gameId,
+                                          potentialWin: calculateDiscount(
+                                                  double.parse(stake))
+                                              .toString(),
+                                        );
+                                      });
+                                    });
+                                  });
+                                },
+                                isLoading: firestoreService.isLoading,
+                              );
+                            }),
                           ],
                         ),
                       ],
@@ -586,6 +715,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 const SizedBox(height: 20),
                 PrimaryButton(
+                  backgroundColor: const Color(0xFF3B4FFE),
                   title: 'Close',
                   width: double.infinity,
                   height: 50,

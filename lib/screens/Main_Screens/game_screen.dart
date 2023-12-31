@@ -1,10 +1,12 @@
 // ignore_for_file: prefer_const_constructors, prefer_const_literals_to_create_immutables
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Game/get_available_games_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
@@ -16,6 +18,9 @@ import 'package:xando/components/tabs.dart';
 import 'package:xando/models/available_games_model.dart';
 import 'package:xando/models/game_screen_model.dart';
 import 'package:xando/models/user_profile_model.dart';
+import 'package:xando/screens/Main_Screens/game_details_screen.dart';
+import 'package:xando/screens/Main_Screens/user_game_details_screen.dart';
+import 'package:xando/utils/dynamic_links.dart';
 import 'package:xando/utils/snackbar_message.dart';
 
 class GameScreen extends StatefulWidget {
@@ -283,14 +288,42 @@ class _OpenGamesState extends State<OpenGames> {
               itemBuilder: (context, index) {
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 13),
-                  child: GameCard(
-                    image: 'assets/images/scott_brown.png',
-                    username: 'Host',
-                    price: filteredGames[index].stake,
-                    buttonText: 'Share',
-                    onTap: () {},
-                    cardColor: Color.fromARGB(255, 15, 22, 44),
-                  ),
+                  child: Consumer<DynamicLinksProvider>(
+                      builder: (context, links, child) {
+                    return GameCard(
+                      onCardTap: () {
+                        Navigator.push(
+                            context,
+                            CupertinoPageRoute(
+                                builder: (context) => UserGameDetailsScreen(
+                                      state: filteredGames[index].state!,
+                                      isRequested: filteredGames[index].state,
+                                      stake: filteredGames[index].stake,
+                                      potentialWin: filteredGames[index].stake!,
+                                      gameTitle: filteredGames[index].title,
+                                      gameId: filteredGames[index].gameId,
+                                      username:
+                                          filteredGames[index].user?.username,
+                                    )));
+                      },
+                      state: filteredGames[index].state!,
+                      image: filteredGames[index].user?.avatar ??
+                          'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                      username: 'Host',
+                      price: filteredGames[index].stake,
+                      buttonText: 'Share',
+                      onTap: filteredGames[index].state!
+                          ? () {
+                              links
+                                  .createGameLink(filteredGames[index].gameId)
+                                  .then((value) {
+                                Share.share(value);
+                              });
+                            }
+                          : null,
+                      cardColor: Color.fromARGB(255, 15, 22, 44),
+                    );
+                  }),
                 );
               },
             );

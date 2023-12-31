@@ -147,6 +147,7 @@ class _EditLastNameScreenState extends State<EditLastNameScreen> {
                 Consumer<EditProfileProvider>(
                   builder: (context, editProfile, child) {
                     return PrimaryButton(
+                      backgroundColor: const Color(0xFF3B4FFE),
                       title: 'Save',
                       width: 200,
                       height: 55,

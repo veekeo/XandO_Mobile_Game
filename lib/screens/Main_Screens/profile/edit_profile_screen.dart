@@ -188,7 +188,8 @@ class _EditProfileState extends State<EditProfile> {
                                       child: ClipRRect(
                                         borderRadius: BorderRadius.circular(8),
                                         child: Image.network(
-                                          'https://api.multiavatar.com/dc8d09961b64430bc4.png',
+                                          snapshot.data?.avatar ??
+                                              'https://api.multiavatar.com/5b1271f9320afc278a.png',
                                           width: 300,
                                           height: 200,
                                           fit: BoxFit.cover,

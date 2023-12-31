@@ -26,6 +26,24 @@ class OTPScreen extends StatefulWidget {
 class _OTPScreenState extends State<OTPScreen> {
   TextEditingController otpController = TextEditingController();
   String? otpCode;
+  late String _deviceToken;
+
+  _loadUserData() async {
+    String? deviceToken = await DatabaseProvider().getDeviceToken();
+    if (mounted) {
+      setState(() {
+        _deviceToken = deviceToken;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _deviceToken = '';
+    _loadUserData();
+  }
+
   @override
   Widget build(BuildContext context) {
     final isLoading =
@@ -199,6 +217,7 @@ class _OTPScreenState extends State<OTPScreen> {
                 Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
                     child: PrimaryButton(
+                      backgroundColor: const Color(0xFF3B4FFE),
                       title: 'Verify',
                       width: 200,
                       height: 55,
@@ -219,18 +238,22 @@ class _OTPScreenState extends State<OTPScreen> {
     );
   }
 
-  void verifyOtp(BuildContext context, userOtp) {
+  void verifyOtp(BuildContext context, userOtp) async {
     final ap = Provider.of<PhoneNumberAuthProvider>(context, listen: false);
     final dbProvider = context.read<DatabaseProvider>();
+
     print('id is: ${dbProvider.userId}');
+
     ap.verifyOtp(
         context: context,
         verificationId: widget.verificationId,
         userOtp: userOtp,
         onSuccess: () async {
           //check DB
-          ap.saveUserPhoneNumber(context, dbProvider.userId,
-              {'contact': widget.phoneNumber}).then((value) {
+          ap.saveUserPhoneNumber(context, dbProvider.userId, {
+            'contact': widget.phoneNumber,
+            'devicetoken': _deviceToken,
+          }).then((value) {
             if (ap.hasError == true) {
               print(dbProvider.userId);
               showErrorSnackBarMessage(

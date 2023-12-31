@@ -1,23 +1,61 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutterflow_ui/flutterflow_ui.dart';
+import 'package:provider/provider.dart';
+import 'package:xando/Providers/Game/get_available_games_provider.dart';
+import 'package:xando/Providers/firestore_service.dart';
+import 'package:xando/XandO/game_loading_screen.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/components/primary_button_outline.dart';
-import 'package:xando/components/profile_avatar_screen.dart';
+import 'package:xando/utils/game_requests_enums.dart';
+import 'package:xando/utils/routers.dart';
 
-class PendingRequests extends StatelessWidget {
+class PendingRequests extends StatefulWidget {
   const PendingRequests({
     super.key,
+    required this.senderUsername,
+    required this.requestTime,
+    required this.gameID,
+    required this.stake,
+    required this.status,
+    required this.profileAvatar,
+    required this.documentID,
+    required this.username,
   });
 
+  final String senderUsername;
+  final String requestTime;
+  final String gameID;
+  final String stake;
+  final String status;
+  final String profileAvatar;
+  final String documentID;
+  final String username;
+
+  @override
+  State<PendingRequests> createState() => _PendingRequestsState();
+}
+
+class _PendingRequestsState extends State<PendingRequests> {
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10.0),
       child: Row(
         children: [
-          const ProfileAvatar(
-            image: 'https://api.multiavatar.com/dc8d09961b64430bc4.png',
-            imageSize: 60,
-            onTap: null,
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: FlutterFlowTheme.of(context).secondaryBackground,
+              image: DecorationImage(
+                fit: BoxFit.cover,
+                image: Image.network(
+                  widget.profileAvatar,
+                ).image,
+              ),
+              shape: BoxShape.circle,
+            ),
           ),
           Expanded(
             child: Padding(
@@ -28,9 +66,9 @@ class PendingRequests extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Veekeo',
-                        style: TextStyle(
+                      Text(
+                        widget.senderUsername,
+                        style: const TextStyle(
                           fontFamily: 'Medium',
                           fontSize: 14,
                         ),
@@ -44,7 +82,7 @@ class PendingRequests extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        '10h ago',
+                        widget.requestTime,
                         style: TextStyle(
                           fontFamily: 'Medium',
                           fontSize: 12,
@@ -58,7 +96,7 @@ class PendingRequests extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        ' ID: 3573ub',
+                        widget.gameID,
                         style: TextStyle(
                           fontFamily: 'Medium',
                           fontSize: 12,
@@ -66,7 +104,7 @@ class PendingRequests extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'Stake: NGN 200',
+                        widget.stake,
                         style: TextStyle(
                           fontFamily: 'Medium',
                           fontSize: 12,
@@ -79,25 +117,63 @@ class PendingRequests extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 5),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      PrimaryButton(
-                        title: 'Accept',
-                        width: 120,
-                        height: 29,
-                        onpressed: () {},
-                        isLoading: false,
-                      ),
-                      const SizedBox(width: 8),
-                      SecondaryButton(
-                        title: 'Decline',
-                        width: 120,
-                        height: 29,
-                        onpressed: () {},
-                        isLoading: false,
-                      ),
-                    ],
+                  FutureBuilder(
+                    future: FireStoreServiceProvider()
+                        .readDocument(widget.documentID),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.done) {
+                        // Now you can use documentData safely
+                        Map<String, dynamic>? documentData = snapshot.data;
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            PrimaryButton(
+                              title: documentData!['status'] ==
+                                      'RequestStatus.accepted'
+                                  ? 'Play'
+                                  : 'Accept',
+                              width: 120,
+                              height: 29,
+                              onpressed: documentData['status'] ==
+                                      'RequestStatus.accepted'
+                                  ? startGame(
+                                      documentData['senderDeviceToken'],
+                                      documentData['receiverAvatar'],
+                                      documentData['senderAvatar'],
+                                      documentData['gameID'],
+                                      documentData['receiverId'],
+                                      documentData['senderId'],
+                                      true,
+                                      documentData['stake'],
+                                    )
+                                  : requestAccepted(
+                                      documentData['senderDeviceToken']),
+                              isLoading: false,
+                              backgroundColor: documentData['status'] ==
+                                      'RequestStatus.accepted'
+                                  ? Colors.green
+                                  : const Color(0xFF3B4FFE),
+                            ),
+                            const SizedBox(width: 8),
+                            SecondaryButton(
+                              title: documentData['status'] ==
+                                      'RequestStatus.accepted'
+                                  ? 'Accepted'
+                                  : 'Decline',
+                              width: 120,
+                              height: 29,
+                              onpressed: documentData['status'] ==
+                                      'RequestStatus.accepted'
+                                  ? null
+                                  : requestDeclined(),
+                              isLoading: false,
+                            ),
+                          ],
+                        );
+                      } else {
+                        return const Text('');
+                      }
+                    },
                   ),
                 ],
               ),
@@ -105,6 +181,83 @@ class PendingRequests extends StatelessWidget {
           )
         ],
       ),
+    );
+  }
+
+  //
+  requestDeclined() async {
+    final firestore = context.read<FireStoreServiceProvider>();
+    final game = context.read<GetAvailableGamesProvider>();
+    await firestore
+        .updatePendingRequest(widget.documentID, RequestStatus.declined)
+        .then((value) async {
+      await firestore.deletePendingRequest(widget.documentID).then((value) {
+        game.updateGameState(true, widget.documentID);
+      });
+    });
+  }
+
+  requestAccepted(String senderDeviceToken) async {
+    final firestore = context.read<FireStoreServiceProvider>();
+    await firestore
+        .updatePendingRequest(widget.documentID, RequestStatus.accepted)
+        .then((value) async {
+      await firestore.sendNotification(
+          senderDeviceToken,
+          'Game Request Accepted',
+          'your request to join ${widget.username} has been accepted',
+          widget.profileAvatar);
+    });
+  }
+
+  //start game
+  startGame(
+    String senderDeviceToken,
+    String hostAvatar,
+    player2Avatar,
+    String gameId,
+    String hostId,
+    String player2Id,
+    bool state,
+    double stake,
+  ) async {
+    final firestore = context.read<FireStoreServiceProvider>();
+
+    await firestore
+        .sendNotification(
+            senderDeviceToken,
+            'Game Alert',
+            'Your request was accepted and a game with ${widget.username} is about to start',
+            widget.profileAvatar)
+        .then(
+      (value) async {
+        await firestore
+            .connectPlayersToGame(
+          gameId: gameId,
+          exTurn: true,
+          ohTurn: false,
+          displayExOh: List.filled(9, ''),
+          matchedIndexes: [],
+          filledBoxes: 0,
+          attempts: 0,
+          seconds: 60,
+          hostAvatar: hostAvatar,
+          player2Avatar: player2Avatar,
+          hostId: hostId,
+          player2Id: player2Id,
+          stake: stake,
+          gameState: state,
+          isHostConnected: true,
+          isPlayer2Connected: true,
+        )
+            .then((value) {
+          PageNavigator().nextPageOnly(
+              page: GameLoadingScreen(
+            gameId: gameId,
+            stake: stake,
+          ));
+        });
+      },
     );
   }
 }

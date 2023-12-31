@@ -106,6 +106,7 @@ class _DeactivateProfileScreenState extends State<DeactivateProfileScreen> {
                       builder: (context, profile, child) {
                     final dbProvider = context.read<DatabaseProvider>();
                     return PrimaryButton(
+                      backgroundColor: const Color(0xFF3B4FFE),
                       title: 'Continue',
                       width: 200,
                       height: 55,

@@ -433,6 +433,7 @@ class _OnboardingScreenState extends State<OnboardingScreen>
                   child: Padding(
                     padding: const EdgeInsets.only(bottom: 24),
                     child: PrimaryButton(
+                      backgroundColor: const Color(0xFF3B4FFE),
                       title: _model.pageViewCurrentIndex == 2
                           ? 'Get Started'
                           : 'Next',

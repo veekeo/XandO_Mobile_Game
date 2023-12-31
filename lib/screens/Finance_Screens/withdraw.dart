@@ -409,6 +409,7 @@ class _WithdrawState extends State<Withdraw> {
               ),
             ),
             PrimaryButton(
+              backgroundColor: const Color(0xFF3B4FFE),
               title: 'Withdraw',
               width: 200,
               height: 55,

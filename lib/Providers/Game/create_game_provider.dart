@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:xando/Providers/Database/db_provider.dart';
 
 class CreateGameProvider extends ChangeNotifier {
   String _resMessage = '';
@@ -76,7 +78,111 @@ class CreateGameProvider extends ChangeNotifier {
     }
   }
 
-  void calculateDiscount(double stake) {
+  Future<void> calcUserWinBalance(
+      BuildContext context, int initialAmount, int wonAmount) async {
+    final userId = await DatabaseProvider().getUserId();
+    // ignore: use_build_context_synchronously
+    final dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
+    int userTotalAmount = wonAmount + initialAmount;
+    _isLoading = true;
+    notifyListeners();
+
+    String requestbaseUrl = 'https://tictac-production.up.railway.app';
+    String url = '$requestbaseUrl/tictac/coin/$userId/';
+
+    final body = {
+      "balance": userTotalAmount,
+    };
+
+    //.....
+    try {
+      http.Response req = await http.patch(
+        Uri.parse(url),
+        body: json.encode(body),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (req.statusCode == 200) {
+        final res = json.decode(req.body);
+        dbProvider.saveUserCoin(res['balance']);
+        print(res);
+        print('User balance Updated successfully');
+        _isLoading = false;
+        _hasError = false;
+        notifyListeners();
+      } else {
+        _isLoading = false;
+        _hasError = true;
+        _resMessage = 'Deposit Failed';
+        notifyListeners();
+      }
+    } on SocketException catch (_) {
+      _hasError = true;
+      _resMessage = 'Internet connection is not available';
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _hasError = true;
+      _resMessage = e.toString();
+      notifyListeners();
+      return Future.error(e.toString());
+    }
+  }
+
+  Future<void> calcUserLostBalance(
+      BuildContext context, double initialAmount, double lostAmount) async {
+    final userId = await DatabaseProvider().getUserId();
+    // ignore: use_build_context_synchronously
+    final dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
+    double userTotalAmount = lostAmount + initialAmount;
+    _isLoading = true;
+    notifyListeners();
+
+    String requestbaseUrl = 'https://tictac-production.up.railway.app';
+    String url = '$requestbaseUrl/tictac/coin/$userId/';
+
+    final body = {
+      "balance": userTotalAmount,
+    };
+
+    //.....
+    try {
+      http.Response req = await http.patch(
+        Uri.parse(url),
+        body: json.encode(body),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (req.statusCode == 200) {
+        final res = json.decode(req.body);
+        dbProvider.saveUserCoin(res['balance']);
+        print(res);
+        print('User balance Updated successfully');
+        _isLoading = false;
+        _hasError = false;
+        notifyListeners();
+      } else {
+        _isLoading = false;
+        _hasError = true;
+        _resMessage = 'Deposit Failed';
+        notifyListeners();
+      }
+    } on SocketException catch (_) {
+      _hasError = true;
+      _resMessage = 'Internet connection is not available';
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _hasError = true;
+      _resMessage = e.toString();
+      notifyListeners();
+      return Future.error(e.toString());
+    }
+  }
+
+  Future<double> calculateDiscount(double stake) async {
     // Calculate the sum of the two equal numbers
     double sum = 2 * stake;
 
@@ -87,6 +193,8 @@ class CreateGameProvider extends ChangeNotifier {
     double discountedValue = sum - discount;
 
     _potentialWin = discountedValue;
+
     notifyListeners();
+    return discountedValue;
   }
 }

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:xando/screens/Auth_Screens/signin_screen.dart';
-import 'package:xando/utils/routers.dart';
 
 class DatabaseProvider extends ChangeNotifier {
   final Future<SharedPreferences> _pref = SharedPreferences.getInstance();
@@ -16,6 +14,7 @@ class DatabaseProvider extends ChangeNotifier {
   String _lastName = '';
   String _imageURL = '';
   String _dateOfBirth = '';
+  String _deviceToken = '';
   bool? _rememberUser = false;
 
   String get userId => _userId;
@@ -28,8 +27,16 @@ class DatabaseProvider extends ChangeNotifier {
   String get imageURL => _imageURL;
   String get dateOfBirth => _dateOfBirth;
   bool? get rememberUser => _rememberUser;
+  String get deviceToken => _deviceToken;
 
 //save user data starts here
+
+  void saveUserDeviceToken(String? deviceToken) async {
+    SharedPreferences value = await _pref;
+
+    value.setString('devicetoken', deviceToken!);
+  }
+  //.
 
   void saveUsername(String? userName) async {
     SharedPreferences value = await _pref;
@@ -100,6 +107,21 @@ class DatabaseProvider extends ChangeNotifier {
     value.setBool('remember_user', rememberUser!);
   }
   //.
+
+  Future<String> getDeviceToken() async {
+    SharedPreferences value = await _pref;
+
+    if (value.containsKey('devicetoken')) {
+      String data = value.getString('devicetoken')!;
+      _deviceToken = data;
+      notifyListeners();
+      return data;
+    } else {
+      _deviceToken = '';
+      notifyListeners();
+      return '';
+    }
+  }
 
   Future<int> getCoin() async {
     SharedPreferences value = await _pref;

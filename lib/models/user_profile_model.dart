@@ -10,7 +10,7 @@ String userModelToJson(UserModel data) => json.encode(data.toJson());
 
 class UserModel {
   String? id;
-  String? profileImage;
+  String? avatar;
   String? firstName;
   String? lastName;
   String? email;
@@ -23,7 +23,7 @@ class UserModel {
 
   UserModel({
     this.id,
-    this.profileImage,
+    this.avatar,
     this.firstName,
     this.lastName,
     this.email,
@@ -37,7 +37,7 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) => UserModel(
         id: json["id"],
-        profileImage: json["profile_image"],
+        avatar: json["avatar"],
         firstName: json["first_name"],
         lastName: json["last_name"],
         email: json["email"],
@@ -51,7 +51,7 @@ class UserModel {
 
   Map<String, dynamic> toJson() => {
         "id": id,
-        "profile_image": profileImage,
+        "profile_image": avatar,
         "first_name": firstName,
         "last_name": lastName,
         "email": email,

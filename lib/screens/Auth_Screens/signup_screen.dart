@@ -5,18 +5,16 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Auth_providers/auth_provider.dart';
 import 'package:xando/Providers/Auth_providers/google_auth_provider.dart';
-import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/reusable_widgets/check_password.dart';
-import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
-
 import 'package:xando/screens/Auth_Screens/signin_screen.dart';
-
 import 'package:xando/utils/snackbar_message.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
+  const SignUpScreen({super.key, this.affliateCode});
+
+  final String? affliateCode;
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -27,6 +25,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _affliateCodeController = TextEditingController();
 
   bool _isPasswordEightCharacters = false;
   bool _passwordAtleastHasOneNumber = false;
@@ -59,6 +58,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final String _emailAlreadyExist = 'User with this email already exists';
   final String _noInternerConnection = 'Internet Connection is not available';
   final String _tryAgain = 'Please try again!';
+  final String _invalidAffliateCode = 'Invalid Affliate Code.';
   @override
   Widget build(BuildContext context) {
     bool isLoading =
@@ -204,6 +204,27 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     _passwordAtleastHasOneNumber,
                               )
                             : const SizedBox(height: 10),
+                        TextFormField(
+                          controller: _affliateCodeController,
+                          // autofocus: true,
+                          cursorColor: const Color(0xFF3B4FFE),
+                          keyboardType: TextInputType.emailAddress,
+                          onChanged: (value) {
+                            setState(() {
+                              _affliateCodeController.text = value;
+                            });
+                          },
+                          decoration: customInputDecoration(
+                            context,
+                            "Affiliate code",
+                            'Affiliate code (Optional)',
+                            Icons.person,
+                            const Icon(
+                              Icons.access_alarm,
+                              color: Colors.transparent,
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 15),
                         Consumer<AuthenticationProvider>(
                           builder: (context, auth, child) {
@@ -240,8 +261,18 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 );
                                 auth.clear();
                               }
+
+                              if (auth.resMessage == _invalidAffliateCode) {
+                                showErrorSnackBarMessage(
+                                  message: auth.resMessage,
+                                  context: context,
+                                  status: true,
+                                );
+                                auth.clear();
+                              }
                             });
                             return PrimaryButton(
+                              backgroundColor: const Color(0xFF3B4FFE),
                               title: 'Sign up',
                               width: 200,
                               height: 55,
@@ -251,6 +282,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   auth.registerUser(
                                     email: _emailController.text.trim(),
                                     password: _passwordController.text.trim(),
+                                    affliateCode:
+                                        _affliateCodeController.text == ''
+                                            ? 'PR2KZE'
+                                            : _affliateCodeController.text
+                                                .toString()
+                                                .trim(),
                                     context: context,
                                   );
                                 } else {

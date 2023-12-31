@@ -172,6 +172,7 @@ class _AddPhoneNumberScreenState extends State<AddPhoneNumberScreen> {
                 Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
                   child: PrimaryButton(
+                    backgroundColor: const Color(0xFF3B4FFE),
                     title: 'Send OTP',
                     width: 200,
                     height: 55,

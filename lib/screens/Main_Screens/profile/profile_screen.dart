@@ -9,6 +9,7 @@ import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/models/user_profile_model.dart';
 import 'package:xando/reusable_widgets/sections/profile_feature.dart';
+import 'package:xando/screens/Auth_Screens/onboarding_screen.dart';
 import 'package:xando/screens/Auth_Screens/signin_screen.dart';
 import 'package:xando/screens/Finance_Screens/transactions_screen.dart';
 import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
@@ -91,23 +92,40 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Stack(
                         alignment: AlignmentDirectional(0, 0),
                         children: [
-                          ClipOval(
-                            child: Container(
-                              width: 100,
-                              height: 100,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                              ),
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.network(
-                                  'https://api.multiavatar.com/dc8d09961b64430bc4.png',
-                                  width: 300,
-                                  height: 200,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            ),
+                          FutureBuilder<UserModel>(
+                            future: EditProfileProvider().getUserProfileData(),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return Text('');
+                              } else if (snapshot.hasError) {
+                                showErrorSnackBarMessage(
+                                    message: 'Something went wrong!',
+                                    context: context,
+                                    status: true);
+                              } else {
+                                return ClipOval(
+                                  child: Container(
+                                    width: 100,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        snapshot.data?.avatar ??
+                                            'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                        width: 300,
+                                        height: 200,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                              return Text('');
+                            },
                           ),
                           Align(
                             alignment: AlignmentDirectional(0.292, -0.625),
@@ -202,7 +220,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   context: context,
                                   status: true);
                             } else if (snapshot.hasData) {
-                              if (snapshot.data != null) {
+                              if (snapshot.data != null &&
+                                  snapshot.data!.gamedata != null) {
                                 return UserCoinBalanceTextWidget(
                                     coin: snapshot.data!.gamedata!.coin);
                               } else {
@@ -345,7 +364,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     final dbProvider = context.read<DatabaseProvider>();
                     await dbProvider.clearDatabase(context).then((value) =>
                         PageNavigator(ctx: context)
-                            .nextPageOnly(page: const SignInScreen()));
+                            .nextPageOnly(page: const OnboardingScreen()));
                   },
                   text: 'Logout',
                   icon: Icon(

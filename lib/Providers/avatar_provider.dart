@@ -30,7 +30,7 @@ class AvatarProvider extends ChangeNotifier {
     String url = '$requestbaseUrl/tictac/sign-up/$userId/';
 
     final body = {
-      'imageURL': container.imageURL,
+      'avatar': container.imageURL,
     };
 
     try {
@@ -42,7 +42,7 @@ class AvatarProvider extends ChangeNotifier {
 
       if (req.statusCode == 200 || req.statusCode == 201) {
         final res = json.decode(req.body);
-        dbProvider.saveUserImage(res['imageURL']);
+        dbProvider.saveUserImage(res['avatar']);
         _resMessage = 'Avatar updated successfully';
         _isLoading = false;
         _hasError = false;
@@ -52,7 +52,6 @@ class AvatarProvider extends ChangeNotifier {
         Navigator.pop(context);
       } else {
         final res = json.decode(req.body);
-        print(req.statusCode);
         print(res);
         _isLoading = false;
         _hasError = true;

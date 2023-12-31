@@ -69,6 +69,7 @@ class _DepositState extends State<Deposit> {
                       } else if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
                       } else {
+                        print(snapshot.data);
                         return Container(
                           width: double.infinity,
                           height: 130,
@@ -342,6 +343,7 @@ class _DepositState extends State<Deposit> {
                 Padding(
                   padding: const EdgeInsetsDirectional.fromSTEB(0, 0, 0, 20),
                   child: PrimaryButton(
+                    backgroundColor: const Color(0xFF3B4FFE),
                     title: 'Top up now',
                     width: 200,
                     height: 55,

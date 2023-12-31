@@ -182,6 +182,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       Consumer<AuthenticationProvider>(
                           builder: (context, auth, child) {
                         return PrimaryButton(
+                          backgroundColor: const Color(0xFF3B4FFE),
                           title: 'Send OTP',
                           width: 200,
                           height: 55,
@@ -379,6 +380,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(0, 20, 0, 0),
                     child: PrimaryButton(
+                      backgroundColor: const Color(0xFF3B4FFE),
                       title: 'Verify OTP',
                       width: 200,
                       height: 55,
@@ -578,6 +580,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 : const SizedBox(height: 10),
                             const SizedBox(height: 15),
                             PrimaryButton(
+                              backgroundColor: const Color(0xFF3B4FFE),
                               title: 'Continue',
                               width: 200,
                               height: 55,
