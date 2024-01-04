@@ -48,7 +48,7 @@ class Player1Container extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(50),
-                  child: Image.asset(
+                  child: Image.network(
                     image,
                     width: 60,
                     height: 60,
@@ -99,7 +99,7 @@ class Player2Container extends StatelessWidget {
           topRight: Radius.circular(50),
         ),
         border: Border.all(
-          color: isactive ? Colors.transparent : const Color(0xFFFF4773),
+          color: isactive ? const Color(0xFFFF4773) : Colors.transparent,
           width: 2,
         ),
       ),
@@ -120,7 +120,7 @@ class Player2Container extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(50),
-                  child: Image.asset(
+                  child: Image.network(
                     image,
                     width: 60,
                     height: 60,

@@ -8,16 +8,21 @@ import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:simple_gradient_text/simple_gradient_text.dart';
-import 'package:xando/Providers/Auth_providers/auth_provider.dart';
-import 'package:xando/Providers/Database/db_provider.dart';
+import 'package:xando/Providers/Auth_providers/affliate_provider.dart';
+
 import 'package:xando/models/affilaite_user_model.dart';
 import 'package:xando/models/earn_screen_model.dart';
 import 'package:xando/utils/dynamic_links.dart';
 
 class EarnScreen extends StatefulWidget {
-  const EarnScreen({super.key, required this.isFromExternalSource});
+  const EarnScreen({
+    super.key,
+    required this.isFromExternalSource,
+    this.earnData,
+  });
 
   final bool isFromExternalSource;
+  final AffliateUserModel? earnData;
 
   @override
   State<EarnScreen> createState() => _EarnScreenState();
@@ -25,41 +30,17 @@ class EarnScreen extends StatefulWidget {
 
 class _EarnScreenState extends State<EarnScreen> {
   late EarnScreenModel _model;
-  final StreamController<AffliateUserModel> _streamController =
-      StreamController.broadcast();
-  late Timer _timer;
-  late String _userId;
 
   @override
   void initState() {
     super.initState();
-    _userId = '';
-    _loadUserData();
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
-      if (mounted) {
-        getAffliateUser();
-      } else {
-        // Ensure that the timer is canceled when the widget is disposed
-        timer.cancel();
-      }
-    });
     _model = createModel(context, () => EarnScreenModel());
   }
 
   @override
   void dispose() {
     _model.dispose();
-    _timer.cancel();
     super.dispose();
-  }
-
-  _loadUserData() async {
-    String? userId = await DatabaseProvider().getUserId();
-    if (mounted) {
-      setState(() {
-        _userId = userId;
-      });
-    }
   }
 
   @override
@@ -110,11 +91,13 @@ class _EarnScreenState extends State<EarnScreen> {
           : null,
       body: SafeArea(
           top: true,
-          child: StreamBuilder<AffliateUserModel>(
-              stream: _streamController.stream,
+          child: FutureBuilder<AffliateUserModel>(
+              future: widget.earnData != null
+                  ? Future.value(
+                      widget.earnData!) // Use existing data if available
+                  : context.read<AffliateProvider>().getAffliateUser(),
               builder: (context, snapshot) {
                 return ListView(
-                  physics: BouncingScrollPhysics(),
                   padding: EdgeInsets.zero,
                   scrollDirection: Axis.vertical,
                   children: [
@@ -808,15 +791,5 @@ class _EarnScreenState extends State<EarnScreen> {
                 );
               })),
     );
-  }
-
-  Future<void> getAffliateUser() async {
-    final getAffliateUser = context.read<AuthenticationProvider>();
-    await getAffliateUser.getAffliateUser(_userId).then((value) {
-      setState(() {
-        _streamController.sink.add(getAffliateUser.affliateUser);
-        print('value is : ${getAffliateUser.affliateUser}');
-      });
-    });
   }
 }

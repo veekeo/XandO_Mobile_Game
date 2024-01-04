@@ -20,7 +20,9 @@ class PendingRequests extends StatefulWidget {
     required this.status,
     required this.profileAvatar,
     required this.documentID,
+    required this.gameNumberId,
     required this.username,
+    required this.receiverAvatar,
   });
 
   final String senderUsername;
@@ -29,7 +31,9 @@ class PendingRequests extends StatefulWidget {
   final String stake;
   final String status;
   final String profileAvatar;
+  final String receiverAvatar;
   final String documentID;
+  final String gameNumberId;
   final String username;
 
   @override
@@ -117,7 +121,7 @@ class _PendingRequestsState extends State<PendingRequests> {
                     ],
                   ),
                   const SizedBox(height: 5),
-                  FutureBuilder(
+                  FutureBuilder<dynamic>(
                     future: FireStoreServiceProvider()
                         .readDocument(widget.documentID),
                     builder: (context, snapshot) {
@@ -134,20 +138,25 @@ class _PendingRequestsState extends State<PendingRequests> {
                                   : 'Accept',
                               width: 120,
                               height: 29,
-                              onpressed: documentData['status'] ==
-                                      'RequestStatus.accepted'
-                                  ? startGame(
-                                      documentData['senderDeviceToken'],
-                                      documentData['receiverAvatar'],
-                                      documentData['senderAvatar'],
-                                      documentData['gameID'],
-                                      documentData['receiverId'],
-                                      documentData['senderId'],
-                                      true,
-                                      documentData['stake'],
-                                    )
-                                  : requestAccepted(
-                                      documentData['senderDeviceToken']),
+                              onpressed: () {
+                                if (documentData['status'] ==
+                                    'RequestStatus.accepted') {
+                                  startGame(
+                                    documentData['senderDeviceToken'],
+                                    documentData['receiverAvatar'],
+                                    documentData['senderAvatar'],
+                                    documentData['gameID'],
+                                    documentData['gameNumberId'],
+                                    documentData['receiverId'],
+                                    documentData['senderId'],
+                                    true,
+                                    double.parse(documentData['stake']),
+                                  );
+                                } else {
+                                  requestAccepted(
+                                      documentData['senderDeviceToken']);
+                                }
+                              },
                               isLoading: false,
                               backgroundColor: documentData['status'] ==
                                       'RequestStatus.accepted'
@@ -165,7 +174,9 @@ class _PendingRequestsState extends State<PendingRequests> {
                               onpressed: documentData['status'] ==
                                       'RequestStatus.accepted'
                                   ? null
-                                  : requestDeclined(),
+                                  : () {
+                                      requestDeclined();
+                                    },
                               isLoading: false,
                             ),
                           ],
@@ -192,7 +203,7 @@ class _PendingRequestsState extends State<PendingRequests> {
         .updatePendingRequest(widget.documentID, RequestStatus.declined)
         .then((value) async {
       await firestore.deletePendingRequest(widget.documentID).then((value) {
-        game.updateGameState(true, widget.documentID);
+        game.updateGameState(true, widget.gameNumberId);
       });
     });
   }
@@ -203,10 +214,11 @@ class _PendingRequestsState extends State<PendingRequests> {
         .updatePendingRequest(widget.documentID, RequestStatus.accepted)
         .then((value) async {
       await firestore.sendNotification(
-          senderDeviceToken,
-          'Game Request Accepted',
-          'your request to join ${widget.username} has been accepted',
-          widget.profileAvatar);
+        senderDeviceToken,
+        'Game Request Accepted',
+        'your request to join ${widget.username} has been accepted',
+        widget.receiverAvatar,
+      );
     });
   }
 
@@ -216,6 +228,7 @@ class _PendingRequestsState extends State<PendingRequests> {
     String hostAvatar,
     player2Avatar,
     String gameId,
+    String gameNumberId,
     String hostId,
     String player2Id,
     bool state,
@@ -227,13 +240,14 @@ class _PendingRequestsState extends State<PendingRequests> {
         .sendNotification(
             senderDeviceToken,
             'Game Alert',
-            'Your request was accepted and a game with ${widget.username} is about to start',
-            widget.profileAvatar)
+            'Your request was accepted and a game with ${widget.username} is about to start click to join',
+            widget.receiverAvatar)
         .then(
       (value) async {
         await firestore
             .connectPlayersToGame(
           gameId: gameId,
+          gameNumberId: gameNumberId,
           exTurn: true,
           ohTurn: false,
           displayExOh: List.filled(9, ''),
@@ -250,13 +264,15 @@ class _PendingRequestsState extends State<PendingRequests> {
           isHostConnected: true,
           isPlayer2Connected: true,
         )
-            .then((value) {
-          PageNavigator().nextPageOnly(
-              page: GameLoadingScreen(
-            gameId: gameId,
-            stake: stake,
-          ));
-        });
+            .then(
+          (value) {
+            Navigator.pushReplacement(context, CupertinoPageRoute(
+              builder: (context) {
+                return GameLoadingScreen(gameId: gameId, stake: stake);
+              },
+            ));
+          },
+        );
       },
     );
   }

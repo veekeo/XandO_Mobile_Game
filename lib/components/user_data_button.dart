@@ -38,7 +38,7 @@ class UserDataButton extends StatelessWidget {
             Row(
               children: [
                 Text(
-                  trailing!,
+                  trailing ?? '',
                   style: FlutterFlowTheme.of(context).bodyMedium.override(
                         fontFamily: 'Plus Jakarta Sans',
                         color: const Color(0xB2FFFFFF),

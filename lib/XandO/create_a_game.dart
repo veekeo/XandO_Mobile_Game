@@ -1,4 +1,7 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:easy_debounce/easy_debounce.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
@@ -7,8 +10,11 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Game/create_game_provider.dart';
+import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/components/primary_button_outline.dart';
+import 'package:xando/screens/Finance_Screens/deposit_screen.dart';
+import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/utils/dynamic_links.dart';
 import 'package:xando/utils/snackbar_message.dart';
 import 'package:rive/rive.dart';
@@ -25,8 +31,32 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   final TextEditingController _gameTitleController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   double _stake = 0;
+  var userBalance;
 
-  //Rive
+  late int _coin;
+  _loadUserData() async {
+    int? coin = await DatabaseProvider().getCoin();
+    if (mounted) {
+      setState(() {
+        _coin = coin;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _coin = 0;
+    _loadUserData();
+  }
+
+  bool _checkifUserBalanceIsSufficient(int balance, int stake) {
+    if (balance >= stake) {
+      return true;
+    } else {
+      return false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -337,45 +367,68 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                     width: double.infinity,
                                     height: 55,
                                     onpressed: () async {
-                                      final userId =
-                                          await DatabaseProvider().getUserId();
                                       if (_formKey.currentState?.validate() ??
                                           false) {
+                                        final userId = await DatabaseProvider()
+                                            .getUserId();
                                         print(userId);
-                                        // ignore: use_build_context_synchronously
-                                        creategame
-                                            .createGame(
-                                                context,
-                                                userId,
-                                                _gameTitleController.text
-                                                    .trim(),
-                                                _stake.toString().trim())
-                                            .then((value) {
-                                          if (creategame.hasError == true) {
-                                            showErrorSnackBarMessage(
-                                              message: creategame.resMessage,
-                                              context: context,
-                                              status: false,
-                                            );
-                                          } else {
-                                            _showBottomSheet(
-                                              context: context,
-                                              potentialWin: creategame
-                                                  .potentialWin
-                                                  .toString(),
-                                              stake: creategame.stake,
-                                              gameId:
-                                                  creategame.gameId.toString(),
-                                            );
-                                            showSuccessSnackBarMessage(
-                                              message: creategame.resMessage,
-                                              context: context,
-                                              status: false,
-                                            );
-                                          }
-                                        });
+                                        final profileCoinProvider =
+                                            context.read<EditProfileProvider>();
+                                        var userProfileData =
+                                            await profileCoinProvider
+                                                .getUserProfileData();
+                                        if (_checkifUserBalanceIsSufficient(
+                                            userProfileData.gamedata!.coin,
+                                            int.parse(
+                                                _amountController.text))) {
+                                          await creategame
+                                              .createGame(
+                                            context,
+                                            userId,
+                                            _gameTitleController.text.trim(),
+                                            _stake.toString().trim(),
+                                          )
+                                              .then(
+                                            (value) async {
+                                              if (creategame.hasError == true) {
+                                                showErrorSnackBarMessage(
+                                                  message:
+                                                      creategame.resMessage,
+                                                  context: context,
+                                                  status: false,
+                                                );
+                                              } else {
+                                                _showBottomSheet(
+                                                  context: context,
+                                                  potentialWin: creategame
+                                                      .potentialWin
+                                                      .toString(),
+                                                  stake: creategame.stake,
+                                                  gameId: creategame.gameId
+                                                      .toString(),
+                                                );
+                                                showSuccessSnackBarMessage(
+                                                  message:
+                                                      creategame.resMessage,
+                                                  context: context,
+                                                  status: false,
+                                                );
+                                                creategame
+                                                    .calcBalanceAfterGameCreation(
+                                                        context,
+                                                        double.parse(
+                                                            userProfileData
+                                                                .gamedata!.coin
+                                                                .toString()),
+                                                        _stake);
+                                              }
+                                            },
+                                          );
+                                        } else {
+                                          Navigator.pop(context);
+                                          _showInsufficientDailog();
+                                        }
                                       } else {
-                                        // ignore: use_build_context_synchronously
                                         showErrorSnackBarMessage(
                                           message:
                                               'Please fill in the required fields!',
@@ -401,6 +454,76 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
         ),
       ),
     );
+  }
+
+  void _showInsufficientDailog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: const Color.fromARGB(255, 32, 40, 73),
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            content: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 15),
+                const Text(
+                  'Balance Insufficient',
+                  style: TextStyle(
+                    fontFamily: 'Bold',
+                    fontSize: 20,
+                  ),
+                ),
+                Text(
+                  'There is not enough balance in your account to create this game',
+                  style: TextStyle(
+                      fontFamily: 'Medium',
+                      fontSize: 14,
+                      color: Colors.white.withOpacity(0.5)),
+                ),
+              ],
+            ),
+            actions: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Later',
+                  style: TextStyle(
+                    fontFamily: 'Bold',
+                    fontSize: 16,
+                    color: Color(0xFF3B4FFE),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context,
+                      CupertinoPageRoute(builder: (context) {
+                    return const WalletScreen(selectedTabFromExternalRoute: 0);
+                  }));
+                },
+                child: const Text(
+                  'Deposit',
+                  style: TextStyle(
+                    fontFamily: 'Bold',
+                    fontSize: 16,
+                    color: Color(0xFF3B4FFE),
+                  ),
+                ),
+              ),
+            ],
+          );
+        });
   }
 
   void _showBottomSheet({

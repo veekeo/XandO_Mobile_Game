@@ -58,7 +58,7 @@ class _WalletScreenState extends State<WalletScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(140), // Set this height
+        preferredSize: const Size.fromHeight(150), // Set this height
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: Padding(
@@ -101,41 +101,41 @@ class _WalletScreenState extends State<WalletScreen> {
                           ],
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.push(context,
-                              CupertinoPageRoute(builder: (context) {
-                            return const TransactionsScreen();
-                          }));
-                        },
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.currency_exchange_outlined,
-                              size: 18,
-                              color: Colors.grey,
-                            ),
-                            const SizedBox(
-                              width: 5,
-                            ),
-                            Text(
-                              'Transactions',
-                              style: FlutterFlowTheme.of(context)
-                                  .bodyMedium
-                                  .override(
-                                    fontFamily: 'Plus Jakarta Sans',
-                                    color: Colors.grey,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.normal,
-                                    useGoogleFonts: GoogleFonts.asMap()
-                                        .containsKey(
-                                            FlutterFlowTheme.of(context)
-                                                .bodyMediumFamily),
-                                  ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      // GestureDetector(
+                      //   onTap: () {
+                      //     Navigator.push(context,
+                      //         CupertinoPageRoute(builder: (context) {
+                      //       return const TransactionsScreen();
+                      //     }));
+                      //   },
+                      //   child: Row(
+                      //     children: [
+                      //       const Icon(
+                      //         Icons.currency_exchange_outlined,
+                      //         size: 18,
+                      //         color: Colors.grey,
+                      //       ),
+                      //       const SizedBox(
+                      //         width: 5,
+                      //       ),
+                      //       Text(
+                      //         'Transactions',
+                      //         style: FlutterFlowTheme.of(context)
+                      //             .bodyMedium
+                      //             .override(
+                      //               fontFamily: 'Plus Jakarta Sans',
+                      //               color: Colors.grey,
+                      //               fontSize: 14,
+                      //               fontWeight: FontWeight.normal,
+                      //               useGoogleFonts: GoogleFonts.asMap()
+                      //                   .containsKey(
+                      //                       FlutterFlowTheme.of(context)
+                      //                           .bodyMediumFamily),
+                      //             ),
+                      //       ),
+                      //     ],
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),

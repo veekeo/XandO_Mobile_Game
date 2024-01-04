@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
@@ -136,18 +137,29 @@ class _GameRequestsScreenState extends State<GameRequestsScreen> {
                                     index < receivedRequests.length) {
                                   return PendingRequests(
                                     username: receivedRequests[index]
-                                        ['username'],
+                                            ['username'] ??
+                                        '',
                                     documentID: _userId,
+                                    gameNumberId: receivedRequests[index]
+                                        ['gameNumberId'],
                                     profileAvatar: receivedRequests[index]
-                                        ['profileAvatar'],
+                                            ['senderAvatar'] ??
+                                        '',
+                                    receiverAvatar: receivedRequests[index]
+                                            ['receiverAvatar'] ??
+                                        '',
                                     senderUsername: receivedRequests[index]
-                                        ['senderUsername'],
+                                            ['senderUsername'] ??
+                                        '',
                                     requestTime: formatTimestamp(
-                                        receivedRequests[index]['timestamp']),
-                                    gameID: receivedRequests[index]['gameID'],
-                                    stake: receivedRequests[index]['stake'],
-                                    status: receivedRequests[index]['status']
-                                        .toString(),
+                                        receivedRequests[index]['timestamp'] ??
+                                            ''),
+                                    gameID:
+                                        receivedRequests[index]['gameID'] ?? '',
+                                    stake:
+                                        receivedRequests[index]['stake'] ?? '',
+                                    status: receivedRequests[index]['status'] ??
+                                        ''.toString(),
                                   );
                                 } else {
                                   return Container();
@@ -213,17 +225,24 @@ class _GameRequestsScreenState extends State<GameRequestsScreen> {
                               if (index >= 0 &&
                                   index < receivedRequests.length) {
                                 return UserRequests(
+                                  gameNumberId: receivedRequests[index]
+                                      ['gameNumberId'],
                                   documentID: receivedRequests[index]
-                                      ['receiverId'],
+                                          ['receiverId'] ??
+                                      '',
                                   profileAvatar: receivedRequests[index]
-                                      ['profileAvatar'],
-                                  username: receivedRequests[index]['username'],
+                                          ['receiverAvatar'] ??
+                                      '',
+                                  username:
+                                      receivedRequests[index]['username'] ?? '',
                                   requestTime: formatTimestamp(
-                                      receivedRequests[index]['timestamp']),
-                                  gameID: receivedRequests[index]['gameID'],
-                                  stake: receivedRequests[index]['stake'],
-                                  status: receivedRequests[index]['status']
-                                      .toString(),
+                                      receivedRequests[index]['timestamp'] ??
+                                          ''),
+                                  gameID:
+                                      receivedRequests[index]['gameID'] ?? '',
+                                  stake: receivedRequests[index]['stake'] ?? '',
+                                  status: receivedRequests[index]['status'] ??
+                                      ''.toString(),
                                 );
                               } else {
                                 return Container();
@@ -264,8 +283,47 @@ class _GameRequestsScreenState extends State<GameRequestsScreen> {
                       snapshot.data?.any((list) => list.isNotEmpty) ?? false;
 
                   if (!isDataAvailable) {
-                    return const Center(
-                      child: Text('No game requests yet'),
+                    return SizedBox(
+                      height: MediaQuery.of(context).size.height / 2,
+                      width: MediaQuery.of(context).size.width,
+                      child: Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(13.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(8),
+                                child: Image.asset(
+                                  'assets/images/3d_bell.png',
+                                  width: 136,
+                                  height: 145,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              const Text(
+                                'No Game Requests yet',
+                                style: TextStyle(
+                                  fontFamily: 'Bold',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                ' No worries! when new requests come \nin it will appear here. ',
+                                style: TextStyle(
+                                  fontFamily: 'Regular',
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white.withOpacity(0.5),
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ).animate().fadeIn(duration: 500.ms),
+                        ),
+                      ),
                     );
                   } else {
                     return Container();

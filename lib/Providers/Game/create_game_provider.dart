@@ -78,6 +78,46 @@ class CreateGameProvider extends ChangeNotifier {
     }
   }
 
+  //delete game
+  Future<void> deleteGame(
+    BuildContext context,
+    String? userId,
+    String? id,
+  ) async {
+    _isLoading = true;
+    notifyListeners();
+    String requestbaseUrl = 'https://tictac-production.up.railway.app';
+    String url = '$requestbaseUrl/game/games/$userId?game=$id';
+
+    try {
+      http.Response req = await http.delete(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (req.statusCode == 200 || req.statusCode == 201) {
+        _hasError = false;
+        _isLoading = false;
+        notifyListeners();
+      } else {
+        _isLoading = false;
+        _hasError = true;
+        _resMessage = 'Something went wrong, try again';
+        notifyListeners();
+      }
+    } on SocketException catch (_) {
+      _hasError = true;
+      _resMessage = 'Internet connection is not available';
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _hasError = true;
+      _resMessage = e.toString();
+      notifyListeners();
+    }
+  }
+
   Future<void> calcUserWinBalance(
       BuildContext context, int initialAmount, int wonAmount) async {
     final userId = await DatabaseProvider().getUserId();
@@ -135,7 +175,59 @@ class CreateGameProvider extends ChangeNotifier {
     final userId = await DatabaseProvider().getUserId();
     // ignore: use_build_context_synchronously
     final dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
-    double userTotalAmount = lostAmount + initialAmount;
+    double userTotalAmount = lostAmount - initialAmount;
+    _isLoading = true;
+    notifyListeners();
+
+    String requestbaseUrl = 'https://tictac-production.up.railway.app';
+    String url = '$requestbaseUrl/tictac/coin/$userId/';
+
+    final body = {
+      "balance": userTotalAmount,
+    };
+
+    //.....
+    try {
+      http.Response req = await http.patch(
+        Uri.parse(url),
+        body: json.encode(body),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (req.statusCode == 200) {
+        final res = json.decode(req.body);
+        dbProvider.saveUserCoin(res['balance']);
+        print(res);
+        print('User balance Updated successfully');
+        _isLoading = false;
+        _hasError = false;
+        notifyListeners();
+      } else {
+        _isLoading = false;
+        _hasError = true;
+        _resMessage = 'Deposit Failed';
+        notifyListeners();
+      }
+    } on SocketException catch (_) {
+      _hasError = true;
+      _resMessage = 'Internet connection is not available';
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _hasError = true;
+      _resMessage = e.toString();
+      notifyListeners();
+      return Future.error(e.toString());
+    }
+  }
+
+  Future<void> calcBalanceAfterGameCreation(
+      BuildContext context, double initialAmount, double stake) async {
+    final userId = await DatabaseProvider().getUserId();
+    // ignore: use_build_context_synchronously
+    final dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
+    double userTotalAmount = initialAmount - stake;
     _isLoading = true;
     notifyListeners();
 

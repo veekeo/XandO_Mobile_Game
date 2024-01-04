@@ -18,6 +18,7 @@ class UserModel {
   String? dateOfBirth;
   String? googleId;
   String? username;
+  String? deviceToken;
   String? password;
   Gamedata? gamedata;
 
@@ -31,6 +32,7 @@ class UserModel {
     this.dateOfBirth,
     this.googleId,
     this.username,
+    this.deviceToken,
     this.password,
     this.gamedata,
   });
@@ -45,6 +47,7 @@ class UserModel {
         dateOfBirth: json["date_of_birth"],
         googleId: json["google_id"],
         username: json["username"],
+        deviceToken: json["devicetoken"],
         password: json["password"],
         gamedata: Gamedata.fromJson(json["gamedata"]),
       );
@@ -59,6 +62,7 @@ class UserModel {
         "date_of_birth": dateOfBirth,
         "google_id": googleId,
         "username": username,
+        "devicetoken": deviceToken,
         "password": password,
         "gamedata": gamedata?.toJson(),
       };

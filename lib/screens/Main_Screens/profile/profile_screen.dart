@@ -312,23 +312,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 SizedBox(height: 10),
-                divider(),
-                ProfileFeature(
-                  onTap: () {
-                    Navigator.push(context,
-                        CupertinoPageRoute(builder: (contect) {
-                      return TransactionsScreen();
-                    }));
-                  },
-                  icon: Icons.monetization_on_outlined,
-                  feature: 'Transactions',
-                  rightSide: Icon(
-                    Icons.chevron_right,
-                    color: Color(0xB2FFFFFF),
-                    size: 24,
-                  ),
-                ),
-                divider(),
+                // divider(),
+                // ProfileFeature(
+                //   onTap: () {
+                //     Navigator.push(context,
+                //         CupertinoPageRoute(builder: (contect) {
+                //       return TransactionsScreen();
+                //     }));
+                //   },
+                //   icon: Icons.monetization_on_outlined,
+                //   feature: 'Transactions',
+                //   rightSide: Icon(
+                //     Icons.chevron_right,
+                //     color: Color(0xB2FFFFFF),
+                //     size: 24,
+                //   ),
+                // ),
+                // divider(),
                 ProfileFeature(
                   onTap: () {
                     Navigator.push(context,
@@ -358,7 +358,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 divider(),
-                SizedBox(height: 20),
+                SizedBox(height: 30),
                 FFButtonWidget(
                   onPressed: () async {
                     final dbProvider = context.read<DatabaseProvider>();

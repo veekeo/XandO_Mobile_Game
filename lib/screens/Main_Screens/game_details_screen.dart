@@ -1,12 +1,17 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart';
+import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Game/get_available_games_provider.dart';
+import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/Providers/firestore_service.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/components/primary_button_outline.dart';
+import 'package:xando/screens/Finance_Screens/deposit_screen.dart';
+import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/utils/game_requests_enums.dart';
 
 // ignore: must_be_immutable
@@ -18,6 +23,7 @@ class GameDetailsScreen extends StatefulWidget {
     required this.potentialWin,
     required this.gameTitle,
     required this.gameId,
+    required this.idOfgame,
     required this.username,
     required this.senderUsername,
     required this.senderId,
@@ -32,6 +38,7 @@ class GameDetailsScreen extends StatefulWidget {
   String potentialWin;
   final String? gameTitle;
   final String? gameId;
+  final String? idOfgame;
   final String? username;
   final String? senderUsername;
   final String? senderId;
@@ -47,6 +54,23 @@ class GameDetailsScreen extends StatefulWidget {
 }
 
 class _GameDetailsScreenState extends State<GameDetailsScreen> {
+  late int _coin;
+  _loadUserData() async {
+    int? coin = await DatabaseProvider().getCoin();
+    if (mounted) {
+      setState(() {
+        _coin = coin;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _coin = 0;
+    _loadUserData();
+  }
+
   double? calculateDiscount(double stake) {
     // Calculate the sum of the two equal numbers
     double sum = 2 * stake;
@@ -58,6 +82,14 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
     double discountedValue = sum - discount;
 
     return discountedValue;
+  }
+
+  bool _checkifUserBalanceIsSufficient(int balance, int stake) {
+    if (balance >= stake) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override
@@ -256,45 +288,57 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
                       height: 50,
                       onpressed: widget.state!
                           ? () async {
-                              await game
-                                  .updateGameState(false, widget.receiverId)
-                                  .then((value) async {
-                                await firestoreService
-                                    .addGameRequest(
-                                  widget.senderId,
-                                  widget.receiverId,
-                                  widget.senderDeviceToken,
-                                  widget.receiverDeviceToken,
-                                  widget.username,
-                                  widget.gameId,
-                                  widget.stake,
-                                  widget.senderUsername,
-                                  widget.receiverAvatar,
-                                  widget.senderAvatar,
-                                  RequestStatus.pending,
-                                )
+                              final profileCoinProvider =
+                                  context.read<EditProfileProvider>();
+                              var userProfileData = await profileCoinProvider
+                                  .getUserProfileData();
+                              if (_checkifUserBalanceIsSufficient(
+                                  userProfileData.gamedata!.coin,
+                                  double.parse(widget.stake!).toInt())) {
+                                await game
+                                    .updateGameState(false, widget.idOfgame)
                                     .then((value) async {
                                   await firestoreService
-                                      .sendNotification(
+                                      .addGameRequest(
+                                    widget.senderId,
+                                    widget.receiverId,
+                                    widget.senderDeviceToken,
                                     widget.receiverDeviceToken,
-                                    'Game Request',
-                                    '${widget.username} wants to join your game',
-                                    widget.senderAvatar ??
-                                        'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                    widget.username,
+                                    widget.gameId,
+                                    widget.idOfgame,
+                                    widget.stake,
+                                    widget.senderUsername,
+                                    widget.receiverAvatar,
+                                    widget.senderAvatar,
+                                    RequestStatus.pending,
                                   )
-                                      .then((value) {
-                                    Navigator.pop(context);
-                                    _showJoinGameBottomSheet(
-                                      context: context,
-                                      stake: widget.stake,
-                                      gameId: widget.gameId,
-                                      potentialWin: calculateDiscount(
-                                              double.parse(widget.stake!))
-                                          .toString(),
-                                    );
+                                      .then((value) async {
+                                    await firestoreService
+                                        .sendNotification(
+                                      widget.receiverDeviceToken,
+                                      'Game Request',
+                                      '${widget.username} wants to join your game',
+                                      widget.senderAvatar ??
+                                          'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                    )
+                                        .then((value) {
+                                      Navigator.pop(context);
+                                      _showJoinGameBottomSheet(
+                                        context: context,
+                                        stake: widget.stake,
+                                        gameId: widget.gameId,
+                                        potentialWin: calculateDiscount(
+                                                double.parse(widget.stake!))
+                                            .toString(),
+                                      );
+                                    });
                                   });
                                 });
-                              });
+                              } else {
+                                Navigator.pop(context);
+                                _showInsufficientDailog();
+                              }
                             }
                           : null,
                       isLoading: firestoreService.isLoading,
@@ -307,6 +351,76 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
         ),
       ),
     );
+  }
+
+  void _showInsufficientDailog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: const Color.fromARGB(255, 32, 40, 73),
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            content: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 15),
+                const Text(
+                  'Balance Insufficient',
+                  style: TextStyle(
+                    fontFamily: 'Bold',
+                    fontSize: 20,
+                  ),
+                ),
+                Text(
+                  'There is not enough balance in your account to join this game',
+                  style: TextStyle(
+                      fontFamily: 'Medium',
+                      fontSize: 14,
+                      color: Colors.white.withOpacity(0.5)),
+                ),
+              ],
+            ),
+            actions: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Later',
+                  style: TextStyle(
+                    fontFamily: 'Bold',
+                    fontSize: 16,
+                    color: Color(0xFF3B4FFE),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context,
+                      CupertinoPageRoute(builder: (context) {
+                    return const WalletScreen(selectedTabFromExternalRoute: 0);
+                  }));
+                },
+                child: const Text(
+                  'Deposit',
+                  style: TextStyle(
+                    fontFamily: 'Bold',
+                    fontSize: 16,
+                    color: Color(0xFF3B4FFE),
+                  ),
+                ),
+              ),
+            ],
+          );
+        });
   }
 
   void _showJoinGameBottomSheet({

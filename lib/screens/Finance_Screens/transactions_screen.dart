@@ -23,7 +23,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120), // Set this height
+        preferredSize: const Size.fromHeight(130), // Set this height
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: Padding(

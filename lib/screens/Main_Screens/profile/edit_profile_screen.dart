@@ -21,20 +21,20 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
-  late String _loadedUsername;
-  late String _firstName;
-  late String _lastName;
-  late String _userId;
-  late String userIdFromDB;
+  late UserModel _loadedUsername;
+  late UserModel _firstName;
+  late UserModel _lastName;
+  late UserModel _userId;
+  late UserModel userIdFromDB;
 
   @override
   void initState() {
     super.initState();
-    _loadedUsername = '';
-    _firstName = '';
-    _lastName = '';
-    _userId = '';
-    userIdFromDB = '';
+    _loadedUsername = UserModel();
+    _firstName = UserModel();
+    _lastName = UserModel();
+    _userId = UserModel();
+    userIdFromDB = UserModel();
   }
 
   @override
@@ -45,9 +45,9 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   _loadUserData() async {
-    String? username = await DatabaseProvider().getUserName();
-    String? firstName = await DatabaseProvider().getfirstName();
-    String? lastName = await DatabaseProvider().getLastName();
+    UserModel username = await EditProfileProvider().getUserProfileData();
+    UserModel firstName = await EditProfileProvider().getUserProfileData();
+    UserModel lastName = await EditProfileProvider().getUserProfileData();
 
     if (mounted) {
       setState(() {
@@ -59,7 +59,7 @@ class _EditProfileState extends State<EditProfile> {
   }
 
   _getUserIdfromDB() async {
-    userIdFromDB = await DatabaseProvider().getUserId();
+    userIdFromDB = await EditProfileProvider().getUserProfileData();
     if (mounted) {
       setState(() {
         _userId = userIdFromDB;
@@ -223,7 +223,7 @@ class _EditProfileState extends State<EditProfile> {
                               Navigator.push(context,
                                   CupertinoPageRoute(builder: (context) {
                                 return EditUserNameScreen(
-                                  username: _loadedUsername,
+                                  username: _loadedUsername.username!,
                                 );
                               }));
                             },
@@ -236,7 +236,7 @@ class _EditProfileState extends State<EditProfile> {
                               Navigator.push(context,
                                   CupertinoPageRoute(builder: (context) {
                                 return EditFirstNameScreen(
-                                  firstname: _firstName,
+                                  firstname: _firstName.firstName!,
                                 );
                               }));
                             },
@@ -249,7 +249,7 @@ class _EditProfileState extends State<EditProfile> {
                               Navigator.push(context,
                                   CupertinoPageRoute(builder: (context) {
                                 return EditLastNameScreen(
-                                  lastname: _lastName,
+                                  lastname: _lastName.lastName!,
                                 );
                               }));
                             },
@@ -270,8 +270,10 @@ class _EditProfileState extends State<EditProfile> {
                                         getFormattedDate(newDate);
                                       });
                                       if (date != '') {
-                                        editProfile.updateDateOfBirth(context,
-                                            _userId, {"date_of_birth": date});
+                                        editProfile.updateDateOfBirth(
+                                            context,
+                                            _userId.id,
+                                            {"date_of_birth": date});
                                       }
                                     },
                                   );

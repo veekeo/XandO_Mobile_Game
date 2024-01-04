@@ -8,6 +8,7 @@ import 'package:xando/components/profile_avatar_screen.dart';
 import 'package:xando/models/user_profile_model.dart';
 import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/screens/Main_Screens/game_requests.dart';
+import 'package:xando/screens/Main_Screens/notifications_screen.dart';
 
 import 'package:xando/screens/Main_Screens/profile/profile_screen.dart';
 import 'package:xando/screens/Main_Screens/search_screen.dart';
@@ -177,16 +178,25 @@ class _ReusableAppBarState extends State<ReusableAppBar> {
                       ),
                     ),
                     const SizedBox(width: 5),
-                    Container(
-                      width: 37,
-                      height: 29,
-                      decoration: BoxDecoration(
-                        color: const Color.fromARGB(255, 32, 40, 73),
-                        borderRadius: BorderRadius.circular(5),
-                      ),
-                      child: const Icon(
-                        Icons.notifications,
-                        size: 20,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const NotificationsScreen()));
+                      },
+                      child: Container(
+                        width: 37,
+                        height: 29,
+                        decoration: BoxDecoration(
+                          color: const Color.fromARGB(255, 32, 40, 73),
+                          borderRadius: BorderRadius.circular(5),
+                        ),
+                        child: const Icon(
+                          Icons.notifications,
+                          size: 20,
+                        ),
                       ),
                     ),
                   ],

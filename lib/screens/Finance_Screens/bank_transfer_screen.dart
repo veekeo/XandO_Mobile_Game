@@ -6,7 +6,6 @@ import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xando/components/deposit_textfield.dart';
 
-
 class BankTransferScreen extends StatefulWidget {
   const BankTransferScreen({super.key});
 
@@ -19,7 +18,7 @@ class _BankTransferScreenState extends State<BankTransferScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120), // Set this height
+        preferredSize: const Size.fromHeight(130), // Set this height
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: Padding(

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:xando/APIs/firebase_api.dart';
 import 'package:xando/Providers/Auth_providers/auth_provider.dart';
 import 'package:xando/Providers/Auth_providers/google_auth_provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
@@ -31,6 +32,13 @@ class _SignInScreenState extends State<SignInScreen> {
   final String _invalidEmailandPassword = 'Invalid Email or Password';
   final String _noInternerConnection = 'Internet Connection is not available';
   final String _tryAgain = 'Please try again!';
+
+  @override
+  void initState() {
+    FirebaseApi().initializeFirebaseMessaging();
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     bool isLoading =
@@ -303,7 +311,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   );
                                 }
                               },
-                              isLoading: false,
+                              isLoading: auth.isLoading,
                             );
                           },
                         ),

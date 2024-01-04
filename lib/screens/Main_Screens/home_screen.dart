@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
@@ -10,6 +11,7 @@ import 'package:xando/Providers/Game/get_available_games_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/Providers/firestore_service.dart';
 import 'package:xando/Providers/internet_provider.dart';
+import 'package:xando/XandO/create_a_game.dart';
 import 'package:xando/components/game_card.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/components/primary_button_outline.dart';
@@ -18,6 +20,7 @@ import 'package:xando/models/home_screen_model.dart';
 import 'package:xando/models/user_profile_model.dart';
 import 'package:xando/reusable_widgets/banner_pageview.dart';
 import 'package:xando/reusable_widgets/reusable_appbar.dart';
+import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/screens/Main_Screens/game_details_screen.dart';
 import 'package:xando/utils/game_requests_enums.dart';
 import 'package:xando/utils/snackbar_message.dart';
@@ -103,10 +106,18 @@ class _HomeScreenState extends State<HomeScreen> {
     } else {
       await getGames.getAvailableGames().then((value) {
         if (getGames.hasError == true) {
-          showErrorSnackBarMessage(
-            message: getGames.resMessage,
-            context: context,
-            status: false,
+          // showErrorSnackBarMessage(
+          //   message: getGames.resMessage,
+          //   context: context,
+          //   status: false,
+          // );
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                getGames.resMessage,
+              ),
+              backgroundColor: Colors.red,
+            ),
           );
         } else {
           setState(() {
@@ -133,6 +144,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return potentialWin;
   }
 
+  bool _checkifUserBalanceIsSufficient(int balance, int stake) {
+    if (balance >= stake) {
+      return true;
+    } else {
+      return false;
+    }
+  }
   //Firebase Cloud Messaging for Push Notifications
 
   @override
@@ -153,11 +171,10 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Scaffold(
         key: scaffoldKey,
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(136), // Set this height
-          child: ReusableAppBar(
-            coin: _coin,
-          ),
-        ),
+            preferredSize: const Size.fromHeight(144), // Set this height
+            child: ReusableAppBar(
+              coin: _coin,
+            )),
         body: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
@@ -270,19 +287,55 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   //.
                   if (filteredGames.isEmpty) {
-                    return const SliverToBoxAdapter(
+                    return SliverToBoxAdapter(
                       child: Center(
                         child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
+                            const SizedBox(height: 20),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.asset(
+                                'assets/images/tic-tac-toe_black.png',
+                                width: 100,
+                                height: 100,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                            const SizedBox(height: 15),
+                            const Text(
+                              'No available games yet',
+                              style: TextStyle(
+                                fontFamily: 'Bold',
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                             Text(
-                              'No Available Games Yet',
+                              'Don\'t worry when there are \ngames available, it will  appear here. \nYou can also create a game to get \nstarted.',
                               style: TextStyle(
                                 fontFamily: 'Regular',
                                 fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white.withOpacity(0.5),
                               ),
+                              textAlign: TextAlign.center,
                             ),
+                            const SizedBox(height: 20),
+                            SecondaryButton(
+                                title: '+ Create Game',
+                                width: 180,
+                                height: 50,
+                                onpressed: () {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              const CreateGameScreen()));
+                                },
+                                isLoading: false),
                           ],
-                        ),
+                        ).animate().fadeIn(duration: 500.ms),
                       ),
                     );
                   } else {
@@ -302,12 +355,18 @@ class _HomeScreenState extends State<HomeScreen> {
                                           CupertinoPageRoute(
                                               builder: (context) =>
                                                   GameDetailsScreen(
-                                                    receiverAvatar:
+                                                    idOfgame:
                                                         filteredGames[index]
+                                                            .id
+                                                            .toString(),
+                                                    receiverAvatar: filteredGames[
+                                                                index]
                                                             .user
-                                                            ?.avatar,
-                                                    senderAvatar:
-                                                        snapshot.data?.avatar,
+                                                            ?.avatar ??
+                                                        'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                                    senderAvatar: snapshot
+                                                            .data?.avatar ??
+                                                        'https://api.multiavatar.com/5b1271f9320afc278a.png',
                                                     receiverDeviceToken:
                                                         filteredGames[index]
                                                             .user
@@ -352,6 +411,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         context: context,
                                         stake: filteredGames[index].stake,
                                         gameId: filteredGames[index].gameId,
+                                        idOfGame: filteredGames[index].id,
                                         username:
                                             filteredGames[index].user?.username,
                                         receiverId:
@@ -393,6 +453,76 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showInsufficientDailog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: const Color.fromARGB(255, 32, 40, 73),
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            content: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 15),
+                const Text(
+                  'Balance Insufficient',
+                  style: TextStyle(
+                    fontFamily: 'Bold',
+                    fontSize: 20,
+                  ),
+                ),
+                Text(
+                  'There is not enough balance in your account to join this game',
+                  style: TextStyle(
+                      fontFamily: 'Medium',
+                      fontSize: 14,
+                      color: Colors.white.withOpacity(0.5)),
+                ),
+              ],
+            ),
+            actions: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Later',
+                  style: TextStyle(
+                    fontFamily: 'Bold',
+                    fontSize: 16,
+                    color: Color(0xFF3B4FFE),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context,
+                      CupertinoPageRoute(builder: (context) {
+                    return const WalletScreen(selectedTabFromExternalRoute: 0);
+                  }));
+                },
+                child: const Text(
+                  'Deposit',
+                  style: TextStyle(
+                    fontFamily: 'Bold',
+                    fontSize: 16,
+                    color: Color(0xFF3B4FFE),
+                  ),
+                ),
+              ),
+            ],
+          );
+        });
+  }
+
   void _showCustomDialog({
     required BuildContext context,
     required String? stake,
@@ -401,6 +531,7 @@ class _HomeScreenState extends State<HomeScreen> {
     required String? senderUsername,
     required String? receiverId,
     required String? senderId,
+    required int? idOfGame,
     required String? receiverDeviceToken,
     required String? receiverAvatar,
     required String? senderAvatar,
@@ -534,51 +665,65 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Provider.of<GetAvailableGamesProvider>(
                                       context,
                                       listen: false);
+
                               return PrimaryButton(
                                 backgroundColor: const Color(0xFF3B4FFE),
                                 title: 'Proceed',
                                 width: 110,
                                 height: 35,
                                 onpressed: () async {
-                                  print('receiver $receiverId');
-                                  await game
-                                      .updateGameState(false, receiverId)
-                                      .then((value) async {
-                                    await firestoreService
-                                        .addGameRequest(
-                                      senderId,
-                                      receiverId,
-                                      senderDeviceToken,
-                                      receiverDeviceToken,
-                                      username,
-                                      gameId,
-                                      stake,
-                                      senderUsername,
-                                      receiverAvatar,
-                                      senderAvatar,
-                                      RequestStatus.pending,
-                                    )
+                                  final profileCoinProvider =
+                                      context.read<EditProfileProvider>();
+                                  var userProfileData =
+                                      await profileCoinProvider
+                                          .getUserProfileData();
+                                  if (_checkifUserBalanceIsSufficient(
+                                      userProfileData.gamedata!.coin,
+                                      double.parse(stake).toInt())) {
+                                    await game
+                                        .updateGameState(
+                                            false, idOfGame.toString())
                                         .then((value) async {
                                       await firestoreService
-                                          .sendNotification(
+                                          .addGameRequest(
+                                        senderId,
+                                        receiverId,
+                                        senderDeviceToken,
                                         receiverDeviceToken,
-                                        'Game Request',
-                                        '$username wants to join your game',
+                                        username,
+                                        gameId,
+                                        idOfGame.toString(),
+                                        stake,
+                                        senderUsername,
+                                        receiverAvatar,
                                         senderAvatar,
+                                        RequestStatus.pending,
                                       )
-                                          .then((value) {
-                                        Navigator.pop(context);
-                                        _showJoinGameBottomSheet(
-                                          context: context,
-                                          stake: stake,
-                                          gameId: gameId,
-                                          potentialWin: calculateDiscount(
-                                                  double.parse(stake))
-                                              .toString(),
-                                        );
+                                          .then((value) async {
+                                        await firestoreService
+                                            .sendNotification(
+                                          receiverDeviceToken,
+                                          'Game Request',
+                                          '$senderUsername wants to join your game',
+                                          senderAvatar,
+                                        )
+                                            .then((value) {
+                                          Navigator.pop(context);
+                                          _showJoinGameBottomSheet(
+                                            context: context,
+                                            stake: stake,
+                                            gameId: gameId,
+                                            potentialWin: calculateDiscount(
+                                                    double.parse(stake))
+                                                .toString(),
+                                          );
+                                        });
                                       });
                                     });
-                                  });
+                                  } else {
+                                    Navigator.pop(context);
+                                    _showInsufficientDailog();
+                                  }
                                 },
                                 isLoading: firestoreService.isLoading,
                               );

@@ -3,6 +3,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -11,21 +12,24 @@ import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Game/get_available_games_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/Providers/internet_provider.dart';
+import 'package:xando/XandO/create_a_game.dart';
 import 'package:xando/components/currency_balance_container.dart';
 import 'package:xando/components/game_card.dart';
 import 'package:xando/components/history_list_item.dart';
+import 'package:xando/components/primary_button_outline.dart';
 import 'package:xando/components/tabs.dart';
 import 'package:xando/models/available_games_model.dart';
 import 'package:xando/models/game_screen_model.dart';
 import 'package:xando/models/user_profile_model.dart';
-import 'package:xando/screens/Main_Screens/game_details_screen.dart';
 import 'package:xando/screens/Main_Screens/user_game_details_screen.dart';
 import 'package:xando/utils/dynamic_links.dart';
 import 'package:xando/utils/snackbar_message.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key, required this.selectedTabFromExternalRoute});
+  const GameScreen(
+      {super.key, required this.selectedTabFromExternalRoute, this.gameData});
   final int selectedTabFromExternalRoute;
+  final List<AvailableGamesModel>? gameData;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -91,7 +95,7 @@ class _GameScreenState extends State<GameScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: PreferredSize(
-        preferredSize: Size.fromHeight(140), // Set this height
+        preferredSize: Size.fromHeight(150), // Set this height
         child: SizedBox(
           width: MediaQuery.of(context).size.width,
           child: Padding(
@@ -184,7 +188,12 @@ class _GameScreenState extends State<GameScreen> {
         ),
       ),
       body: SafeArea(
-        child: _selectedIndex == 0 ? OpenGames(userId: _userId) : History(),
+        child: _selectedIndex == 0
+            ? OpenGames(
+                userId: _userId,
+                gameData: widget.gameData,
+              )
+            : History(),
       ),
     );
   }
@@ -194,73 +203,23 @@ class OpenGames extends StatefulWidget {
   const OpenGames({
     super.key,
     required this.userId,
+    this.gameData,
   });
 
   final String userId;
+  final List<AvailableGamesModel>? gameData;
 
   @override
   State<OpenGames> createState() => _OpenGamesState();
 }
 
 class _OpenGamesState extends State<OpenGames> {
-  final StreamController<List<AvailableGamesModel>> _streamController =
-      StreamController.broadcast();
-  late Timer _timer;
-
-  @override
-  void initState() {
-    super.initState();
-
-    _timer = Timer.periodic(Duration(seconds: 5), (timer) {
-      if (mounted) {
-        getAvailableGames();
-      } else {
-        // Ensure that the timer is canceled when the widget is disposed
-        timer.cancel();
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _timer.cancel();
-    _streamController.close();
-    super.dispose();
-  }
-
-  Future<void> getAvailableGames() async {
-    final getGames = context.read<GetAvailableGamesProvider>();
-    final internetProvider = context.read<InternetProvider>();
-    await internetProvider.checkInternetConnection();
-
-    if (internetProvider.hasInternet == false) {
-      // ignore: use_build_context_synchronously
-      showErrorSnackBarMessage(
-        message: 'You seem to be offline',
-        context: context,
-        status: false,
-      );
-    } else {
-      await getGames.getAvailableGames().then((value) {
-        if (getGames.hasError == true) {
-          showErrorSnackBarMessage(
-            message: getGames.resMessage,
-            context: context,
-            status: false,
-          );
-        } else {
-          setState(() {
-            _streamController.sink.add(getGames.availableGames);
-          });
-        }
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<AvailableGamesModel>>(
-      stream: _streamController.stream,
+    return FutureBuilder<List<AvailableGamesModel>>(
+      future: widget.gameData != null
+          ? Future.value(widget.gameData!)
+          : context.read<GetAvailableGamesProvider>().getAvailableGames(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return SizedBox(
@@ -280,7 +239,53 @@ class _OpenGamesState extends State<OpenGames> {
 
           if (filteredGames.isEmpty) {
             return Center(
-              child: Text('No Available Games'),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(height: 20),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.asset(
+                      'assets/images/tic-tac-toe_black.png',
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  const SizedBox(height: 15),
+                  const Text(
+                    'Your games will appear here',
+                    style: TextStyle(
+                      fontFamily: 'Bold',
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    'Tap the ‘Create Game’ button \nto get started.',
+                    style: TextStyle(
+                      fontFamily: 'Regular',
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white.withOpacity(0.5),
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  SecondaryButton(
+                      title: '+ Create Game',
+                      width: 180,
+                      height: 50,
+                      onpressed: () {
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    const CreateGameScreen()));
+                      },
+                      isLoading: false),
+                ],
+              ).animate().fadeIn(duration: 500.ms),
             );
           } else {
             return ListView.builder(
@@ -342,35 +347,76 @@ class History extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      children: [
-        HistoryListItem(
-            title: 'Won',
-            gameID: '189378922073927633',
-            date: '2023/11/09  17:14:00',
-            stakeAmount: '400',
-            currency: 'assets/images/naira_coin.png',
-            stakeAmountinReturn: '+790',
-            statusColor: Colors.green),
-        HistoryListItem(
-          title: 'Lost',
-          gameID: '189378922073927633',
-          date: '2023/11/09  17:14:00',
-          stakeAmount: '200',
-          currency: 'assets/images/naira_coin.png',
-          stakeAmountinReturn: '-200',
-          statusColor: Color(0xFFFF0000),
-        ),
-        HistoryListItem(
-          title: 'Lost',
-          gameID: '189378922073927633',
-          date: '2023/11/09  17:14:00',
-          stakeAmount: '200',
-          currency: 'assets/images/naira_coin.png',
-          stakeAmountinReturn: '-200',
-          statusColor: Color(0xFFFF0000),
-        ),
-      ],
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const SizedBox(height: 20),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              'assets/images/cup_black.png',
+              width: 100,
+              height: 100,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(height: 15),
+          const Text(
+            'No game history yet',
+            style: TextStyle(
+              fontFamily: 'Bold',
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            'Don’t worry when there is data \navailable, it will appear here.',
+            style: TextStyle(
+              fontFamily: 'Regular',
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.white.withOpacity(0.5),
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ).animate().fadeIn(duration: 500.ms),
     );
   }
 }
+
+
+
+
+
+// ListView(
+//       children: [
+//         HistoryListItem(
+//             title: 'Won',
+//             gameID: '189378922073927633',
+//             date: '2023/11/09  17:14:00',
+//             stakeAmount: '400',
+//             currency: 'assets/images/naira_coin.png',
+//             stakeAmountinReturn: '+790',
+//             statusColor: Colors.green),
+//         HistoryListItem(
+//           title: 'Lost',
+//           gameID: '189378922073927633',
+//           date: '2023/11/09  17:14:00',
+//           stakeAmount: '200',
+//           currency: 'assets/images/naira_coin.png',
+//           stakeAmountinReturn: '-200',
+//           statusColor: Color(0xFFFF0000),
+//         ),
+//         HistoryListItem(
+//           title: 'Lost',
+//           gameID: '189378922073927633',
+//           date: '2023/11/09  17:14:00',
+//           stakeAmount: '200',
+//           currency: 'assets/images/naira_coin.png',
+//           stakeAmountinReturn: '-200',
+//           statusColor: Color(0xFFFF0000),
+//         ),
+//       ],
+//     )

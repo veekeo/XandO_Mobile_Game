@@ -92,11 +92,11 @@ class GetAvailableGamesProvider extends ChangeNotifier {
   }
 
   //Update game state
-  Future<void> updateGameState(bool state, String? userId) async {
+  Future<void> updateGameState(bool state, String? id) async {
     _isLoading = true;
     notifyListeners();
     String requestbaseUrl = 'https://tictac-production.up.railway.app';
-    String url = '$requestbaseUrl/tictac/create-game/$userId/';
+    String url = '$requestbaseUrl/tictac/create-game/$id/';
 
     final body = {
       "state": state,

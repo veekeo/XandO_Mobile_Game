@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:provider/provider.dart';
+import 'package:xando/Providers/Game/create_game_provider.dart';
 import 'package:xando/components/primary_button.dart';
 
 class WinnerDailog extends StatelessWidget {
@@ -51,18 +53,23 @@ class WinnerDailog extends StatelessWidget {
         ],
       ),
       actions: [
-        PrimaryButton(
-          title: 'Go Home',
-          width: 250,
-          height: 55,
-          onpressed: onPressed,
-          isLoading: false,
-          backgroundColor: const Color(0xFF3B4FFE),
-        )
-            .animate(
-              delay: 1000.ms, // this delay only happens once at the very start
+        Consumer<CreateGameProvider>(
+          builder: (context, game, child) {
+            return PrimaryButton(
+              title: 'Go Home',
+              width: 250,
+              height: 55,
+              onpressed: onPressed,
+              isLoading: game.isLoading,
+              backgroundColor: const Color(0xFF3B4FFE),
             )
-            .shake(duration: 1000.ms)
+                .animate(
+                  delay:
+                      1000.ms, // this delay only happens once at the very start
+                )
+                .shake(duration: 1000.ms);
+          },
+        ),
       ],
     );
   }

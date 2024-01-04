@@ -6,6 +6,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/Providers/paystack_provider.dart';
+import 'package:xando/models/user_profile_model.dart';
 
 class PaystackCheckoutScreen extends StatefulWidget {
   const PaystackCheckoutScreen({super.key, required this.url});
@@ -47,10 +48,8 @@ class _PaystackCheckoutScreenState extends State<PaystackCheckoutScreen> {
                   NavigationDelegate(
                     onNavigationRequest: (NavigationRequest request) async {
                       final paystack = context.read<PaystackProvider>();
-                      int initialUserBalance = await DatabaseProvider()
-                          .getCoin()
-                          .then((value) => value);
-                      print('Initial balance: $initialUserBalance');
+                      UserModel initialUserBalance =
+                          await EditProfileProvider().getUserProfileData();
                       //-----------------
                       if (request.url.startsWith('https://google.com')) {
                         // ignore: use_build_context_synchronously
@@ -58,7 +57,8 @@ class _PaystackCheckoutScreenState extends State<PaystackCheckoutScreen> {
                             .verifyTransaction(context)
                             .then((value) async {
                           await paystack
-                              .calcUserTotalAmount(context, initialUserBalance)
+                              .calcUserTotalAmount(
+                                  context, initialUserBalance.gamedata!.coin)
                               .then((value) => Navigator.pop(context));
                         });
                       }

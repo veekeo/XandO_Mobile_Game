@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/APIs/firebase_api.dart';
+import 'package:xando/Providers/Auth_providers/affliate_provider.dart';
 import 'package:xando/Providers/Auth_providers/auth_provider.dart';
 import 'package:xando/Providers/Auth_providers/google_auth_provider.dart';
 import 'package:xando/Providers/Auth_providers/phone_auth_provider.dart';
@@ -16,7 +17,6 @@ import 'package:xando/Providers/avatar_provider.dart';
 import 'package:xando/Providers/firestore_service.dart';
 import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/Providers/paystack_provider.dart';
-import 'package:xando/XandO/game_loading_screen.dart';
 import 'package:xando/screens/splash_screen.dart';
 import 'package:xando/utils/dynamic_links.dart';
 import 'firebase_options.dart';
@@ -40,6 +40,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthenticationProvider()),
+        ChangeNotifierProvider(create: (_) => AffliateProvider()),
         ChangeNotifierProvider(create: (_) => PhoneNumberAuthProvider()),
         ChangeNotifierProvider(create: (_) => GoogleAuthenticationProvider()),
         ChangeNotifierProvider(create: (_) => InternetProvider()),

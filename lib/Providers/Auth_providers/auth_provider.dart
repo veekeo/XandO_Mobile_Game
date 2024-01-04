@@ -22,14 +22,13 @@ class AuthenticationProvider extends ChangeNotifier {
   bool _isLoading = false;
   String _resMessage = '';
   bool? _rememberUser = false;
-  late AffliateUserModel _affliateUser = AffliateUserModel();
 
   bool _alreadyRequested = false;
 
   bool get isLoading => _isLoading;
   String get resMessage => _resMessage;
   bool? get rememberUser => _rememberUser;
-  dynamic get affliateUser => _affliateUser;
+
   bool get alreadyRequested => _alreadyRequested;
 
   void registerUser({
@@ -280,45 +279,6 @@ class AuthenticationProvider extends ChangeNotifier {
       _resMessage = 'Please try again!';
       notifyListeners();
     }
-  }
-
-  //Get An Afflitate
-  Future<AffliateUserModel> getAffliateUser(String userId) async {
-    AffliateUserModel affliateUser = AffliateUserModel();
-    _isLoading = true;
-    notifyListeners();
-    String requestbaseUrl = 'https://tictac-production.up.railway.app';
-    String url = '$requestbaseUrl/tictac/affiliate/$userId/';
-
-    try {
-      http.Response req = await http.get(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-      );
-
-      if (req.statusCode == 200 || req.statusCode == 201) {
-        if (json.decode(req.body) == null) {
-          return affliateUser;
-        } else {
-          final affliateUserModel = affliateUserModelFromJson(req.body);
-          _affliateUser = affliateUserModel;
-          notifyListeners();
-          return affliateUserModel;
-        }
-      } else {
-        _isLoading = false;
-        notifyListeners();
-      }
-    } on SocketException catch (_) {
-      _resMessage = 'Internet connection is not available';
-      _isLoading = false;
-      notifyListeners();
-    } catch (e) {
-      _isLoading = false;
-      _resMessage = e.toString();
-      notifyListeners();
-    }
-    return affliateUser;
   }
 
   void switchAleadyRequested() {

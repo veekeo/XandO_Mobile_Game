@@ -1,8 +1,10 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Game/get_available_games_provider.dart';
 import 'package:xando/Providers/firestore_service.dart';
+import 'package:xando/XandO/game_loading_screen.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/components/primary_button_outline.dart';
 
@@ -16,11 +18,13 @@ class UserRequests extends StatefulWidget {
     required this.status,
     required this.profileAvatar,
     required this.documentID,
+    required this.gameNumberId,
   });
 
   final String username;
   final String requestTime;
   final String gameID;
+  final String gameNumberId;
   final String stake;
   final String status;
   final String profileAvatar;
@@ -140,19 +144,25 @@ class _UserRequestsState extends State<UserRequests> {
                                   : 'Pending',
                               width: 120,
                               height: 29,
-                              onpressed: documentData?['status'] ==
+                              onpressed: documentData?['status'] !=
                                       'RequestStatus.accepted'
-                                  ? startGame(
-                                      documentData?['receiverDeviceToken'],
-                                      documentData?['receiverAvatar'],
-                                      documentData?['senderAvatar'],
-                                      documentData?['gameID'],
-                                      documentData?['receiverId'],
-                                      documentData?['senderId'],
-                                      true,
-                                      documentData?['stake'],
-                                    )
-                                  : null,
+                                  ? null
+                                  : () {
+                                      if (documentData?['status'] ==
+                                          'RequestStatus.accepted') {
+                                        startGame(
+                                          documentData?['receiverDeviceToken'],
+                                          documentData?['receiverAvatar'],
+                                          documentData?['senderAvatar'],
+                                          documentData?['gameID'],
+                                          documentData?['gameNumberId'],
+                                          documentData?['receiverId'],
+                                          documentData?['senderId'],
+                                          true,
+                                          double.parse(documentData?['stake']),
+                                        );
+                                      }
+                                    },
                               isLoading: false,
                             ),
                             const SizedBox(width: 8),
@@ -170,7 +180,7 @@ class _UserRequestsState extends State<UserRequests> {
                                   await firestore
                                       .deletePendingRequest(widget.documentID)
                                       .then((value) => game.updateGameState(
-                                          true, widget.documentID));
+                                          true, widget.gameNumberId));
                                 },
                                 isLoading: firestore.isLoading,
                               );
@@ -195,6 +205,7 @@ class _UserRequestsState extends State<UserRequests> {
     String hostAvatar,
     player2Avatar,
     String gameId,
+    String gameNumberId,
     String hostId,
     String player2Id,
     bool state,
@@ -210,7 +221,9 @@ class _UserRequestsState extends State<UserRequests> {
             widget.profileAvatar)
         .then(
       (value) async {
-        await firestore.connectPlayersToGame(
+        await firestore
+            .connectPlayersToGame(
+          gameNumberId: gameNumberId,
           gameId: gameId,
           exTurn: true,
           ohTurn: false,
@@ -227,6 +240,15 @@ class _UserRequestsState extends State<UserRequests> {
           gameState: state,
           isHostConnected: true,
           isPlayer2Connected: true,
+        )
+            .then(
+          (value) {
+            Navigator.pushReplacement(context, CupertinoPageRoute(
+              builder: (context) {
+                return GameLoadingScreen(gameId: gameId, stake: stake);
+              },
+            ));
+          },
         );
       },
     );

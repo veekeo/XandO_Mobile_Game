@@ -19,6 +19,7 @@ class FireStoreServiceProvider extends ChangeNotifier {
     String? receiverDeviceToken,
     String? username,
     String? gameID,
+    String? gameNumberId,
     String? stake,
     String? senderUsername,
     String? receiverAvatar,
@@ -38,6 +39,7 @@ class FireStoreServiceProvider extends ChangeNotifier {
         'receiverAvatar': receiverAvatar,
         'senderAvatar': senderAvatar,
         'gameID': gameID,
+        'gameNumberId': gameNumberId,
         'stake': stake,
         'timestamp': FieldValue.serverTimestamp(),
         'status': status.toString(),
@@ -215,6 +217,7 @@ class FireStoreServiceProvider extends ChangeNotifier {
   Future<void> connectPlayersToGame({
     required String gameId,
     required String hostId,
+    required String gameNumberId,
     required String player2Id,
     required bool exTurn,
     required bool ohTurn,
@@ -235,6 +238,8 @@ class FireStoreServiceProvider extends ChangeNotifier {
         'host': {
           'exTurn': exTurn,
           'hostId': hostId,
+          'gameNumberId': gameNumberId,
+          'hostGameId': hostId,
           'displayExOh': displayExOh,
           'matchedIndexes': matchedIndexes,
           'filledBoxes': filledBoxes,
@@ -264,8 +269,24 @@ class FireStoreServiceProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> updateUserState(
-      String documentID, bool hostState, bool player2State) async {
+  Future<void> updateUserState({
+    required String documentID,
+    required bool hostState,
+    required bool player2State,
+    required bool exTurn,
+    required bool ohTurn,
+    required List<dynamic> displayExOh,
+    required List<dynamic> matchedIndexes,
+    required String hostId,
+    required String player2Id,
+    required String hostAvatar,
+    required String player2Avatar,
+    required int filledBoxes,
+    required int attempts,
+    required bool gameState,
+    required String hostGameId,
+    required String gameNumberId,
+  }) async {
     _isLoading = true;
     notifyListeners();
     // Get a reference to the 'pendingRequests' collection
@@ -277,9 +298,25 @@ class FireStoreServiceProvider extends ChangeNotifier {
     await documentReference.update({
       'host': {
         'isHostConnected': hostState,
+        'exTurn': exTurn,
+        'displayExOh': displayExOh,
+        'matchedIndexes': matchedIndexes,
+        'hostId': hostId,
+        'hostAvatar': hostAvatar,
+        'hostGameId': hostId,
+        'gameNumberId': gameNumberId,
+        'filledBoxes': filledBoxes,
+        'attempts': attempts,
       },
       'player2': {
         'isPlayer2Connected': player2State,
+        'ohTurn': ohTurn,
+        'displayExOh': displayExOh,
+        'player2Id': player2Id,
+        'player2Avatar': player2Avatar,
+        'matchedIndexes': matchedIndexes,
+        'filledBoxes': filledBoxes,
+        'attempts': attempts,
       }
     });
 
@@ -287,6 +324,23 @@ class FireStoreServiceProvider extends ChangeNotifier {
     notifyListeners();
 
     print('Document with ID $documentID updated successfully.');
+  }
+
+  // delete game
+  Future<void> deleteGame(String documentID) async {
+    _isLoading = true;
+    notifyListeners();
+    // Get a reference to the 'pendingRequests' collection
+    CollectionReference gamesCollection =
+        FirebaseFirestore.instance.collection('games');
+
+    // Get a reference to the specific document using the specified document ID
+    DocumentReference documentReference = gamesCollection.doc(documentID);
+
+    // Delete the document
+    await documentReference.delete();
+    _isLoading = false;
+    notifyListeners();
   }
 
   // Add a method to get real-time updates from Firestore

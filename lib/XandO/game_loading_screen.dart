@@ -23,7 +23,7 @@ class _GameLoadingScreenState extends State<GameLoadingScreen>
     // // print(dbProvider.usr);
 
     Future.delayed(
-      const Duration(seconds: 10),
+      const Duration(seconds: 3),
       () {
         Navigator.of(context)
             .pushReplacement(CupertinoPageRoute(builder: (context) {
@@ -51,8 +51,8 @@ class _GameLoadingScreenState extends State<GameLoadingScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const SizedBox(
-              height: 150,
-              width: 150,
+              height: 110,
+              width: 110,
               child: RiveAnimation.asset(
                 'assets/images/loader.riv',
                 fit: BoxFit.cover,

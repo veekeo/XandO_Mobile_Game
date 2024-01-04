@@ -14,6 +14,8 @@ import 'package:xando/components/primary_button.dart';
 import 'package:xando/components/primary_button_outline.dart';
 import 'package:xando/models/available_games_model.dart';
 import 'package:xando/models/user_profile_model.dart';
+import 'package:xando/screens/Finance_Screens/deposit_screen.dart';
+import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/screens/Main_Screens/game_details_screen.dart';
 import 'package:xando/utils/game_requests_enums.dart';
 
@@ -29,15 +31,18 @@ class _SearchScreenState extends State<SearchScreen> {
   late String _deviceToken;
   late String _username;
   double potentialWin = 0;
+  late int _coin;
   _loadUserData() async {
     String? userId = await DatabaseProvider().getUserId();
     String? deviceToken = await DatabaseProvider().getDeviceToken();
     String? username = await DatabaseProvider().getUserName();
+    int? coin = await DatabaseProvider().getCoin();
     if (mounted) {
       setState(() {
         _userId = userId;
         _deviceToken = deviceToken;
         _username = username;
+        _coin = coin;
       });
     }
   }
@@ -48,6 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
     _userId = '';
     _deviceToken = '';
     _username = '';
+    _coin = 0;
     _loadUserData();
   }
 
@@ -65,6 +71,14 @@ class _SearchScreenState extends State<SearchScreen> {
     });
 
     return potentialWin;
+  }
+
+  bool _checkifUserBalanceIsSufficient(int balance, int stake) {
+    if (balance >= stake) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override
@@ -211,6 +225,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                     context,
                                     CupertinoPageRoute(
                                         builder: (context) => GameDetailsScreen(
+                                              idOfgame: game.id.toString(),
                                               senderAvatar: snapshot
                                                       .data?.avatar ??
                                                   'https://api.multiavatar.com/5b1271f9320afc278a.png',
@@ -251,6 +266,8 @@ class _SearchScreenState extends State<SearchScreen> {
                                       'https://api.multiavatar.com/5b1271f9320afc278a.png',
                                   senderAvatar: snapshot.data?.avatar ??
                                       'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                  senderUsername: _username,
+                                  idOfGame: game.id,
                                 );
                               },
                               cardColor: const Color.fromARGB(255, 15, 22, 44),
@@ -268,13 +285,85 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
+  void _showInsufficientDailog() {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            backgroundColor: const Color.fromARGB(255, 32, 40, 73),
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10.0),
+            ),
+            content: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const SizedBox(height: 15),
+                const Text(
+                  'Balance Insufficient',
+                  style: TextStyle(
+                    fontFamily: 'Bold',
+                    fontSize: 20,
+                  ),
+                ),
+                Text(
+                  'There is not enough balance in your \naccount to join this game',
+                  style: TextStyle(
+                      fontFamily: 'Medium',
+                      fontSize: 14,
+                      color: Colors.white.withOpacity(0.5)),
+                ),
+              ],
+            ),
+            actions: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  'Later',
+                  style: TextStyle(
+                    fontFamily: 'Bold',
+                    fontSize: 16,
+                    color: Color(0xFF3B4FFE),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context,
+                      CupertinoPageRoute(builder: (context) {
+                    return const WalletScreen(selectedTabFromExternalRoute: 0);
+                  }));
+                },
+                child: const Text(
+                  'Deposit',
+                  style: TextStyle(
+                    fontFamily: 'Bold',
+                    fontSize: 16,
+                    color: Color(0xFF3B4FFE),
+                  ),
+                ),
+              ),
+            ],
+          );
+        });
+  }
+
   void _showCustomDialog({
     required BuildContext context,
     required String? stake,
     required String? gameId,
     required String? username,
+    required String? senderUsername,
     required String? receiverId,
     required String? senderId,
+    required int? idOfGame,
     required String? receiverDeviceToken,
     required String? receiverAvatar,
     required String? senderAvatar,
@@ -408,50 +497,65 @@ class _SearchScreenState extends State<SearchScreen> {
                                   Provider.of<GetAvailableGamesProvider>(
                                       context,
                                       listen: false);
+
                               return PrimaryButton(
                                 backgroundColor: const Color(0xFF3B4FFE),
                                 title: 'Proceed',
                                 width: 110,
                                 height: 35,
                                 onpressed: () async {
-                                  await game
-                                      .updateGameState(false, receiverId)
-                                      .then((value) async {
-                                    await firestoreService
-                                        .addGameRequest(
-                                      senderId,
-                                      receiverId,
-                                      senderDeviceToken,
-                                      receiverDeviceToken,
-                                      username,
-                                      gameId,
-                                      stake,
-                                      _username,
-                                      receiverAvatar,
-                                      senderAvatar,
-                                      RequestStatus.pending,
-                                    )
+                                  final profileCoinProvider =
+                                      context.read<EditProfileProvider>();
+                                  var userProfileData =
+                                      await profileCoinProvider
+                                          .getUserProfileData();
+                                  if (_checkifUserBalanceIsSufficient(
+                                      userProfileData.gamedata!.coin,
+                                      double.parse(stake).toInt())) {
+                                    await game
+                                        .updateGameState(
+                                            false, idOfGame.toString())
                                         .then((value) async {
                                       await firestoreService
-                                          .sendNotification(
+                                          .addGameRequest(
+                                        senderId,
+                                        receiverId,
+                                        senderDeviceToken,
                                         receiverDeviceToken,
-                                        'Game Request',
-                                        '$username wants to join your game',
+                                        username,
+                                        gameId,
+                                        idOfGame.toString(),
+                                        stake,
+                                        senderUsername,
                                         receiverAvatar,
+                                        senderAvatar,
+                                        RequestStatus.pending,
                                       )
-                                          .then((value) {
-                                        Navigator.pop(context);
-                                        _showJoinGameBottomSheet(
-                                          context: context,
-                                          stake: stake,
-                                          gameId: gameId,
-                                          potentialWin: calculateDiscount(
-                                                  double.parse(stake))
-                                              .toString(),
-                                        );
+                                          .then((value) async {
+                                        await firestoreService
+                                            .sendNotification(
+                                          receiverDeviceToken,
+                                          'Game Request',
+                                          '$username wants to join your game',
+                                          senderAvatar,
+                                        )
+                                            .then((value) {
+                                          Navigator.pop(context);
+                                          _showJoinGameBottomSheet(
+                                            context: context,
+                                            stake: stake,
+                                            gameId: gameId,
+                                            potentialWin: calculateDiscount(
+                                                    double.parse(stake))
+                                                .toString(),
+                                          );
+                                        });
                                       });
                                     });
-                                  });
+                                  } else {
+                                    Navigator.pop(context);
+                                    _showInsufficientDailog();
+                                  }
                                 },
                                 isLoading: firestoreService.isLoading,
                               );

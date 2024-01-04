@@ -284,7 +284,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                     password: _passwordController.text.trim(),
                                     affliateCode:
                                         _affliateCodeController.text == ''
-                                            ? 'PR2KZE'
+                                            ? 'T49E6W'
                                             : _affliateCodeController.text
                                                 .toString()
                                                 .trim(),

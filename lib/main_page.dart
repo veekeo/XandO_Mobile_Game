@@ -1,31 +1,55 @@
-// ignore_for_file: prefer_const_constructors, sized_box_for_whitespace, library_private_types_in_public_api, prefer_const_literals_to_create_immutables, use_key_in_widget_constructors
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
+import 'package:xando/Providers/Auth_providers/affliate_provider.dart';
+import 'package:xando/Providers/Database/db_provider.dart';
+import 'package:xando/Providers/Game/get_available_games_provider.dart';
 import 'package:xando/XandO/create_a_game.dart';
+import 'package:xando/models/affilaite_user_model.dart';
+import 'package:xando/models/available_games_model.dart';
 import 'package:xando/screens/Main_Screens/chat_screen.dart';
 import 'package:xando/screens/Main_Screens/game_screen.dart';
 import 'package:xando/screens/Main_Screens/home_screen.dart';
 import 'package:xando/screens/Main_Screens/earn_screen.dart';
 
 class MainPage extends StatefulWidget {
+  const MainPage({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _MainPageState createState() => _MainPageState();
 }
 
 class _MainPageState extends State<MainPage> {
+  late String _userId;
   int currentIndex = 0;
-  final List<Widget> screens = [
-    HomeScreen(),
-    ChatScreen(),
-    GameScreen(selectedTabFromExternalRoute: 0),
-    EarnScreen(
+
+  List<Widget> screens = [
+    const HomeScreen(),
+    const ChatScreen(),
+    const GameScreen(selectedTabFromExternalRoute: 0),
+    const EarnScreen(
       isFromExternalSource: false,
     ),
   ];
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
+
+  //Fetching Data for GameScreen and EarnScreen
+
+  Future<List<AvailableGamesModel>> fetchGameScreenData() async {
+    final getGames = context.read<GetAvailableGamesProvider>();
+    List<AvailableGamesModel> fetchedData = await getGames.getAvailableGames();
+    return fetchedData;
+  }
+
+  Future<AffliateUserModel> fetchEarnScreenData() async {
+    final getAffiliateUser = context.read<AffliateProvider>();
+    AffliateUserModel fetchedData = await getAffiliateUser.getAffliateUser();
+    return fetchedData;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,13 +64,13 @@ class _MainPageState extends State<MainPage> {
 
   Widget _buildCustomBottomNavigationBar() {
     return BottomAppBar(
-      padding: EdgeInsets.all(0),
-      color: Color.fromARGB(255, 32, 40, 73),
+      padding: const EdgeInsets.all(0),
+      color: const Color.fromARGB(255, 0, 7, 38),
       height: 70,
       child: Stack(
         children: [
           Align(
-            alignment: AlignmentDirectional(0.00, 1.00),
+            alignment: const AlignmentDirectional(0.00, 1.00),
             child: Padding(
               padding: const EdgeInsets.all(0).copyWith(bottom: 5),
               child: Row(
@@ -139,7 +163,7 @@ class _MainPageState extends State<MainPage> {
                       ),
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Opacity(
                     opacity: currentIndex == 2 ? 1.0 : 0.5,
                     child: InkWell(
@@ -227,16 +251,16 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                 ]
-                    .divide(SizedBox(width: 24))
-                    .addToStart(SizedBox(width: 24))
-                    .addToEnd(SizedBox(width: 24)),
+                    .divide(const SizedBox(width: 24))
+                    .addToStart(const SizedBox(width: 24))
+                    .addToEnd(const SizedBox(width: 24)),
               ),
             ),
           ),
           Align(
-            alignment: AlignmentDirectional(0.00, 1.00),
+            alignment: const AlignmentDirectional(0.00, 1.00),
             child: Padding(
-              padding: EdgeInsetsDirectional.fromSTEB(0, 5, 0, 10),
+              padding: const EdgeInsetsDirectional.fromSTEB(0, 5, 0, 10),
               child: ClipOval(
                 child: Container(
                   width: 65,
@@ -245,11 +269,11 @@ class _MainPageState extends State<MainPage> {
                     gradient: LinearGradient(
                       colors: [
                         FlutterFlowTheme.of(context).primary,
-                        Color(0xFF0013BC)
+                        const Color(0xFF0013BC)
                       ],
-                      stops: [0, 1],
-                      begin: AlignmentDirectional(0, -1),
-                      end: AlignmentDirectional(0, 1),
+                      stops: const [0, 1],
+                      begin: const AlignmentDirectional(0, -1),
+                      end: const AlignmentDirectional(0, 1),
                     ),
                     shape: BoxShape.circle,
                   ),
@@ -266,7 +290,7 @@ class _MainPageState extends State<MainPage> {
                     onPressed: () {
                       Navigator.push(context,
                           CupertinoPageRoute(builder: (context) {
-                        return CreateGameScreen();
+                        return const CreateGameScreen();
                       }));
                     },
                   ),
@@ -279,9 +303,31 @@ class _MainPageState extends State<MainPage> {
     );
   }
 
-  void _onTabTapped(int index) {
+  void _onTabTapped(int index) async {
     setState(() {
       currentIndex = index;
+
+      // Call the appropriate Future function based on the tapped tab
+      switch (index) {
+        case 2: // GameScreen
+          fetchGameScreenData().then((gameData) {
+            screens = List.from(screens);
+            screens[2] = GameScreen(
+              selectedTabFromExternalRoute: 0,
+              gameData: gameData,
+            );
+          });
+          break;
+        case 3: // EarnScreen
+          fetchEarnScreenData().then((earnData) {
+            screens = List.from(screens);
+            screens[3] = EarnScreen(
+              isFromExternalSource: false,
+              earnData: earnData,
+            );
+          });
+          break;
+      }
     });
   }
 }
