@@ -67,7 +67,6 @@ class _XandOGameScreenState extends State<XandOGameScreen> {
                       child: IconButton(
                         onPressed: () {
                           audio.toggleSound();
-                          print('clicked');
                         },
                         icon: isSoundOn
                             ? const Icon(

@@ -153,8 +153,6 @@ class _EditUserNameScreenState extends State<EditUserNameScreen> {
                       height: 55,
                       onpressed: () {
                         if (_formKey.currentState?.validate() ?? false) {
-                          print(_userId);
-                          print(_userNameController.text);
                           editProfile.updateUsername(context, _userId, {
                             'username': _userNameController.text.trim()
                           }).then((value) {

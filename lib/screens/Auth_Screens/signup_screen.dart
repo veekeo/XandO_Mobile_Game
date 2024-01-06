@@ -332,7 +332,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           onTap: isLoading
                               ? null
                               : () {
-                                  // handleGoogleSignIn();
+                                  handleGoogleSignIn();
                                 },
                           child: Container(
                             width: 200,
@@ -455,7 +455,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-//handling google sign in
+  //handling google sign in
 
   Future handleGoogleSignIn() async {
     final googleSignInProvider = context.read<GoogleAuthenticationProvider>();

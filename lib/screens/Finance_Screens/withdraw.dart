@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -26,12 +27,21 @@ class _WithdrawState extends State<Withdraw> {
       TextEditingController();
   String _selectedBank = '';
   String _bankCode = '';
+  int? userBalance = 0;
 
   void _updateSelectedBank(String bankName, String bankCode) {
     setState(() {
       _selectedBank = bankName;
       _bankCode = bankCode;
     });
+  }
+
+  bool _checkifUserBalanceIsSufficient(int balance, int transferAmount) {
+    if (balance >= transferAmount) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   @override
@@ -47,7 +57,7 @@ class _WithdrawState extends State<Withdraw> {
               child: FutureBuilder<UserModel>(
                 future: EditProfileProvider().getUserProfileData(),
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
+                  if (snapshot.connectionState == ConnectionState.none) {
                     return const Center(
                       child: CircularProgressIndicator(
                         color: Color(0xFF3B4FFE),
@@ -56,6 +66,7 @@ class _WithdrawState extends State<Withdraw> {
                   } else if (snapshot.hasError) {
                     return Text('Error: ${snapshot.error}');
                   } else {
+                    userBalance = snapshot.data?.gamedata?.coin ?? 0;
                     return Container(
                       width: double.infinity,
                       height: 130,
@@ -110,7 +121,7 @@ class _WithdrawState extends State<Withdraw> {
                                         const EdgeInsetsDirectional.fromSTEB(
                                             0, 0, 0, 8),
                                     child: Text(
-                                      '${snapshot.data!.gamedata?.coin} NGN',
+                                      '${snapshot.data?.gamedata?.coin ?? 0} NGN',
                                       style: FlutterFlowTheme.of(context)
                                           .bodyMedium
                                           .override(
@@ -433,6 +444,13 @@ class _WithdrawState extends State<Withdraw> {
                     status: false,
                   );
                   //Dont forget to make sure the user does not transfer more than what they have as their balance
+                } else if (!_checkifUserBalanceIsSufficient(
+                    userBalance!, int.parse(_transferAmountController.text))) {
+                  showErrorSnackBarMessage(
+                    message: 'Amount cannot not be transferred.',
+                    context: context,
+                    status: false,
+                  );
                 } else {
                   handleTransfer().then((value) {
                     setState(() {
@@ -490,6 +508,8 @@ class _WithdrawState extends State<Withdraw> {
     final paystack = context.read<PaystackProvider>();
     //internet provider
     final internetProvider = context.read<InternetProvider>();
+    UserModel initialUserBalance =
+        await EditProfileProvider().getUserProfileData();
 
     await internetProvider.checkInternetConnection();
     if (internetProvider.hasInternet == false) {
@@ -512,24 +532,80 @@ class _WithdrawState extends State<Withdraw> {
         } else {
           paystack
               .initiateTransfer(_transferAmountController.text)
-              .then((value) {
+              .then((value) async {
             if (paystack.transferStatus == false) {
               showErrorSnackBarMessage(
-                message: paystack.resMessage,
+                message: 'Something went wrong. Please try again.',
                 context: context,
                 status: false,
               );
             } else {
-              showSuccessSnackBarMessage(
-                message: paystack.resMessage,
-                context: context,
-                status: true,
-              );
+              await paystack
+                  .calcUserTotalAmountAfterTransfer(
+                      context, initialUserBalance.gamedata!.coin)
+                  .then((value) => _showPendingTransferDailog());
             }
           });
         }
       });
     }
+  }
+
+  void _showPendingTransferDailog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color.fromARGB(255, 32, 40, 73),
+          elevation: 0,
+          shadowColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10.0),
+          ),
+          content: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 15),
+              const Text(
+                'Processing Transfer',
+                style: TextStyle(
+                  fontFamily: 'Bold',
+                  fontSize: 20,
+                ),
+              )
+                  .animate()
+                  .fadeIn(delay: 500.ms, duration: 500.ms)
+                  .slideY(duration: 500.ms),
+              Text(
+                'Please wait while we securely process your transfer. This may take a few moments. Thank you for your patience!',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                    fontFamily: 'Medium',
+                    fontSize: 14,
+                    color: Colors.white.withOpacity(0.5)),
+              )
+                  .animate()
+                  .fadeIn(delay: 800.ms, duration: 500.ms)
+                  .slideY(duration: 500.ms),
+            ],
+          ),
+          actions: [
+            PrimaryButton(
+              title: 'Close',
+              width: 230,
+              height: 55,
+              onpressed: () {
+                Navigator.pop(context);
+              },
+              isLoading: false,
+              backgroundColor: const Color(0xFF3B4FFE),
+            )
+          ],
+        );
+      },
+    );
   }
 
   void _showBottomSheet(BuildContext context) {

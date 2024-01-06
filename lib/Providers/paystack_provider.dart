@@ -24,15 +24,15 @@ class PaystackProvider extends ChangeNotifier {
   int get stake => _depositedAmount;
 
   //<-------------------Transfer Variables-------------------->
-  String _transferAmount = '';
+  int _transferAmount = 0;
   String _recipientCode = '';
   bool _transferStatus = false;
 
-  String get transferAmount => _transferAmount;
+  int get transferAmount => _transferAmount;
   String get recipientCode => _recipientCode;
   bool get transferStatus => _transferStatus;
 
-  String apiKey = 'sk_test_a3d87c1c774b0a3eb4efd4c9fd07fde9ccca9bdb';
+  String apiKey = 'sk_live_c0b3015a647d231ca553ed1d5ea2d417560e420c';
 
   Future getPaystackCheckoutUrl(String email, String amount) async {
     _isLoading = true;
@@ -47,6 +47,7 @@ class PaystackProvider extends ChangeNotifier {
     final body = {
       "email": email,
       "amount": stake,
+      "metadata": {"cancel_action": "https://google.com"}
     };
 
     try {
@@ -61,7 +62,7 @@ class PaystackProvider extends ChangeNotifier {
 
       if (req.statusCode == 200 || req.statusCode == 201) {
         final res = json.decode(req.body);
-        print('i wanna get deposited amount here: $res');
+
         _authorizationUrl = res['data']['authorization_url'];
         _reference = res['data']['reference'];
         _hasError = false;
@@ -92,7 +93,7 @@ class PaystackProvider extends ChangeNotifier {
     notifyListeners();
 
     String url = 'https://api.paystack.co/transaction/verify/$reference';
-    String apiKey = 'sk_test_a3d87c1c774b0a3eb4efd4c9fd07fde9ccca9bdb';
+    String apiKey = 'sk_live_c0b3015a647d231ca553ed1d5ea2d417560e420c';
 
     try {
       http.Response req = await http.get(
@@ -105,7 +106,7 @@ class PaystackProvider extends ChangeNotifier {
 
       if (req.statusCode == 200 || req.statusCode == 201) {
         final res = json.decode(req.body);
-        print('Rubishbdbhkvfkhf');
+
         _depositedAmount = res['data']['amount'];
         _hasError = false;
         _isLoading = false;
@@ -158,8 +159,7 @@ class PaystackProvider extends ChangeNotifier {
       if (req.statusCode == 200) {
         final res = json.decode(req.body);
         dbProvider.saveUserCoin(res['balance']);
-        print(res);
-        print('User balance Updated successfully');
+
         _isLoading = false;
         _hasError = false;
         notifyListeners();
@@ -242,13 +242,15 @@ class PaystackProvider extends ChangeNotifier {
 
   //Initiate Transfer
   Future initiateTransfer(String amount) async {
+    int tAmount = int.parse(amount) * 100;
+    _transferAmount = int.parse(amount);
     _isLoading = true;
     notifyListeners();
 
     String url = 'https://api.paystack.co/transfer';
 
     final body = {
-      "amount": amount,
+      "amount": tAmount,
       "recipient": _recipientCode,
     };
 
@@ -264,7 +266,7 @@ class PaystackProvider extends ChangeNotifier {
 
       if (req.statusCode == 200 || req.statusCode == 201) {
         final res = json.decode(req.body);
-        print(res);
+
         _resMessage = res['message'];
         _transferStatus = res['status'];
         _hasError = false;
@@ -272,7 +274,7 @@ class PaystackProvider extends ChangeNotifier {
         notifyListeners();
       } else if (req.statusCode == 400) {
         final res = json.decode(req.body);
-        print(res);
+
         _resMessage = res['message'];
         _transferStatus = res['status'];
         _isLoading = false;
@@ -295,6 +297,58 @@ class PaystackProvider extends ChangeNotifier {
       _hasError = true;
       _resMessage = e.toString();
       notifyListeners();
+    }
+  }
+
+  //Calculate User Balance aftrer Transfer
+  Future<void> calcUserTotalAmountAfterTransfer(
+      BuildContext context, int initialAmount) async {
+    final userId = await DatabaseProvider().getUserId();
+    // ignore: use_build_context_synchronously
+    final dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
+    int userTotalAmount = initialAmount - _transferAmount;
+    _isLoading = true;
+    notifyListeners();
+
+    String requestbaseUrl = 'https://tictac-production.up.railway.app';
+    String url = '$requestbaseUrl/tictac/coin/$userId/';
+
+    final body = {
+      "balance": userTotalAmount,
+    };
+
+    //.....
+    try {
+      http.Response req = await http.patch(
+        Uri.parse(url),
+        body: json.encode(body),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (req.statusCode == 200) {
+        final res = json.decode(req.body);
+        dbProvider.saveUserCoin(res['balance']);
+
+        _isLoading = false;
+        _hasError = false;
+        notifyListeners();
+      } else {
+        _isLoading = false;
+        _hasError = true;
+        _resMessage = 'Deposit Failed';
+        notifyListeners();
+      }
+    } on SocketException catch (_) {
+      _hasError = true;
+      _resMessage = 'Internet connection is not available';
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      _hasError = true;
+      _resMessage = e.toString();
+      notifyListeners();
+      return Future.error(e.toString());
     }
   }
 }

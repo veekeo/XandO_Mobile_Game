@@ -98,6 +98,7 @@ class _EarnScreenState extends State<EarnScreen> {
                   : context.read<AffliateProvider>().getAffliateUser(),
               builder: (context, snapshot) {
                 return ListView(
+                  physics: ClampingScrollPhysics(),
                   padding: EdgeInsets.zero,
                   scrollDirection: Axis.vertical,
                   children: [

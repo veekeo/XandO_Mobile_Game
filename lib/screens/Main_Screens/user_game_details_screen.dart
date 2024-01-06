@@ -3,7 +3,6 @@ import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:xando/Providers/firestore_service.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/utils/dynamic_links.dart';
 
@@ -18,15 +17,23 @@ class UserGameDetailsScreen extends StatefulWidget {
     required this.gameId,
     required this.username,
     required this.state,
+    required this.idOfGame,
+    required this.receiverId,
+    required this.receiverdeviceToken,
+    required this.receiverAvatar,
   });
 
   final String? stake;
   String potentialWin;
   final String? gameTitle;
+  final String? idOfGame;
   final String? gameId;
   final String? username;
   final bool? isRequested;
   final bool state;
+  final String? receiverId;
+  final String? receiverdeviceToken;
+  final String? receiverAvatar;
 
   @override
   State<UserGameDetailsScreen> createState() => _UserGameDetailsScreenState();
@@ -38,7 +45,7 @@ class _UserGameDetailsScreenState extends State<UserGameDetailsScreen> {
     double sum = 2 * stake;
 
     // Calculate 20% off the sum
-    double discount = 0.20 * sum;
+    double discount = 0.15 * sum;
 
     // Calculate the final discounted value
     double discountedValue = sum - discount;
@@ -225,7 +232,26 @@ class _UserGameDetailsScreenState extends State<UserGameDetailsScreen> {
                   height: 50,
                   onpressed: widget.state
                       ? () {
-                          links.createGameLink(widget.gameId).then((value) {
+                          links
+                              .createGameLink(
+                            potentialWin:
+                                calculateDiscount(double.parse(widget.stake!))
+                                    .toString(),
+                            stake: widget.stake,
+                            state: widget.state,
+                            gameTitle: widget.gameTitle,
+                            gameId: widget.gameId,
+                            idOfgame: widget.idOfGame,
+                            username: widget.username,
+                            senderUsername: '',
+                            senderId: '',
+                            receiverId: widget.receiverId,
+                            receiverDeviceToken: widget.receiverdeviceToken,
+                            senderDeviceToken: '',
+                            senderAvatar: '',
+                            receiverAvatar: widget.receiverAvatar,
+                          )
+                              .then((value) {
                             Share.share(value);
                           });
                         }

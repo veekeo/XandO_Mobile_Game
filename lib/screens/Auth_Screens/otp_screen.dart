@@ -6,7 +6,6 @@ import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Auth_providers/phone_auth_provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
-import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/main_page.dart';
 import 'package:xando/utils/routers.dart';
@@ -244,8 +243,6 @@ class _OTPScreenState extends State<OTPScreen> {
     final dbProvider = context.read<DatabaseProvider>();
     final userId = await dbProvider.getUserId();
 
-    print('id is: ${userId}');
-
     // ignore: use_build_context_synchronously
     ap.verifyOtp(
         context: context,
@@ -258,8 +255,7 @@ class _OTPScreenState extends State<OTPScreen> {
             'devicetoken': _deviceToken,
           }).then((value) {
             if (ap.hasError == true) {
-              print(dbProvider.userId);
-              showErrorSnackBarMessage(
+                          showErrorSnackBarMessage(
                   message: ap.errorCode, context: context, status: true);
             } else {
               PageNavigator(ctx: context).nextPageOnly(page: const MainPage());

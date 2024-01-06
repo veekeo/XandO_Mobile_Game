@@ -169,7 +169,7 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
             shouldUpdateUserState = true;
             hostState = true;
             player2State = true;
-            print('Data: ${snapshot.data?.data()}');
+
             final hostData = snapshot.data?['host'];
             final player2Data = snapshot.data?['player2'];
             gameState = snapshot.data?['state'];
@@ -229,7 +229,6 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
               }
             } else {
               if (isHost) {
-                print('Host is $isHost');
                 final hostGameId = gameData['host']['hostGameId'];
                 final gameNumberId = gameData['host']['gameNumberId'];
                 final player2Id = gameData['player2']['player2Id'];
@@ -363,7 +362,6 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
                   ],
                 );
               } else if (isPlayer2) {
-                print('Player2 is $isPlayer2 and $isHost');
                 final hostGameId = gameData['host']['hostGameId'];
                 final gameNumberId = gameData['host']['gameNumberId'];
                 final player2Id = gameData['player2']['player2Id'];
@@ -502,7 +500,6 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
                   ],
                 );
               } else if (isHost == false && isPlayer2 == false) {
-                print('user id is ${widget.userId} and host id is $hostId');
                 return const NoConnectionWidget(message: 'Reconnecting...');
               }
             }
@@ -589,14 +586,12 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
         () {
           if (exTurn && ohTurn == false) {
             displayExOh[index] = 'assets/images/x_indicator.png';
-            print('Before update: $displayExOh');
           } else if (ohTurn && exTurn == false) {
             displayExOh[index] = 'assets/images/o_indicator.png';
           }
           filledBoxes += 1;
           exTurn = !exTurn;
           ohTurn = !ohTurn;
-          print('After update: $displayExOh');
 
           _checkWinner(
             filledBoxes,
@@ -924,7 +919,6 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
     } else if (filledBoxes == 9) {
       setState(() {
         attempts++;
-        print(attempts);
         stopTimer();
         _showDialog(
           'Draw',

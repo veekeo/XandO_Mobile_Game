@@ -311,7 +311,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     ),
                     controller: otpController,
                     onChanged: (value) {
-                      print(value);
                       setState(() {
                         otpController.text = value;
                       });
@@ -385,7 +384,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       width: 200,
                       height: 55,
                       onpressed: () async {
-                        print(otpController.text);
                         await auth.verifyEmailOTP(otpController).then((value) {
                           if (value == true) {
                             showSuccessSnackBarMessage(

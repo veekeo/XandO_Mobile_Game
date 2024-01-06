@@ -153,7 +153,6 @@ class _EditFirstNameScreenState extends State<EditFirstNameScreen> {
                       height: 55,
                       onpressed: () async {
                         if (_formKey.currentState?.validate() ?? false) {
-                          print(_userId);
                           await editProfile.updateFirstName(context, _userId, {
                             'first_name': _firstNameController.text.trim()
                           }).then((value) {

@@ -4,7 +4,6 @@ import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Auth_providers/affliate_provider.dart';
-import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Game/get_available_games_provider.dart';
 import 'package:xando/XandO/create_a_game.dart';
 import 'package:xando/models/affilaite_user_model.dart';
@@ -23,7 +22,6 @@ class MainPage extends StatefulWidget {
 }
 
 class _MainPageState extends State<MainPage> {
-  late String _userId;
   int currentIndex = 0;
 
   List<Widget> screens = [

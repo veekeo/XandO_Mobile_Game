@@ -3,7 +3,6 @@ import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/Providers/paystack_provider.dart';
 import 'package:xando/models/user_profile_model.dart';
@@ -62,8 +61,19 @@ class _PaystackCheckoutScreenState extends State<PaystackCheckoutScreen> {
                               .then((value) => Navigator.pop(context));
                         });
                       }
+                      if (request.url
+                          .startsWith('https://standard.paystack.co/close')) {
+                        // ignore: use_build_context_synchronously
+                        Navigator.of(context).pop(); //close webview
+                      }
 
                       return NavigationDecision.navigate;
+                    },
+                    onPageFinished: (String url) {
+                      if (url
+                          .startsWith('https://standard.paystack.co/close')) {
+                        Navigator.of(context).pop(); //close webview
+                      }
                     },
                   ),
                 ),

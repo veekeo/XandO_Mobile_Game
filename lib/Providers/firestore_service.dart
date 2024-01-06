@@ -37,7 +37,8 @@ class FireStoreServiceProvider extends ChangeNotifier {
         'receiverDeviceToken': receiverDeviceToken,
         'senderDeviceToken': senderDeviceToken,
         'receiverAvatar': receiverAvatar,
-        'senderAvatar': senderAvatar,
+        'senderAvatar': senderAvatar ??
+            'https://api.multiavatar.com/5b1271f9320afc278a.png',
         'gameID': gameID,
         'gameNumberId': gameNumberId,
         'stake': stake,
@@ -47,7 +48,6 @@ class FireStoreServiceProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
     } catch (e) {
-      print('Error adding game request: $e');
       _isLoading = false;
       notifyListeners();
     }
@@ -69,9 +69,7 @@ class FireStoreServiceProvider extends ChangeNotifier {
       Map<String, dynamic> data =
           documentSnapshot.data() as Map<String, dynamic>;
       return data;
-    } else {
-      print('Document with ID $documentID does not exist.');
-    }
+    } else {}
   }
 
   //update request
@@ -94,8 +92,6 @@ class FireStoreServiceProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
-
-    print('Document with ID $documentID updated successfully.');
   }
 
   // delete request
@@ -116,6 +112,22 @@ class FireStoreServiceProvider extends ChangeNotifier {
   }
 
   //pending requests streams
+  Stream<List<Map<String, dynamic>>> getAllRequestsStreamForUser(
+      String userId) {
+    try {
+      return pendingRequests.snapshots().map(
+        (querySnapshot) {
+          return querySnapshot.docs
+              .map(
+                (doc) => doc.data() as Map<String, dynamic>,
+              )
+              .toList();
+        },
+      );
+    } catch (e) {
+      return Stream.value([]); // Return an empty stream in case of error
+    }
+  }
 
   // Retrieve a real-time stream of requests received by a specific user
   Stream<List<Map<String, dynamic>>> getRequestsStreamForUser(String userId) {
@@ -125,11 +137,12 @@ class FireStoreServiceProvider extends ChangeNotifier {
           .snapshots()
           .map((querySnapshot) {
         return querySnapshot.docs
-            .map((doc) => doc.data() as Map<String, dynamic>)
+            .map(
+              (doc) => doc.data() as Map<String, dynamic>,
+            )
             .toList();
       });
     } catch (e) {
-      print('Error getting requests: $e');
       return Stream.value([]); // Return an empty stream in case of error
     }
   }
@@ -147,7 +160,6 @@ class FireStoreServiceProvider extends ChangeNotifier {
             .toList();
       });
     } catch (e) {
-      print('Error getting requests stream: $e');
       return Stream.value([]); // Return an empty stream in case of error
     }
   }
@@ -185,26 +197,18 @@ class FireStoreServiceProvider extends ChangeNotifier {
           await http.post(url, headers: headers, body: jsonEncode(body));
 
       if (req.statusCode == 200 || req.statusCode == 201) {
-        final res = json.decode(req.body);
-        print(res);
         _isLoading = false;
         notifyListeners();
       } else {
-        final res = json.decode(req.body);
-        print(res);
-        print(req.statusCode);
-        print('hereooooooo');
         _isLoading = false;
         notifyListeners();
       }
     } on SocketException catch (_) {
       _isLoading = false;
       notifyListeners();
-      print('no internet connect');
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      print(e);
     }
   }
 
@@ -263,9 +267,8 @@ class FireStoreServiceProvider extends ChangeNotifier {
         'seconds': seconds,
         'stake': stake,
       });
-      print('Players connected to the game successfully!');
     } catch (e) {
-      print('Error connecting players to the game: $e');
+//
     }
   }
 
@@ -322,8 +325,6 @@ class FireStoreServiceProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
-
-    print('Document with ID $documentID updated successfully.');
   }
 
   // delete game

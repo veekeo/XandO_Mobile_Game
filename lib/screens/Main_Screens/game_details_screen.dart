@@ -10,7 +10,6 @@ import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/Providers/firestore_service.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/components/primary_button_outline.dart';
-import 'package:xando/screens/Finance_Screens/deposit_screen.dart';
 import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/utils/game_requests_enums.dart';
 
@@ -54,12 +53,21 @@ class GameDetailsScreen extends StatefulWidget {
 }
 
 class _GameDetailsScreenState extends State<GameDetailsScreen> {
-  late int _coin;
+  late String _usernameFromRef;
+  late String _idFromRef;
+  late String _deviceTokenFromRef;
+  late String _avatarFromRef;
   _loadUserData() async {
-    int? coin = await DatabaseProvider().getCoin();
+    String? usernameFromRef = await DatabaseProvider().getUserName();
+    String? idfromRef = await DatabaseProvider().getUserId();
+    String? deviceTokenFromRef = await DatabaseProvider().getDeviceToken();
+    String? avatarFromRef = await DatabaseProvider().getUserAvatar();
     if (mounted) {
       setState(() {
-        _coin = coin;
+        _usernameFromRef = usernameFromRef;
+        _idFromRef = idfromRef;
+        _deviceTokenFromRef = deviceTokenFromRef;
+        _avatarFromRef = avatarFromRef;
       });
     }
   }
@@ -67,7 +75,10 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    _coin = 0;
+
+    _usernameFromRef = '';
+    _idFromRef = '';
+    _deviceTokenFromRef = '';
     _loadUserData();
   }
 
@@ -76,7 +87,7 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
     double sum = 2 * stake;
 
     // Calculate 20% off the sum
-    double discount = 0.20 * sum;
+    double discount = 0.15 * sum;
 
     // Calculate the final discounted value
     double discountedValue = sum - discount;
@@ -172,7 +183,9 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
                     ),
                   ),
                   Text(
-                    '${widget.username}',
+                    widget.username == ''
+                        ? _usernameFromRef
+                        : '${widget.username}',
                     style: const TextStyle(
                       fontFamily: 'Medium',
                       fontSize: 14,
@@ -300,17 +313,25 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
                                     .then((value) async {
                                   await firestoreService
                                       .addGameRequest(
-                                    widget.senderId,
+                                    widget.senderId == ''
+                                        ? _idFromRef
+                                        : widget.senderId,
                                     widget.receiverId,
-                                    widget.senderDeviceToken,
+                                    widget.senderDeviceToken == ''
+                                        ? _deviceTokenFromRef
+                                        : widget.senderDeviceToken,
                                     widget.receiverDeviceToken,
                                     widget.username,
                                     widget.gameId,
                                     widget.idOfgame,
                                     widget.stake,
-                                    widget.senderUsername,
+                                    widget.senderUsername == ''
+                                        ? _usernameFromRef
+                                        : widget.senderUsername,
                                     widget.receiverAvatar,
-                                    widget.senderAvatar,
+                                    widget.senderAvatar == ''
+                                        ? _avatarFromRef
+                                        : widget.senderAvatar,
                                     RequestStatus.pending,
                                   )
                                       .then((value) async {
@@ -319,8 +340,10 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
                                       widget.receiverDeviceToken,
                                       'Game Request',
                                       '${widget.username} wants to join your game',
-                                      widget.senderAvatar ??
-                                          'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                      widget.senderAvatar == ''
+                                          ? _avatarFromRef
+                                          : widget.senderAvatar ??
+                                              'https://api.multiavatar.com/5b1271f9320afc278a.png',
                                     )
                                         .then((value) {
                                       Navigator.pop(context);
@@ -336,6 +359,7 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
                                   });
                                 });
                               } else {
+                                // ignore: use_build_context_synchronously
                                 Navigator.pop(context);
                                 _showInsufficientDailog();
                               }
@@ -440,14 +464,18 @@ class _GameDetailsScreenState extends State<GameDetailsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                Container(
-                  width: 35,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 73, 84, 129),
-                    borderRadius: BorderRadius.circular(50),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Container(
+                    width: 35,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 73, 84, 129),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16.0),

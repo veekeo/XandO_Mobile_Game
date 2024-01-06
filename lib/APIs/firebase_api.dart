@@ -6,14 +6,12 @@ class FirebaseApi {
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
 
   Future<void> requestNotificationPermission() async {
-    NotificationSettings settings = await _firebaseMessaging.requestPermission(
+    await _firebaseMessaging.requestPermission(
       alert: true,
       badge: true,
       provisional: false,
       sound: true,
     );
-
-    print('User granted permission: ${settings.authorizationStatus}');
   }
 
   void initializeFirebaseMessaging() async {
@@ -21,11 +19,9 @@ class FirebaseApi {
     String? token = await _firebaseMessaging.getToken();
     DatabaseProvider().saveUserDeviceToken(token);
     saveDeviceTokenAsExternalId(token!);
-    print('FCM Token: $token');
 
     // Handle incoming messages when the app is in the foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      print('Foreground Message: ${message.notification?.body}');
       // Handle the message here
     });
   }
@@ -40,6 +36,5 @@ class FirebaseApi {
 
   Future<void> saveDeviceTokenAsExternalId(String externalId) async {
     await OneSignal.login(externalId);
-    print('this is onesignal $externalId');
   }
 }

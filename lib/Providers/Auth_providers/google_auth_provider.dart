@@ -4,7 +4,6 @@ import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -71,7 +70,6 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
 
         _name = userDetails.displayName;
         _email = userDetails.email;
-        print('Emailllll 000 $_email');
         _uid = userDetails.uid;
         _imageURL = userDetails.photoURL;
         _provider = 'GOOGLE';
@@ -142,9 +140,6 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
       final response = await http.get(Uri.parse(url));
 
       if (response.statusCode == 200) {
-        final user = json.decode(response.body);
-        print(user);
-        print('i have checked user: $user');
         _isLoading = false;
         notifyListeners();
         // User is signed up
@@ -158,13 +153,9 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
         _isLoading = false;
         notifyListeners();
         // Handle other status codes if needed
-        print(
-            'Failed to check user signup status. Status code: ${response.statusCode}');
         return false;
       }
     } catch (e) {
-      // Handle network or other errors
-      print('Error checking user signup status: $e');
       return false;
     }
   }
@@ -177,7 +168,6 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
     final dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
     const String requestbaseUrl = 'https://tictac-production.up.railway.app';
     String url = '$requestbaseUrl/gamer/sign-in';
-    print('i have checked user with email: $_email');
 
     final body = {
       "email": _email,
@@ -192,7 +182,7 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
 
       if (req.statusCode == 200) {
         final data = json.decode(req.body);
-        print('yes we are here: $data');
+
         _isLoading = false;
         notifyListeners();
         //saving to shared pref.
@@ -203,7 +193,7 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
         dbProvider.saveUserlastName(data['user_data']['last_name']);
         dbProvider.saveUserDateOfBirth(data['user_data']['date_of_birth']);
         dbProvider.saveUserCoin(data['user_data']['coin']);
-        print(data);
+
         notifyListeners();
       } else {
         _isLoading = false;
@@ -244,7 +234,7 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
         _isLoading = false;
         notifyListeners();
         final res = json.decode(req.body);
-        print(res);
+
         dbProvider.saveUsername(res['username']);
         dbProvider.saveUserId(res['id']);
         dbProvider.saveUseremail(res['email']);
@@ -253,7 +243,6 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
         dbProvider.saveUserDateOfBirth(res['date_of_birth']);
         // dbProvider.saveUserCoin(res['coin']);
 
-        print('saved user data');
         notifyListeners();
         _isLoading = false;
         _resMessage = 'Account created';

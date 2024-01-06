@@ -1,6 +1,6 @@
-// ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors
-
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/APIs/firebase_api.dart';
 import 'package:xando/Providers/Auth_providers/affliate_provider.dart';
@@ -14,6 +14,7 @@ import 'package:xando/Providers/Game/create_game_provider.dart';
 import 'package:xando/Providers/Game/get_available_games_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/Providers/avatar_provider.dart';
+import 'package:xando/Providers/dependency_injection.dart';
 import 'package:xando/Providers/firestore_service.dart';
 import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/Providers/paystack_provider.dart';
@@ -26,15 +27,20 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  DependencyInjection.init();
   await FirebaseApi().requestNotificationPermission();
   FirebaseApi().initNotif();
   FirebaseApi().initializeFirebaseMessaging();
-  DynamicLinksProvider().initializeDynamicLink();
-  DynamicLinksProvider().initializeGameDynamicLink();
-  runApp(MyApp());
+  runApp(const MyApp());
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
 }
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
@@ -54,15 +60,15 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DynamicLinksProvider()),
         ChangeNotifierProvider(create: (_) => AudioProvider()),
       ],
-      child: MaterialApp(
+      child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'X and O',
         theme: ThemeData.dark().copyWith(
-          primaryColor: Color(0xFF3B4FFE),
-          scaffoldBackgroundColor: Color.fromARGB(255, 0, 7, 38),
-          cardColor: Color.fromARGB(255, 32, 40, 73),
+          primaryColor: const Color(0xFF3B4FFE),
+          scaffoldBackgroundColor: const Color.fromARGB(255, 0, 7, 38),
+          cardColor: const Color.fromARGB(255, 32, 40, 73),
         ),
-        home: SplashScreen(),
+        home: const SplashScreen(),
       ),
     );
   }

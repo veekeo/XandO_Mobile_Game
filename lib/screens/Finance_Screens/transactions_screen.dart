@@ -98,7 +98,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 mainAxisSize: MainAxisSize.max,
                 children: [
                   ListView.builder(itemBuilder: (context, index) {
-                    return WithdrawalsHistory();
+                    return const WithdrawalsHistory();
                   }),
                   Padding(
                     padding: const EdgeInsetsDirectional.fromSTEB(0, 10, 0, 10),

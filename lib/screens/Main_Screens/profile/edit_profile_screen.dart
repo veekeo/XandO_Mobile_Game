@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/components/user_data_button.dart';
 import 'package:xando/models/user_profile_model.dart';
@@ -21,18 +20,13 @@ class EditProfile extends StatefulWidget {
 }
 
 class _EditProfileState extends State<EditProfile> {
-  late UserModel _loadedUsername;
-  late UserModel _firstName;
-  late UserModel _lastName;
   late UserModel _userId;
   late UserModel userIdFromDB;
 
   @override
   void initState() {
     super.initState();
-    _loadedUsername = UserModel();
-    _firstName = UserModel();
-    _lastName = UserModel();
+
     _userId = UserModel();
     userIdFromDB = UserModel();
   }
@@ -40,22 +34,8 @@ class _EditProfileState extends State<EditProfile> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _loadUserData();
+
     _getUserIdfromDB();
-  }
-
-  _loadUserData() async {
-    UserModel username = await EditProfileProvider().getUserProfileData();
-    UserModel firstName = await EditProfileProvider().getUserProfileData();
-    UserModel lastName = await EditProfileProvider().getUserProfileData();
-
-    if (mounted) {
-      setState(() {
-        _loadedUsername = username;
-        _firstName = firstName;
-        _lastName = lastName;
-      });
-    }
   }
 
   _getUserIdfromDB() async {
@@ -223,7 +203,7 @@ class _EditProfileState extends State<EditProfile> {
                               Navigator.push(context,
                                   CupertinoPageRoute(builder: (context) {
                                 return EditUserNameScreen(
-                                  username: _loadedUsername.username!,
+                                  username: snapshot.data!.username!,
                                 );
                               }));
                             },
@@ -236,7 +216,7 @@ class _EditProfileState extends State<EditProfile> {
                               Navigator.push(context,
                                   CupertinoPageRoute(builder: (context) {
                                 return EditFirstNameScreen(
-                                  firstname: _firstName.firstName!,
+                                  firstname: snapshot.data!.firstName!,
                                 );
                               }));
                             },
@@ -249,7 +229,7 @@ class _EditProfileState extends State<EditProfile> {
                               Navigator.push(context,
                                   CupertinoPageRoute(builder: (context) {
                                 return EditLastNameScreen(
-                                  lastname: _lastName.lastName!,
+                                  lastname: snapshot.data!.lastName!,
                                 );
                               }));
                             },

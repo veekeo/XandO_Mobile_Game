@@ -5,7 +5,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:xando/Providers/Database/db_provider.dart';
-import 'package:xando/models/affilaite_user_model.dart';
 import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
 import 'package:xando/screens/Auth_Screens/signin_screen.dart';
 import 'package:xando/utils/routers.dart';
@@ -75,9 +74,6 @@ class AuthenticationProvider extends ChangeNotifier {
         _resMessage = 'Invalid Affliate Code.';
         notifyListeners();
       } else {
-        final res = json.decode(req.body);
-        print(res);
-        print(req.statusCode);
         _resMessage = 'User with this email already exists';
         _isLoading = false;
         notifyListeners();
@@ -132,7 +128,6 @@ class AuthenticationProvider extends ChangeNotifier {
 
       if (req.statusCode == 200 || req.statusCode == 201) {
         final res = json.decode(req.body);
-        print(res);
 
         dbProvider.saveUsername(res['user_data']['username']);
         dbProvider.saveUserId(res['user_data']['id']);
@@ -260,8 +255,6 @@ class AuthenticationProvider extends ChangeNotifier {
           headers: {'Content-Type': 'application/json'});
 
       if (req.statusCode == 200 || req.statusCode == 201) {
-        final res = json.decode(req.body);
-        print(res);
         _isLoading = false;
         _resMessage = 'Password changed!';
         notifyListeners();

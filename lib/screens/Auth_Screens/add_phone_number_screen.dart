@@ -181,10 +181,8 @@ class _AddPhoneNumberScreenState extends State<AddPhoneNumberScreen> {
                         Provider.of<DatabaseProvider>(context, listen: false)
                             .getUserId()
                             .then(
-                          (value) {
-                            print('ID is : $value');
-                          },
-                        );
+                              (value) {},
+                            );
                         sendPhoneNumber();
                       } else {
                         setState(() {

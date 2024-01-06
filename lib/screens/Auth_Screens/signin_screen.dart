@@ -6,10 +6,8 @@ import 'package:provider/provider.dart';
 import 'package:xando/APIs/firebase_api.dart';
 import 'package:xando/Providers/Auth_providers/auth_provider.dart';
 import 'package:xando/Providers/Auth_providers/google_auth_provider.dart';
-import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/components/primary_button.dart';
-import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
 import 'package:xando/screens/Auth_Screens/forgot_password.dart';
 import 'package:xando/screens/Auth_Screens/signup_screen.dart';
 

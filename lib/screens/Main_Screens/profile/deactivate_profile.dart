@@ -5,10 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/components/primary_button.dart';
-import 'package:xando/screens/Auth_Screens/onboarding_screen.dart';
 import 'package:xando/screens/Auth_Screens/signin_screen.dart';
 import 'package:xando/utils/routers.dart';
-import 'package:xando/utils/snackbar_message.dart';
 
 class DeactivateProfileScreen extends StatefulWidget {
   const DeactivateProfileScreen({super.key});

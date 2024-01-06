@@ -23,7 +23,7 @@ final List<BannerPageViewModel> bannerPageViewList = [
   BannerPageViewModel(
     title: 'Leaderboard',
     body:
-        "Quickly join a Tic Tac Toe game, we \nhave a list of available games \nwith options to join.",
+        " Keep an eye out for special weekly \nchallenges that offer bonus points \nand exclusive rewards. ",
     icon: 'assets/images/leaderboard_icon.png',
     backgroundColor: Color(0xFFEB1D64),
     textColor: Colors.white,

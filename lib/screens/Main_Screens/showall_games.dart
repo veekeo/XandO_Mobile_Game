@@ -4,7 +4,6 @@ import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:rive/rive.dart';
-import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Game/get_available_games_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/Providers/firestore_service.dart';
@@ -12,46 +11,32 @@ import 'package:xando/components/game_card.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/components/primary_button_outline.dart';
 import 'package:xando/models/available_games_model.dart';
-import 'package:xando/models/user_profile_model.dart';
 import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/screens/Main_Screens/game_details_screen.dart';
 import 'package:xando/utils/game_requests_enums.dart';
 
-class SearchScreen extends StatefulWidget {
-  const SearchScreen({super.key});
+class ShowAllGames extends StatefulWidget {
+  const ShowAllGames({
+    super.key,
+    required this.filteredGames,
+    required this.senderAvatar,
+    required this.userId,
+    required this.username,
+    required this.deviceToken,
+  });
+
+  final List<AvailableGamesModel> filteredGames;
+  final String senderAvatar;
+  final String userId;
+  final String username;
+  final String deviceToken;
 
   @override
-  State<SearchScreen> createState() => _SearchScreenState();
+  State<ShowAllGames> createState() => _ShowAllGamesState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
-  late String _userId;
-  late String _deviceToken;
-  late String _username;
+class _ShowAllGamesState extends State<ShowAllGames> {
   double potentialWin = 0;
-
-  _loadUserData() async {
-    String? userId = await DatabaseProvider().getUserId();
-    String? deviceToken = await DatabaseProvider().getDeviceToken();
-    String? username = await DatabaseProvider().getUserName();
-
-    if (mounted) {
-      setState(() {
-        _userId = userId;
-        _deviceToken = deviceToken;
-        _username = username;
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _userId = '';
-    _deviceToken = '';
-    _username = '';
-    _loadUserData();
-  }
 
   double calculateDiscount(double stake) {
     // Calculate the sum of the two equal numbers
@@ -79,7 +64,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final getGamesProvider = Provider.of<GetAvailableGamesProvider>(context);
     return Scaffold(
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(120), // Set this height
@@ -92,196 +76,105 @@ class _SearchScreenState extends State<SearchScreen> {
               top: 50,
               bottom: 20,
             ),
-            child: Padding(
-              padding: const EdgeInsetsDirectional.fromSTEB(8, 0, 8, 0),
-              child: SizedBox(
-                width: double.infinity,
-                child: TextFormField(
-                  // controller: _model.textController,
-                  // focusNode: _model.textFieldFocusNode,
-                  onChanged: (query) {
-                    getGamesProvider.searchGamesByQuery(query);
-                  },
-                  autofocus: true,
-                  obscureText: false,
-                  decoration: InputDecoration(
-                    hintText: 'Accounts,Games, Game ID',
-                    hintStyle: FlutterFlowTheme.of(context).bodyMedium.override(
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.chevron_left,
+                    size: 30,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    'All games',
+                    style: FlutterFlowTheme.of(context).bodyMedium.override(
                           fontFamily: 'Plus Jakarta Sans',
-                          fontSize: 14,
-                          color: const Color(0x4DFFFFFF),
-                          fontWeight: FontWeight.normal,
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
                           useGoogleFonts: GoogleFonts.asMap().containsKey(
                               FlutterFlowTheme.of(context).bodyMediumFamily),
                         ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: FlutterFlowTheme.of(context).primary,
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: FlutterFlowTheme.of(context).primary,
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    errorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: FlutterFlowTheme.of(context).error,
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    focusedErrorBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: FlutterFlowTheme.of(context).error,
-                        width: 1,
-                      ),
-                      borderRadius: BorderRadius.circular(5),
-                    ),
-                    contentPadding:
-                        const EdgeInsetsDirectional.fromSTEB(5, 5, 5, 5),
-                    prefixIcon: const Icon(
-                      Icons.search_rounded,
-                      color: Color(0x4DFFFFFF),
-                    ),
-                    suffixIcon: GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12.0, vertical: 14.0),
-                        child: Text(
-                          'Cancel',
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                fontFamily: 'Plus Jakarta Sans',
-                                fontSize: 14,
-                                color: const Color(0xB1FFFFFF),
-                                fontWeight: FontWeight.normal,
-                                useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                    FlutterFlowTheme.of(context)
-                                        .bodyMediumFamily),
-                              ),
-                        ),
-                      ),
-                    ),
                   ),
-                  style: FlutterFlowTheme.of(context).bodyMedium.override(
-                        fontFamily: 'Plus Jakarta Sans',
-                        fontWeight: FontWeight.normal,
-                        useGoogleFonts: GoogleFonts.asMap().containsKey(
-                            FlutterFlowTheme.of(context).bodyMediumFamily),
-                      ),
-                  cursorColor: FlutterFlowTheme.of(context).primary,
-                  // validator: _model.textControllerValidator.asValidator(context),
-                ),
+                ],
               ),
             ),
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 13),
-        child: Column(
-          children: [
-            if (getGamesProvider.isLoading)
-              const Center(
-                child: CircularProgressIndicator(
-                  color: Color(0xFF3B4FFE),
-                ),
-              )
-            else if (getGamesProvider.searchedGames == [])
-              const Text('')
-            else
-              Expanded(
-                child: ListView.builder(
-                  itemBuilder: (context, index) {
-                    List<AvailableGamesModel> filteredGames = getGamesProvider
-                        .searchedGames
-                        .where((game) => game.user?.id != _userId)
-                        .toList();
-
-                    final game = filteredGames.length > index
-                        ? filteredGames[index]
-                        : null;
-
-                    if (game != null) {
-                      return FutureBuilder<UserModel>(
-                          future: EditProfileProvider().getUserProfileData(),
-                          builder: (context, snapshot) {
-                            return GameCard(
-                              onCardTap: () {
-                                Navigator.push(
-                                    context,
-                                    CupertinoPageRoute(
-                                        builder: (context) => GameDetailsScreen(
-                                              idOfgame: game.id.toString(),
-                                              senderAvatar: snapshot
-                                                      .data?.avatar ??
-                                                  'https://api.multiavatar.com/5b1271f9320afc278a.png',
-                                              senderUsername: _username,
-                                              receiverAvatar: game
-                                                      .user?.avatar ??
-                                                  'https://api.multiavatar.com/5b1271f9320afc278a.png',
-                                              receiverDeviceToken:
-                                                  game.user?.deviceToken,
-                                              state: game.state,
-                                              receiverId: game.user?.id,
-                                              senderId: _userId,
-                                              stake: game.stake,
-                                              potentialWin: game.stake!,
-                                              gameTitle: game.title,
-                                              gameId: game.gameId,
-                                              username: game.user?.username,
-                                              senderDeviceToken: _deviceToken,
-                                            )));
-                              },
-                              image: game.user?.avatar ??
-                                  'https://api.multiavatar.com/5b1271f9320afc278a.png',
-                              username: game.user?.username,
-                              price: game.stake,
-                              buttonText: game.state! ? 'Join' : 'Unavailable',
-                              state: game.state!,
-                              onTap: () {
-                                _showCustomDialog(
-                                  context: context,
-                                  stake: game.stake,
-                                  gameId: game.gameId,
-                                  username: game.user?.username,
-                                  receiverId: game.user?.id,
-                                  senderId: _userId,
-                                  senderDeviceToken: _deviceToken,
-                                  receiverDeviceToken: game.user?.deviceToken,
-                                  receiverAvatar: game.user?.avatar ??
-                                      'https://api.multiavatar.com/5b1271f9320afc278a.png',
-                                  senderAvatar: snapshot.data?.avatar ??
-                                      'https://api.multiavatar.com/5b1271f9320afc278a.png',
-                                  senderUsername: _username,
-                                  idOfGame: game.id,
-                                );
-                              },
-                              cardColor: const Color.fromARGB(255, 15, 22, 44),
-                            );
-                          });
-                    } else {
-                      return const Text('');
-                    }
-                  },
-                ),
+      body: SafeArea(
+        child: ListView.builder(
+          itemCount: widget.filteredGames.length,
+          itemBuilder: (context, index) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 13),
+              child: GameCard(
+                onCardTap: () {
+                  Navigator.push(
+                      context,
+                      CupertinoPageRoute(
+                          builder: (context) => GameDetailsScreen(
+                                idOfgame:
+                                    widget.filteredGames[index].id.toString(),
+                                receiverAvatar: widget
+                                        .filteredGames[index].user?.avatar ??
+                                    'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                senderAvatar: widget.senderAvatar,
+                                receiverDeviceToken: widget
+                                    .filteredGames[index].user?.deviceToken,
+                                senderUsername: widget.username,
+                                senderDeviceToken: widget.deviceToken,
+                                state: widget.filteredGames[index].state,
+                                receiverId:
+                                    widget.filteredGames[index].user?.id,
+                                senderId: widget.userId,
+                                stake: widget.filteredGames[index].stake,
+                                potentialWin:
+                                    widget.filteredGames[index].stake!,
+                                gameTitle: widget.filteredGames[index].title,
+                                gameId: widget.filteredGames[index].gameId,
+                                username:
+                                    widget.filteredGames[index].user?.username,
+                              )));
+                },
+                image: widget.filteredGames[index].user?.avatar ??
+                    'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                username: widget.filteredGames[index].user?.username,
+                price: widget.filteredGames[index].stake,
+                buttonText:
+                    widget.filteredGames[index].state! ? 'Join' : 'Unavailble',
+                state: widget.filteredGames[index].state!,
+                onTap: () {
+                  _showCustomDialog(
+                    context: context,
+                    stake: widget.filteredGames[index].stake,
+                    gameId: widget.filteredGames[index].gameId,
+                    idOfGame: widget.filteredGames[index].id,
+                    username: widget.filteredGames[index].user?.username,
+                    receiverId: widget.filteredGames[index].user?.id,
+                    senderId: widget.userId,
+                    senderUsername: widget.username,
+                    senderDeviceToken: widget.deviceToken,
+                    receiverDeviceToken:
+                        widget.filteredGames[index].user?.deviceToken,
+                    receiverAvatar: widget.filteredGames[index].user?.avatar ??
+                        'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                    senderAvatar: widget.senderAvatar,
+                  );
+                },
+                cardColor: const Color.fromARGB(255, 15, 22, 44),
               ),
-          ],
+            );
+          },
         ),
       ),
     );
   }
 
-  void _showInsufficientDailog() {
+  void _showInsufficientDailog(
+    BuildContext context,
+  ) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -306,7 +199,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   ),
                 ),
                 Text(
-                  'There is not enough balance in your \naccount to join this game',
+                  'There is not enough balance in your account to join this game',
                   style: TextStyle(
                       fontFamily: 'Medium',
                       fontSize: 14,
@@ -532,7 +425,7 @@ class _SearchScreenState extends State<SearchScreen> {
                                             .sendNotification(
                                           receiverDeviceToken,
                                           'Game Request',
-                                          '$username wants to join your game',
+                                          '$senderUsername wants to join your game',
                                           senderAvatar,
                                         )
                                             .then((value) {
@@ -551,7 +444,8 @@ class _SearchScreenState extends State<SearchScreen> {
                                   } else {
                                     // ignore: use_build_context_synchronously
                                     Navigator.pop(context);
-                                    _showInsufficientDailog();
+                                    // ignore: use_build_context_synchronously
+                                    _showInsufficientDailog(context);
                                   }
                                 },
                                 isLoading: firestoreService.isLoading,
@@ -588,18 +482,14 @@ class _SearchScreenState extends State<SearchScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Container(
-                    width: 35,
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 73, 84, 129),
-                      borderRadius: BorderRadius.circular(50),
-                    ),
+                Container(
+                  width: 35,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 73, 84, 129),
+                    borderRadius: BorderRadius.circular(50),
                   ),
                 ),
                 const SizedBox(height: 16.0),

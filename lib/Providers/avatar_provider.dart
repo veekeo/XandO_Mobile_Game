@@ -42,7 +42,7 @@ class AvatarProvider extends ChangeNotifier {
 
       if (req.statusCode == 200 || req.statusCode == 201) {
         final res = json.decode(req.body);
-        dbProvider.saveUserImage(res['avatar']);
+        dbProvider.saveUserAvatar(res['avatar']);
         _resMessage = 'Avatar updated successfully';
         _isLoading = false;
         _hasError = false;
@@ -51,8 +51,6 @@ class AvatarProvider extends ChangeNotifier {
         // ignore: use_build_context_synchronously
         Navigator.pop(context);
       } else {
-        final res = json.decode(req.body);
-        print(res);
         _isLoading = false;
         _hasError = true;
         _resMessage = 'Avatar Update Failed';
@@ -67,7 +65,7 @@ class AvatarProvider extends ChangeNotifier {
       _isLoading = false;
       _hasError = true;
       _resMessage = e.toString();
-      print(e.toString());
+
       notifyListeners();
     }
 

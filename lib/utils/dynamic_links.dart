@@ -1,19 +1,51 @@
 import 'package:firebase_dynamic_links/firebase_dynamic_links.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:xando/screens/Auth_Screens/signup_screen.dart';
+import 'package:xando/screens/Main_Screens/game_details_screen.dart';
 
 class DynamicLinksProvider extends ChangeNotifier {
   String _affliateurl = '';
   String _gameUrl = '';
-  String? _gameId = '';
+
   String? _affliateRefCode = '';
   String get gameUrl => _gameUrl;
-  String? get gameId => _gameId;
+
   String get affliateurl => _affliateurl;
   String? get affliateRefCode => _affliateRefCode;
 
+//Game Variables
+  String? _gameId = '';
+  bool? _state = true;
+  String? _stake = '';
+  String? _potentialWin = '';
+  String? _gameTitle = '';
+  String? _idOfgame = '';
+  String? _username = '';
+  String? _senderUsername = '';
+  String? _senderId = '';
+  String? _receiverId = '';
+  String? _receiverDeviceToken = '';
+  String? _receiverAvatar = '';
+  String? _senderAvatar = '';
+  String? _senderDeviceToken = '';
+
+  // String? get gameId => _gameId;
+  // bool? get state => _state;
+  // String? get stake => _stake;
+  // String? get potentialWin => _potentialWin;
+  // String? get gameTitle => _gameTitle;
+  // String? get idOfgame => _idOfgame;
+  // String? get username => _username;
+  // String? get senderUsername => _senderUsername;
+  // String? get senderId => _senderId;
+  // String? get receiverId => _receiverId;
+  // String? get receiverDeviceToken => _receiverDeviceToken;
+  // String? get receiverAvatar => _receiverAvatar;
+  // String? get senderAvatar => _senderAvatar;
+  // String? get senderDeviceToken => _senderDeviceToken;
+
+  final FirebaseDynamicLinks link = FirebaseDynamicLinks.instance;
   Future<String> createLink(String? refCode) async {
     final String url = "https://xando.app?ref=$refCode";
     _affliateurl = url;
@@ -25,6 +57,12 @@ class DynamicLinksProvider extends ChangeNotifier {
             packageName: "xando.app", minimumVersion: 21),
         iosParameters:
             const IOSParameters(bundleId: "xando.app", minimumVersion: "0"),
+        socialMetaTagParameters: SocialMetaTagParameters(
+            title: 'Join the Ultimate XandO Showdown!',
+            description:
+                'join our Tic Tac Toe game now and challenge friends or foes. Claim victory, win, and let the games begin!',
+            imageUrl: Uri.parse(
+                'https://res.cloudinary.com/dbofcawb1/image/upload/v1704439011/social_tag_azyrpv.png')),
         link: Uri.parse(url),
         uriPrefix: 'https://xandoanimationhub.page.link');
 
@@ -34,10 +72,38 @@ class DynamicLinksProvider extends ChangeNotifier {
   }
 
   //Game Sharing
-  Future<String> createGameLink(String? gameId) async {
+  Future<String> createGameLink({
+    String? stake,
+    required String potentialWin,
+    String? gameTitle,
+    String? gameId,
+    String? idOfgame,
+    String? username,
+    String? senderUsername,
+    String? senderId,
+    String? receiverId,
+    bool? state,
+    String? receiverDeviceToken,
+    String? senderDeviceToken,
+    String? senderAvatar,
+    String? receiverAvatar,
+  }) async {
     final String url = "https://xando.app?game=$gameId";
     _gameUrl = url;
     _gameId = gameId;
+    _stake = stake;
+    _potentialWin = potentialWin;
+    _gameTitle = gameTitle;
+    _idOfgame = idOfgame;
+    _username = username;
+    _senderUsername = senderUsername;
+    _senderId = senderId;
+    _receiverId = receiverId;
+    _state = state;
+    _receiverDeviceToken = receiverDeviceToken;
+    _senderDeviceToken = senderDeviceToken;
+    _senderAvatar = senderAvatar;
+    _receiverAvatar = receiverAvatar;
     notifyListeners();
 
     final DynamicLinkParameters parameters = DynamicLinkParameters(
@@ -45,43 +111,130 @@ class DynamicLinksProvider extends ChangeNotifier {
             packageName: "xando.app", minimumVersion: 21),
         iosParameters:
             const IOSParameters(bundleId: "xando.app", minimumVersion: "0"),
+        socialMetaTagParameters: SocialMetaTagParameters(
+            title: 'Join the Ultimate XandO Showdown!',
+            description:
+                'join our Tic Tac Toe game now and challenge friends or foes. Claim victory, win, and let the games begin!',
+            imageUrl: Uri.parse(
+                'https://res.cloudinary.com/dbofcawb1/image/upload/v1704439011/social_tag_azyrpv.png')),
         link: Uri.parse(url),
         uriPrefix: 'https://xandoanimationhub.page.link');
 
-    final FirebaseDynamicLinks link = FirebaseDynamicLinks.instance;
     final gameLink = await link.buildShortLink(parameters);
     return gameLink.shortUrl.toString();
   }
 
-  ///initialize dynamic link
-  Future<bool?> initializeGameDynamicLink() async {
-    final instanceLink = await FirebaseDynamicLinks.instance.getInitialLink();
-
-    if (instanceLink != null) {
-      final Uri gameLink = instanceLink.link;
-
-      if (gameLink.queryParameters.containsKey('game')) {
-        return true;
+  Future<void> initRefDynamicLink(BuildContext context) async {
+    link.onLink.listen((PendingDynamicLinkData dynamicLinkData) {
+      final Uri deepLink = dynamicLinkData.link;
+      var isReferral = deepLink.pathSegments.contains('ref');
+      if (isReferral) {
+        if (deepLink.toString().isNotEmpty) {
+          try {
+            Navigator.push(context,
+                CupertinoPageRoute(builder: (context) => const SignUpScreen()));
+          } catch (e) {
+            debugPrint(e.toString());
+          }
+        } else {
+          return;
+        }
       }
-    }
+    });
 
-    // If none of the conditions above are met, return null
-    return null;
+    await link.getInitialLink().then(
+      (PendingDynamicLinkData? data) {
+        final Uri? deepLink = data?.link;
+        var isReferral = deepLink?.pathSegments.contains('ref');
+        if (isReferral == true) {
+          if (deepLink.toString().isNotEmpty) {
+            try {
+              Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) => const SignUpScreen()));
+            } catch (e) {
+              debugPrint(e.toString());
+            }
+          } else {
+            return;
+          }
+        }
+      },
+    );
   }
 
-  Future<bool?> initializeDynamicLink() async {
-    final instanceLink = await FirebaseDynamicLinks.instance.getInitialLink();
-
-    if (instanceLink != null) {
-      final Uri refLink = instanceLink.link;
-
-      if (refLink.queryParameters.containsKey('ref')) {
-        return true;
+  // ///initialize dynamic link
+  Future<void> initgameDynamicLink(BuildContext context) async {
+    link.onLink.listen((PendingDynamicLinkData dynamicLinkData) {
+      final Uri deepLink = dynamicLinkData.link;
+      var isReferral = deepLink.pathSegments.contains('game');
+      if (isReferral) {
+        if (deepLink.toString().isNotEmpty) {
+          try {
+            Navigator.push(
+                context,
+                CupertinoPageRoute(
+                    builder: (context) => GameDetailsScreen(
+                          state: _state,
+                          stake: _stake,
+                          potentialWin: _potentialWin!,
+                          gameTitle: _gameTitle,
+                          gameId: _gameId,
+                          idOfgame: _idOfgame,
+                          username: _username,
+                          senderUsername: _senderUsername,
+                          senderId: _senderId,
+                          receiverId: _receiverId,
+                          receiverDeviceToken: _receiverDeviceToken,
+                          receiverAvatar: _receiverAvatar,
+                          senderAvatar: _senderAvatar,
+                          senderDeviceToken: _senderDeviceToken,
+                        )));
+          } catch (e) {
+            debugPrint(e.toString());
+          }
+        } else {
+          return;
+        }
       }
-    }
+    });
 
-    // If none of the conditions above are met, return null
-    return null;
+    await link.getInitialLink().then(
+      (PendingDynamicLinkData? data) {
+        final Uri? deepLink = data?.link;
+        var isReferral = deepLink?.pathSegments.contains('game');
+        if (isReferral == true) {
+          if (deepLink.toString().isNotEmpty) {
+            try {
+              Navigator.push(
+                  context,
+                  CupertinoPageRoute(
+                      builder: (context) => GameDetailsScreen(
+                            state: _state,
+                            stake: _stake,
+                            potentialWin: _potentialWin!,
+                            gameTitle: _gameTitle,
+                            gameId: _gameId,
+                            idOfgame: _idOfgame,
+                            username: _username,
+                            senderUsername: _senderUsername,
+                            senderId: _senderId,
+                            receiverId: _receiverId,
+                            receiverDeviceToken: _receiverDeviceToken,
+                            receiverAvatar: _receiverAvatar,
+                            senderAvatar: _senderAvatar,
+                            senderDeviceToken: _senderDeviceToken,
+                          )));
+            } catch (e) {
+              debugPrint(e.toString());
+            }
+          } else {
+            return;
+          }
+        }
+      },
+    );
   }
 
   void shareOnSocialMedia(String link, String platform) async {

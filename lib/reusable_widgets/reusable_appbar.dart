@@ -2,14 +2,14 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
+import 'package:xando/Providers/firestore_service.dart';
 import 'package:xando/components/profile_avatar_screen.dart';
 import 'package:xando/models/user_profile_model.dart';
 import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/screens/Main_Screens/game_requests.dart';
 import 'package:xando/screens/Main_Screens/notifications_screen.dart';
-
+import 'package:badges/badges.dart' as badges;
 import 'package:xando/screens/Main_Screens/profile/profile_screen.dart';
 import 'package:xando/screens/Main_Screens/search_screen.dart';
 
@@ -17,30 +17,19 @@ import 'package:xando/screens/Main_Screens/search_screen.dart';
 class ReusableAppBar extends StatefulWidget {
   ReusableAppBar({
     required this.coin,
+    required this.userId,
     super.key,
   });
 
   int coin;
+  String userId;
 
   @override
   State<ReusableAppBar> createState() => _ReusableAppBarState();
 }
 
 class _ReusableAppBarState extends State<ReusableAppBar> {
-  @override
-  void initState() {
-    super.initState();
-
-    widget.coin = 0;
-    _loadUserData();
-  }
-
-  _loadUserData() async {
-    int? coin = await DatabaseProvider().getCoin();
-    setState(() {
-      widget.coin = coin;
-    });
-  }
+  bool isDataAvailable = false;
 
   @override
   Widget build(BuildContext context) {
@@ -79,14 +68,69 @@ class _ReusableAppBarState extends State<ReusableAppBar> {
                   runAlignment: WrapAlignment.center,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.push(context,
-                            CupertinoPageRoute(builder: (contect) {
-                          return const GameRequestsScreen();
-                        }));
+                    StreamBuilder<List<Map<String, dynamic>>>(
+                      stream: FireStoreServiceProvider()
+                          .getAllRequestsStreamForUser(widget.userId),
+                      builder: (context,
+                          AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
+                        if (snapshot.hasError) {
+                          return IconButton(
+                            onPressed: () {
+                              Navigator.push(context,
+                                  CupertinoPageRoute(builder: (contect) {
+                                return const GameRequestsScreen();
+                              }));
+                            },
+                            icon: const Icon(Icons.people),
+                          );
+                        } else if (snapshot.data?.isEmpty ?? true) {
+                          return IconButton(
+                            onPressed: () {
+                              Navigator.push(context,
+                                  CupertinoPageRoute(builder: (contect) {
+                                return const GameRequestsScreen();
+                              }));
+                            },
+                            icon: const Icon(Icons.people),
+                          );
+                        } else {
+                          isDataAvailable = true;
+                          List<Map<String, dynamic>> requests =
+                              snapshot.data ?? [];
+                          return badges.Badge(
+                            position:
+                                badges.BadgePosition.topEnd(top: 5, end: 5),
+                            showBadge: true,
+                            badgeContent: Text(
+                              requests.length.toString(),
+                              style: const TextStyle(
+                                fontFamily: 'Medium',
+                                fontSize: 7,
+                              ),
+                            ),
+                            badgeAnimation: const badges.BadgeAnimation.scale(
+                              animationDuration: Duration(seconds: 1),
+                              loopAnimation: false,
+                              curve: Curves.fastOutSlowIn,
+                            ),
+                            badgeStyle: const badges.BadgeStyle(
+                              shape: badges.BadgeShape.circle,
+                              badgeColor: Color(0xFF3B4FFE),
+                              padding: EdgeInsets.all(5),
+                              elevation: 0,
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                Navigator.push(context,
+                                    CupertinoPageRoute(builder: (contect) {
+                                  return const GameRequestsScreen();
+                                }));
+                              },
+                              icon: const Icon(Icons.people),
+                            ),
+                          );
+                        }
                       },
-                      icon: const Icon(Icons.people),
                     ),
                     Container(
                       width: 125,
@@ -111,30 +155,31 @@ class _ReusableAppBarState extends State<ReusableAppBar> {
                             ),
                           ),
                           Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  2, 0, 0, 0),
-                              child: FutureBuilder<UserModel>(
-                                future:
-                                    EditProfileProvider().getUserProfileData(),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasData) {
-                                    return Text(
-                                      snapshot.data!.gamedata?.coin == null
-                                          ? '0'
-                                          : '${snapshot.data!.gamedata!.coin}',
-                                      style: const TextStyle(
-                                        fontFamily: 'Medium',
-                                        fontSize: 12,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    );
-                                  } else {
-                                    return const Text('0');
-                                  }
+                            padding: const EdgeInsetsDirectional.fromSTEB(
+                                2, 0, 0, 0),
+                            child: FutureBuilder<UserModel>(
+                              future:
+                                  EditProfileProvider().getUserProfileData(),
+                              builder: (context, snapshot) {
+                                if (snapshot.hasData) {
+                                  return Text(
+                                    snapshot.data!.gamedata?.coin == null
+                                        ? widget.coin.toString()
+                                        : '${snapshot.data!.gamedata!.coin}',
+                                    style: const TextStyle(
+                                      fontFamily: 'Medium',
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  );
+                                } else {
+                                  return const Text('0');
+                                }
 
-                                  // Rest of the code for displaying data
-                                },
-                              )),
+                                // Rest of the code for displaying data
+                              },
+                            ),
+                          ),
                           // const Icon(
                           //   Icons.keyboard_arrow_down,
                           // ),

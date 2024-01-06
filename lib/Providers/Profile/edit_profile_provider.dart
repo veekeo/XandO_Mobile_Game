@@ -6,8 +6,6 @@ import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/models/user_profile_model.dart';
-import 'package:xando/screens/Auth_Screens/signin_screen.dart';
-import 'package:xando/utils/routers.dart';
 
 class EditProfileProvider extends ChangeNotifier {
   bool _hasError = false;
@@ -48,8 +46,6 @@ class EditProfileProvider extends ChangeNotifier {
         // ignore: use_build_context_synchronously
         Navigator.pop(context);
       } else {
-        final res = json.decode(req.body);
-        print(res);
         _isLoading = false;
         _hasError = true;
         _resMessage = 'Update Failed';
@@ -95,8 +91,6 @@ class EditProfileProvider extends ChangeNotifier {
         // ignore: use_build_context_synchronously
         Navigator.pop(context);
       } else {
-        final res = json.decode(req.body);
-        print(res);
         _isLoading = false;
         _hasError = true;
         _resMessage = 'Update Failed';
@@ -220,8 +214,6 @@ class EditProfileProvider extends ChangeNotifier {
       );
 
       if (req.statusCode == 200) {
-        final res = json.decode(req.body);
-        print(res);
         _hasError = false;
         notifyListeners();
       } else {

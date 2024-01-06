@@ -13,7 +13,6 @@ import 'package:xando/Providers/Game/create_game_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/components/primary_button_outline.dart';
-import 'package:xando/screens/Finance_Screens/deposit_screen.dart';
 import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/utils/dynamic_links.dart';
 import 'package:xando/utils/snackbar_message.dart';
@@ -31,23 +30,10 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
   final TextEditingController _gameTitleController = TextEditingController();
   final TextEditingController _amountController = TextEditingController();
   double _stake = 0;
-  var userBalance;
-
-  late int _coin;
-  _loadUserData() async {
-    int? coin = await DatabaseProvider().getCoin();
-    if (mounted) {
-      setState(() {
-        _coin = coin;
-      });
-    }
-  }
 
   @override
   void initState() {
     super.initState();
-    _coin = 0;
-    _loadUserData();
   }
 
   bool _checkifUserBalanceIsSufficient(int balance, int stake) {
@@ -371,7 +357,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                           false) {
                                         final userId = await DatabaseProvider()
                                             .getUserId();
-                                        print(userId);
+
                                         final profileCoinProvider =
                                             context.read<EditProfileProvider>();
                                         var userProfileData =
@@ -543,14 +529,17 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Container(
-                  width: 35,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 73, 84, 129),
-                    borderRadius: BorderRadius.circular(50),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Container(
+                    width: 35,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 73, 84, 129),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16.0),
@@ -653,7 +642,27 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                         width: 140,
                         height: 50,
                         onpressed: () {
-                          link.createGameLink(gameId).then((value) {
+                          final gameProvider = Provider.of<CreateGameProvider>(
+                              context,
+                              listen: false);
+                          link
+                              .createGameLink(
+                            potentialWin: potentialWin,
+                            stake: stake,
+                            state: gameProvider.state,
+                            gameTitle: _gameTitleController.text,
+                            gameId: gameProvider.gameId,
+                            idOfgame: gameProvider.idOfGame.toString(),
+                            username: gameProvider.username,
+                            senderUsername: '',
+                            senderId: '',
+                            receiverId: gameProvider.userId,
+                            receiverDeviceToken: gameProvider.userDeviceToken,
+                            senderDeviceToken: '',
+                            senderAvatar: '',
+                            receiverAvatar: gameProvider.userAvatar,
+                          )
+                              .then((value) {
                             Share.share(value);
                           });
                         },

@@ -12,7 +12,7 @@ class DatabaseProvider extends ChangeNotifier {
   String _contact = '';
   String _firstName = '';
   String _lastName = '';
-  String _imageURL = '';
+  String _avatar = '';
   String _dateOfBirth = '';
   String _deviceToken = '';
   bool? _rememberUser = false;
@@ -24,7 +24,7 @@ class DatabaseProvider extends ChangeNotifier {
   int get coin => _coin;
   String get firstName => _firstName;
   String get lastName => _lastName;
-  String get imageURL => _imageURL;
+  String get avatar => _avatar;
   String get dateOfBirth => _dateOfBirth;
   bool? get rememberUser => _rememberUser;
   String get deviceToken => _deviceToken;
@@ -66,10 +66,10 @@ class DatabaseProvider extends ChangeNotifier {
   }
 
   //.
-  void saveUsercontact(String? contact) async {
+  void saveUsercontact(String contact) async {
     SharedPreferences value = await _pref;
 
-    value.setString('contact', contact!);
+    value.setString('contact', contact);
   }
   //.
 
@@ -80,17 +80,17 @@ class DatabaseProvider extends ChangeNotifier {
   }
   //.
 
-  Future saveUserCoin(int? coin) async {
+  Future saveUserCoin(int coin) async {
     SharedPreferences value = await _pref;
 
-    value.setInt('coin', coin!);
+    value.setInt('coin', coin);
   }
 
   //.
-  void saveUserImage(String? imageURL) async {
+  void saveUserAvatar(String? avatar) async {
     SharedPreferences value = await _pref;
 
-    value.setString('imageURL', imageURL!);
+    value.setString('avatar', avatar!);
   }
 
   //.
@@ -228,16 +228,16 @@ class DatabaseProvider extends ChangeNotifier {
     }
   }
 
-  Future<String> getUserImage() async {
+  Future<String> getUserAvatar() async {
     SharedPreferences value = await _pref;
 
-    if (value.containsKey('imageURL')) {
-      String data = value.getString('imageURL')!;
-      _imageURL = data;
+    if (value.containsKey('avatar')) {
+      String data = value.getString('avatar')!;
+      _avatar = data;
       notifyListeners();
       return data;
     } else {
-      _imageURL = '';
+      _avatar = '';
       notifyListeners();
       return '';
     }

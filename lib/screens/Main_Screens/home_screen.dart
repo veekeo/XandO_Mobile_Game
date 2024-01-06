@@ -6,11 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
-import 'package:xando/Providers/Database/db_provider.dart';
+import 'package:xando/Providers/Auth_providers/affliate_provider.dart';
 import 'package:xando/Providers/Game/get_available_games_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/Providers/firestore_service.dart';
-import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/XandO/create_a_game.dart';
 import 'package:xando/components/game_card.dart';
 import 'package:xando/components/primary_button.dart';
@@ -22,8 +21,8 @@ import 'package:xando/reusable_widgets/banner_pageview.dart';
 import 'package:xando/reusable_widgets/reusable_appbar.dart';
 import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/screens/Main_Screens/game_details_screen.dart';
+import 'package:xando/screens/Main_Screens/showall_games.dart';
 import 'package:xando/utils/game_requests_enums.dart';
-import 'package:xando/utils/snackbar_message.dart';
 import 'package:rive/rive.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -38,38 +37,37 @@ class _HomeScreenState extends State<HomeScreen> {
   final StreamController<List<AvailableGamesModel>> _streamController =
       StreamController.broadcast();
 
-  late int _coin;
+  int _coin = 0;
   late HomePageModel _model;
   late Timer _timer;
-  late String _userId;
-  late String _username;
-  late String _deviceToken;
+  String _userId = '';
+  String _username = '';
+  String _deviceToken = '';
+  String _userAvatar = 'https://api.multiavatar.com/5b1271f9320afc278a.png';
   double potentialWin = 0;
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   _loadUserData() async {
-    int? coin = await DatabaseProvider().getCoin();
-    String? userId = await DatabaseProvider().getUserId();
-    String? deviceToken = await DatabaseProvider().getDeviceToken();
-    String? username = await DatabaseProvider().getUserName();
-    if (mounted) {
-      setState(() {
-        _userId = userId;
-        _coin = coin;
-        _deviceToken = deviceToken;
-        _username = username;
-      });
-    }
+    final profile = context.read<AffliateProvider>();
+
+    await profile.getUserProfileDataForHomeScreen().then((value) {
+      if (mounted) {
+        setState(() {
+          _coin = value.gamedata!.coin;
+          _deviceToken = value.deviceToken!;
+          _userId = value.id!;
+          _username = value.username!;
+          _userAvatar = value.avatar!;
+        });
+      }
+    });
   }
 
   @override
   void initState() {
     super.initState();
-    _userId = '';
-    _deviceToken = '';
-    _username = '';
-    _coin = 0;
+
     _loadUserData();
     _model = createModel(context, () => HomePageModel());
 
@@ -93,39 +91,15 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> getAvailableGames() async {
     final getGames = context.read<GetAvailableGamesProvider>();
-    final internetProvider = context.read<InternetProvider>();
-    await internetProvider.checkInternetConnection();
 
-    if (internetProvider.hasInternet == false) {
-      // ignore: use_build_context_synchronously
-      showErrorSnackBarMessage(
-        message: 'Internet connection not available.',
-        context: context,
-        status: false,
-      );
-    } else {
-      await getGames.getAvailableGames().then((value) {
-        if (getGames.hasError == true) {
-          // showErrorSnackBarMessage(
-          //   message: getGames.resMessage,
-          //   context: context,
-          //   status: false,
-          // );
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                getGames.resMessage,
-              ),
-              backgroundColor: Colors.red,
-            ),
-          );
-        } else {
-          setState(() {
-            _streamController.sink.add(getGames.availableGames);
-          });
-        }
-      });
-    }
+    await getGames.getAvailableGames().then((value) {
+      if (getGames.hasError == true) {
+      } else {
+        setState(() {
+          _streamController.sink.add(getGames.availableGames);
+        });
+      }
+    });
   }
 
   double calculateDiscount(double stake) {
@@ -173,9 +147,11 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: PreferredSize(
             preferredSize: const Size.fromHeight(144), // Set this height
             child: ReusableAppBar(
+              userId: _userId,
               coin: _coin,
             )),
         body: CustomScrollView(
+          physics: const ClampingScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(
               child: SizedBox(
@@ -238,20 +214,36 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                             filteredGames.length > 10
-                                ? Text(
-                                    'Show(${filteredGames.length})',
-                                    style: FlutterFlowTheme.of(context)
-                                        .bodyMedium
-                                        .override(
-                                          fontFamily: 'Plus Jakarta Sans',
-                                          color: const Color(0xFFB1B1B1),
-                                          fontSize: 11,
-                                          fontWeight: FontWeight.bold,
-                                          useGoogleFonts: GoogleFonts.asMap()
-                                              .containsKey(
-                                                  FlutterFlowTheme.of(context)
-                                                      .bodyMediumFamily),
-                                        ),
+                                ? GestureDetector(
+                                    onTap: () {
+                                      Navigator.push(
+                                          context,
+                                          CupertinoPageRoute(
+                                              builder: (context) =>
+                                                  ShowAllGames(
+                                                    filteredGames:
+                                                        filteredGames,
+                                                    senderAvatar: _userAvatar,
+                                                    userId: _userId,
+                                                    username: _username,
+                                                    deviceToken: _deviceToken,
+                                                  )));
+                                    },
+                                    child: Text(
+                                      'Show All (${filteredGames.length})',
+                                      style: FlutterFlowTheme.of(context)
+                                          .bodyMedium
+                                          .override(
+                                            fontFamily: 'Plus Jakarta Sans',
+                                            color: const Color(0xFFB1B1B1),
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.bold,
+                                            useGoogleFonts: GoogleFonts.asMap()
+                                                .containsKey(
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMediumFamily),
+                                          ),
+                                    ),
                                   )
                                 : const Text(''),
                           ],
@@ -721,6 +713,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                       });
                                     });
                                   } else {
+                                    // ignore: use_build_context_synchronously
                                     Navigator.pop(context);
                                     _showInsufficientDailog();
                                   }
@@ -759,14 +752,18 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 const SizedBox(height: 10),
-                Container(
-                  width: 35,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: const Color.fromARGB(255, 73, 84, 129),
-                    borderRadius: BorderRadius.circular(50),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Container(
+                    width: 35,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: const Color.fromARGB(255, 73, 84, 129),
+                      borderRadius: BorderRadius.circular(50),
+                    ),
                   ),
                 ),
                 const SizedBox(height: 16.0),

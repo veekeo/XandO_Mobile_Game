@@ -5,16 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
 import 'package:xando/models/user_profile_model.dart';
 import 'package:xando/reusable_widgets/sections/profile_feature.dart';
 import 'package:xando/screens/Auth_Screens/onboarding_screen.dart';
-import 'package:xando/screens/Auth_Screens/signin_screen.dart';
-import 'package:xando/screens/Finance_Screens/transactions_screen.dart';
 import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/screens/Main_Screens/earn_screen.dart';
-import 'package:xando/screens/Main_Screens/game_screen.dart';
 import 'package:xando/screens/Main_Screens/profile/edit_profile_screen.dart';
 import 'package:xando/utils/routers.dart';
 import 'package:xando/utils/snackbar_message.dart';
@@ -30,6 +28,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late String _loadedUsername;
   late int _coin;
 
+  bool viewBalance = false;
+  final String hideBalanceText = '****';
   @override
   void initState() {
     super.initState();
@@ -222,18 +222,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             } else if (snapshot.hasData) {
                               if (snapshot.data != null &&
                                   snapshot.data!.gamedata != null) {
-                                return UserCoinBalanceTextWidget(
-                                    coin: snapshot.data!.gamedata!.coin);
+                                if (viewBalance) {
+                                  return UserCoinBalanceTextWidget(
+                                    coin: snapshot.data!.gamedata!.coin,
+                                  );
+                                } else {
+                                  return Text(
+                                    hideBalanceText,
+                                    style: TextStyle(
+                                      fontFamily: 'Bold',
+                                      fontSize: 18,
+                                    ),
+                                  );
+                                }
                               } else {
                                 return UserCoinBalanceTextWidget(coin: _coin);
                               }
                             }
                             return UserCoinBalanceTextWidget(coin: _coin);
                           }),
-                      Icon(
-                        Icons.remove_red_eye_outlined,
-                        color: Color(0xB5FFFFFF),
-                        size: 20,
+                      const SizedBox(width: 5),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            viewBalance = !viewBalance;
+                          });
+                        },
+                        child: Icon(
+                          viewBalance
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: Color(0xB5FFFFFF),
+                          size: 20,
+                        ),
                       ),
                     ],
                   ),
@@ -348,7 +369,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
                 divider(),
                 ProfileFeature(
-                  onTap: () {},
+                  onTap: () {
+                    launchWhatsApp();
+                  },
                   icon: Icons.wechat_outlined,
                   feature: 'Live Support',
                   rightSide: Icon(
@@ -400,6 +423,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  }
+
+  void launchWhatsApp() async {
+    const phoneNumber =
+        '+2347052075318'; // Replace with the actual WhatsApp number
+    const url = 'https://wa.me/$phoneNumber';
+
+    if (await canLaunchUrl(Uri.parse(url))) {
+      await launchUrl(Uri.parse(url));
+    } else {
+      throw 'Could not launch ${Uri.parse(url)}';
+    }
   }
 
   Container divider() {

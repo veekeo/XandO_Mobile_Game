@@ -93,7 +93,7 @@ class _UserRequestsState extends State<UserRequests> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      widget.gameID,
+                      'Game ID: ${widget.gameID}',
                       style: TextStyle(
                         fontFamily: 'Medium',
                         fontSize: 12,
@@ -101,7 +101,7 @@ class _UserRequestsState extends State<UserRequests> {
                       ),
                     ),
                     Text(
-                      widget.stake,
+                      'Stake: ${widget.stake}',
                       style: TextStyle(
                         fontFamily: 'Medium',
                         fontSize: 12,

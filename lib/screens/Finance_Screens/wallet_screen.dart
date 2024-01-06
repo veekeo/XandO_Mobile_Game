@@ -1,11 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/components/tabs.dart';
 import 'package:xando/screens/Finance_Screens/deposit_screen.dart';
-import 'package:xando/screens/Finance_Screens/transactions_screen.dart';
 import 'package:xando/screens/Finance_Screens/withdraw.dart';
 
 class WalletScreen extends StatefulWidget {

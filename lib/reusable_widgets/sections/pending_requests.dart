@@ -8,7 +8,6 @@ import 'package:xando/XandO/game_loading_screen.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/components/primary_button_outline.dart';
 import 'package:xando/utils/game_requests_enums.dart';
-import 'package:xando/utils/routers.dart';
 
 class PendingRequests extends StatefulWidget {
   const PendingRequests({
@@ -100,7 +99,7 @@ class _PendingRequestsState extends State<PendingRequests> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        widget.gameID,
+                        'Game ID: ${widget.gameID}',
                         style: TextStyle(
                           fontFamily: 'Medium',
                           fontSize: 12,
@@ -108,7 +107,7 @@ class _PendingRequestsState extends State<PendingRequests> {
                         ),
                       ),
                       Text(
-                        widget.stake,
+                        'Stake: ${widget.stake}',
                         style: TextStyle(
                           fontFamily: 'Medium',
                           fontSize: 12,

@@ -99,12 +99,10 @@ class _AvatarScreenState extends State<AvatarScreen> {
                         isSelected: avatar.avatars[index].isSelected,
                         selectedColor: avatar.avatars[index].selectedColor,
                         onPressed: () {
-                          print('user id: $_userId');
                           avatar
                               .updateColor(
                                   context, _userId, avatar.avatars[index])
                               .then((value) {
-                            print(_userId);
                             if (avatar.hasError == true) {
                               showErrorSnackBarMessage(
                                 message: avatar.resMessage,

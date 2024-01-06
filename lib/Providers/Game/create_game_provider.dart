@@ -11,17 +11,27 @@ class CreateGameProvider extends ChangeNotifier {
   bool _isLoading = false;
   bool _hasError = false;
   double _potentialWin = 0;
-  int _gameId = 0;
+  int _idOfGame = 0;
+  String _gameId = '';
   String _stake = '';
   String _username = '';
+  bool _state = true;
+  String _userId = '';
+  String _userAvatar = '';
+  String _userDeviceToken = '';
 
   bool get hasError => _hasError;
+  bool get state => _state;
   bool get isLoading => _isLoading;
   String get resMessage => _resMessage;
   double get potentialWin => _potentialWin;
-  int get gameId => _gameId;
+  String get gameId => _gameId;
   String get stake => _stake;
   String get username => _username;
+  int get idOfGame => _idOfGame;
+  String get userId => _userId;
+  String get userAvatar => _userAvatar;
+  String get userDeviceToken => _userDeviceToken;
 
   Future<void> createGame(
     BuildContext context,
@@ -49,10 +59,15 @@ class CreateGameProvider extends ChangeNotifier {
 
       if (req.statusCode == 200 || req.statusCode == 201) {
         final res = json.decode(req.body);
-        print(res);
-        _gameId = res['id'];
+
+        _idOfGame = res['id'];
+        _state = res['state'];
+        _gameId = res['game_id'];
         _stake = res['stake'];
         _username = res['user']['username'];
+        _userId = res['user']['id'];
+        _userAvatar = res['user']['avatar'];
+        _userDeviceToken = res['user']['devicetoken'];
         _resMessage = 'Game created successfully';
         _hasError = false;
         _isLoading = false;
@@ -145,8 +160,7 @@ class CreateGameProvider extends ChangeNotifier {
       if (req.statusCode == 200) {
         final res = json.decode(req.body);
         dbProvider.saveUserCoin(res['balance']);
-        print(res);
-        print('User balance Updated successfully');
+
         _isLoading = false;
         _hasError = false;
         notifyListeners();
@@ -197,8 +211,7 @@ class CreateGameProvider extends ChangeNotifier {
       if (req.statusCode == 200) {
         final res = json.decode(req.body);
         dbProvider.saveUserCoin(res['balance']);
-        print(res);
-        print('User balance Updated successfully');
+
         _isLoading = false;
         _hasError = false;
         notifyListeners();
@@ -249,8 +262,7 @@ class CreateGameProvider extends ChangeNotifier {
       if (req.statusCode == 200) {
         final res = json.decode(req.body);
         dbProvider.saveUserCoin(res['balance']);
-        print(res);
-        print('User balance Updated successfully');
+
         _isLoading = false;
         _hasError = false;
         notifyListeners();
@@ -279,7 +291,7 @@ class CreateGameProvider extends ChangeNotifier {
     double sum = 2 * stake;
 
     // Calculate 20% off the sum
-    double discount = 0.20 * sum;
+    double discount = 0.15 * sum;
 
     // Calculate the final discounted value
     double discountedValue = sum - discount;

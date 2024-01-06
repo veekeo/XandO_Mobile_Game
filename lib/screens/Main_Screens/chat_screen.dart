@@ -60,8 +60,8 @@ class _ChatScreenState extends State<ChatScreen> {
                 alignment: AlignmentDirectional(0.00, 0.00),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    'assets/images/chat_bubble.png',
+                  child: Image.network(
+                    'https://res.cloudinary.com/dbofcawb1/image/upload/v1704495448/chat_bubble_musoev.png',
                     width: 197,
                     height: 183,
                     fit: BoxFit.cover,

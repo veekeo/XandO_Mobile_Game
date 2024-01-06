@@ -109,9 +109,6 @@ class PhoneNumberAuthProvider extends ChangeNotifier {
 
       if (req.statusCode == 200 || req.statusCode == 201) {
         final res = json.decode(req.body);
-        print(req.statusCode);
-        print('User Updated');
-        print(res);
 
         dbProvider.saveUsercontact(res['contact']);
 
@@ -119,9 +116,6 @@ class PhoneNumberAuthProvider extends ChangeNotifier {
         _isLoading = false;
         notifyListeners();
       } else {
-        final res = json.decode(req.body);
-        print(req.statusCode);
-        print(res);
         _isLoading = false;
         _hasError = true;
         _errorCode = 'Sign in failed';
@@ -136,7 +130,7 @@ class PhoneNumberAuthProvider extends ChangeNotifier {
       _isLoading = false;
       _hasError = true;
       _errorCode = 'User with the given phone number already exists.';
-      print(e.toString());
+
       notifyListeners();
     }
   }

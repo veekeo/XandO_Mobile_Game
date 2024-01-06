@@ -105,27 +105,27 @@ class _GameRequestsScreenState extends State<GameRequestsScreen> {
                         children: [
                           receivedRequests.isEmpty
                               ? const Text('')
-                              : Row(
+                              : const Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Pending Requests',
                                       style: TextStyle(
                                         fontFamily: 'Bold',
                                         fontSize: 16,
                                       ),
                                     ),
-                                    Text(
-                                      'See all',
-                                      style: TextStyle(
-                                        fontFamily: 'Bold',
-                                        fontSize: 14,
-                                        color: Colors.white
-                                            .withOpacity(0.5)
-                                            .withOpacity(0.5),
-                                      ),
-                                    ),
+                                    // Text(
+                                    //   'See all',
+                                    //   style: TextStyle(
+                                    //     fontFamily: 'Bold',
+                                    //     fontSize: 14,
+                                    //     color: Colors.white
+                                    //         .withOpacity(0.5)
+                                    //         .withOpacity(0.5),
+                                    //   ),
+                                    // ),
                                   ],
                                 ),
                           ListView.builder(
@@ -194,27 +194,27 @@ class _GameRequestsScreenState extends State<GameRequestsScreen> {
                         children: [
                           receivedRequests.isEmpty
                               ? const Text('')
-                              : Row(
+                              : const Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    const Text(
+                                    Text(
                                       'Sent Requests',
                                       style: TextStyle(
                                         fontFamily: 'Medium',
                                         fontSize: 16,
                                       ),
                                     ),
-                                    Text(
-                                      'See all',
-                                      style: TextStyle(
-                                        fontFamily: 'Bold',
-                                        fontSize: 14,
-                                        color: Colors.white
-                                            .withOpacity(0.5)
-                                            .withOpacity(0.5),
-                                      ),
-                                    ),
+                                    // Text(
+                                    //   'See all',
+                                    //   style: TextStyle(
+                                    //     fontFamily: 'Bold',
+                                    //     fontSize: 14,
+                                    //     color: Colors.white
+                                    //         .withOpacity(0.5)
+                                    //         .withOpacity(0.5),
+                                    //   ),
+                                    // ),
                                   ],
                                 ),
                           ListView.builder(
@@ -306,12 +306,12 @@ class _GameRequestsScreenState extends State<GameRequestsScreen> {
                                 'No Game Requests yet',
                                 style: TextStyle(
                                   fontFamily: 'Bold',
-                                  fontSize: 16,
+                                  fontSize: 14,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
                               Text(
-                                ' No worries! when new requests come \nin it will appear here. ',
+                                ' No worries! when new requests come \nin, it will appear here. ',
                                 style: TextStyle(
                                   fontFamily: 'Regular',
                                   fontSize: 14,

@@ -30,7 +30,7 @@ class GetAvailableGamesProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
 
-    print('Before Search: IsLoading=$_isLoading');
+   
 
     List<AvailableGamesModel> searchResults = _availableGames
         .where(
@@ -44,7 +44,7 @@ class GetAvailableGamesProvider extends ChangeNotifier {
     _searchedGames = searchResults;
     _isLoading = false;
     notifyListeners();
-    print('After Search: IsLoading=$_isLoading');
+
 
     return searchResults;
   }
@@ -110,13 +110,11 @@ class GetAvailableGamesProvider extends ChangeNotifier {
       );
 
       if (req.statusCode == 200 || req.statusCode == 201) {
-        final res = json.decode(req.body);
-        print('Updated game state!!!');
+     
         _isLoading = true;
         notifyListeners();
       } else {
-        final res = json.decode(req.body);
-        print(res);
+    
         _isLoading = false;
         _hasError = true;
         notifyListeners();
@@ -130,7 +128,7 @@ class GetAvailableGamesProvider extends ChangeNotifier {
       _isLoading = false;
       _hasError = true;
       _resMessage = e.toString();
-      print(e.toString());
+  
       notifyListeners();
     }
   }

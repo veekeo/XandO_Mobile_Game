@@ -60,7 +60,7 @@ class _DepositState extends State<Deposit> {
                   child: FutureBuilder<UserModel>(
                     future: EditProfileProvider().getUserProfileData(),
                     builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
+                      if (snapshot.connectionState == ConnectionState.none) {
                         return const Center(
                           child: CircularProgressIndicator(
                             color: Color(0xFF3B4FFE),
@@ -69,7 +69,6 @@ class _DepositState extends State<Deposit> {
                       } else if (snapshot.hasError) {
                         return Text('Error: ${snapshot.error}');
                       } else {
-                        print(snapshot.data);
                         return Container(
                           width: double.infinity,
                           height: 130,
@@ -123,7 +122,7 @@ class _DepositState extends State<Deposit> {
                                         padding: const EdgeInsetsDirectional
                                             .fromSTEB(0, 0, 0, 8),
                                         child: Text(
-                                          '${snapshot.data!.gamedata?.coin} NGN',
+                                          '${snapshot.data?.gamedata?.coin ?? 0} NGN',
                                           style: FlutterFlowTheme.of(context)
                                               .bodyMedium
                                               .override(

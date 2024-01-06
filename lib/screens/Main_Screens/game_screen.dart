@@ -11,11 +11,9 @@ import 'package:share_plus/share_plus.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Game/get_available_games_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
-import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/XandO/create_a_game.dart';
 import 'package:xando/components/currency_balance_container.dart';
 import 'package:xando/components/game_card.dart';
-import 'package:xando/components/history_list_item.dart';
 import 'package:xando/components/primary_button_outline.dart';
 import 'package:xando/components/tabs.dart';
 import 'package:xando/models/available_games_model.dart';
@@ -23,13 +21,17 @@ import 'package:xando/models/game_screen_model.dart';
 import 'package:xando/models/user_profile_model.dart';
 import 'package:xando/screens/Main_Screens/user_game_details_screen.dart';
 import 'package:xando/utils/dynamic_links.dart';
-import 'package:xando/utils/snackbar_message.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen(
-      {super.key, required this.selectedTabFromExternalRoute, this.gameData});
+  const GameScreen({
+    super.key,
+    required this.selectedTabFromExternalRoute,
+    this.gameData,
+    this.userData,
+  });
   final int selectedTabFromExternalRoute;
   final List<AvailableGamesModel>? gameData;
+  final UserModel? userData;
 
   @override
   State<GameScreen> createState() => _GameScreenState();
@@ -214,6 +216,24 @@ class OpenGames extends StatefulWidget {
 }
 
 class _OpenGamesState extends State<OpenGames> {
+  double potentialWin = 0;
+
+  double calculateDiscount(double stake) {
+    // Calculate the sum of the two equal numbers
+    double sum = 2 * stake;
+
+    // Calculate 20% off the sum
+    double discount = 0.20 * sum;
+
+    // Calculate the final discounted value
+    double discountedValue = sum - discount;
+    setState(() {
+      potentialWin = discountedValue;
+    });
+
+    return potentialWin;
+  }
+
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<AvailableGamesModel>>(
@@ -304,11 +324,19 @@ class _OpenGamesState extends State<OpenGames> {
                                       state: filteredGames[index].state!,
                                       isRequested: filteredGames[index].state,
                                       stake: filteredGames[index].stake,
+                                      idOfGame:
+                                          filteredGames[index].id.toString(),
                                       potentialWin: filteredGames[index].stake!,
                                       gameTitle: filteredGames[index].title,
                                       gameId: filteredGames[index].gameId,
                                       username:
                                           filteredGames[index].user?.username,
+                                      receiverId: filteredGames[index].user?.id,
+                                      receiverdeviceToken: filteredGames[index]
+                                          .user
+                                          ?.deviceToken,
+                                      receiverAvatar:
+                                          filteredGames[index].user?.avatar,
                                     )));
                       },
                       state: filteredGames[index].state!,
@@ -320,7 +348,26 @@ class _OpenGamesState extends State<OpenGames> {
                       onTap: filteredGames[index].state!
                           ? () {
                               links
-                                  .createGameLink(filteredGames[index].gameId)
+                                  .createGameLink(
+                                potentialWin: calculateDiscount(double.parse(
+                                        filteredGames[index].stake!))
+                                    .toString(),
+                                stake: filteredGames[index].stake,
+                                state: filteredGames[index].state,
+                                gameTitle: filteredGames[index].title,
+                                gameId: filteredGames[index].gameId,
+                                idOfgame: filteredGames[index].id.toString(),
+                                username: filteredGames[index].user?.username,
+                                senderUsername: '',
+                                senderId: '',
+                                receiverId: filteredGames[index].user?.id,
+                                receiverDeviceToken:
+                                    filteredGames[index].user?.deviceToken,
+                                senderDeviceToken: '',
+                                senderAvatar: '',
+                                receiverAvatar:
+                                    filteredGames[index].user?.avatar,
+                              )
                                   .then((value) {
                                 Share.share(value);
                               });

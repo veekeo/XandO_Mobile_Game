@@ -2,12 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:xando/Providers/Auth_providers/auth_provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/main_page.dart';
 import 'package:xando/screens/Auth_Screens/onboarding_screen.dart';
 import 'package:xando/screens/Auth_Screens/signin_screen.dart';
-import 'package:xando/screens/Auth_Screens/signup_screen.dart';
 import 'package:xando/utils/dynamic_links.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -22,6 +20,7 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     final dbProvider = context.read<DatabaseProvider>();
+    DynamicLinksProvider().initRefDynamicLink(context);
 
     super.initState();
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
@@ -41,7 +40,7 @@ class _SplashScreenState extends State<SplashScreen>
               if (value == true) {
                 Navigator.of(context)
                     .pushReplacement(CupertinoPageRoute(builder: (context) {
-                  return MainPage();
+                  return const MainPage();
                 }));
               } else {
                 Navigator.of(context)
@@ -61,24 +60,6 @@ class _SplashScreenState extends State<SplashScreen>
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
         overlays: SystemUiOverlay.values);
     super.dispose();
-  }
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final dynamicLinksProvider = context.read<DynamicLinksProvider>();
-    final affliateRefCode = dynamicLinksProvider.affliateRefCode;
-
-    dynamicLinksProvider.initializeDynamicLink().then((value) {
-      if (value == true) {
-        Navigator.of(context)
-            .pushReplacement(CupertinoPageRoute(builder: (context) {
-          return SignUpScreen(
-            affliateCode: affliateRefCode,
-          );
-        }));
-      }
-    });
   }
 
   @override
