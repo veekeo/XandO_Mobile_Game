@@ -48,7 +48,7 @@ class EditProfileProvider extends ChangeNotifier {
       } else {
         _isLoading = false;
         _hasError = true;
-        _resMessage = 'Update Failed';
+        _resMessage = 'Username already taken.';
         notifyListeners();
       }
     } on SocketException catch (_) {

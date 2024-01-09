@@ -108,7 +108,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                   const AlignmentDirectional(-1.00, 0.00),
                               child: Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
-                                    15, 0, 15, 10),
+                                    15, 0, 15, 5),
                                 child: Text(
                                   'Game Title',
                                   style: FlutterFlowTheme.of(context)
@@ -127,7 +127,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                             ),
                             Padding(
                               padding: const EdgeInsetsDirectional.fromSTEB(
-                                  15, 0, 15, 5),
+                                  15, 0, 15, 0),
                               child: TextFormField(
                                 autofocus: true,
                                 controller: _gameTitleController,
@@ -174,7 +174,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                   const AlignmentDirectional(-1.00, 0.00),
                               child: Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
-                                    15, 0, 15, 10),
+                                    15, 0, 15, 5),
                                 child: Text(
                                   'Amount',
                                   style: FlutterFlowTheme.of(context)
@@ -255,7 +255,7 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                   const AlignmentDirectional(-1.00, 0.00),
                               child: Padding(
                                 padding: const EdgeInsetsDirectional.fromSTEB(
-                                    15, 0, 15, 10),
+                                    15, 0, 15, 5),
                                 child: Text(
                                   'Potential Win',
                                   style: FlutterFlowTheme.of(context)
@@ -339,6 +339,25 @@ class _CreateGameScreenState extends State<CreateGameScreen> {
                                     ],
                                   ),
                                 ),
+                              ),
+                            ),
+                            Padding(
+                              padding:
+                                  const EdgeInsets.only(left: 15, right: 15),
+                              child: Text(
+                                'NB: A token of 15% will be deducted as service charge on every game.',
+                                style: FlutterFlowTheme.of(context)
+                                    .bodyMedium
+                                    .override(
+                                      fontFamily: 'Plus Jakarta Sans',
+                                      color: const Color(0xB3FFFFFF),
+                                      fontWeight: FontWeight.normal,
+                                      fontSize: 12,
+                                      useGoogleFonts: GoogleFonts.asMap()
+                                          .containsKey(
+                                              FlutterFlowTheme.of(context)
+                                                  .bodyMediumFamily),
+                                    ),
                               ),
                             ),
                             const SizedBox(height: 15),

@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
@@ -12,6 +13,7 @@ import 'package:xando/Providers/Auth_providers/affliate_provider.dart';
 
 import 'package:xando/models/affilaite_user_model.dart';
 import 'package:xando/models/earn_screen_model.dart';
+import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
 import 'package:xando/utils/dynamic_links.dart';
 
 class EarnScreen extends StatefulWidget {
@@ -440,8 +442,8 @@ class _EarnScreenState extends State<EarnScreen> {
                                                     BorderRadius.circular(8),
                                                 child: Image.asset(
                                                   'assets/images/Twitter.png',
-                                                  width: 40,
-                                                  height: 40,
+                                                  width: 30,
+                                                  height: 30,
                                                   fit: BoxFit.cover,
                                                 ),
                                               ),
@@ -674,7 +676,14 @@ class _EarnScreenState extends State<EarnScreen> {
                                       ),
                                     ),
                                     FFButtonWidget(
-                                      onPressed: () {},
+                                      onPressed: () {
+                                        Navigator.push(
+                                            context,
+                                            CupertinoPageRoute(
+                                                builder: (context) => WalletScreen(
+                                                    selectedTabFromExternalRoute:
+                                                        1)));
+                                      },
                                       text: 'CLAIM',
                                       options: FFButtonOptions(
                                         width: double.infinity,

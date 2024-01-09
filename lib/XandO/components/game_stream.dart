@@ -113,7 +113,7 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
   bool gameState = true;
 
   Timer? timer;
-  static const maxSeconds = 60;
+  static const maxSeconds = 20;
   int seconds = maxSeconds;
 
   @override
@@ -279,8 +279,12 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
                         padding: const EdgeInsets.all(5),
                         width: 300,
                         height: 300,
-                        decoration: const BoxDecoration(
-                          color: Color.fromARGB(255, 32, 40, 73),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF29197A),
+                          border: Border.all(
+                            color: const Color(0xFFFDC101),
+                            width: 2.5,
+                          ),
                         ),
                         child: GridView.builder(
                           physics: const NeverScrollableScrollPhysics(),
@@ -293,7 +297,7 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
                               onTap: exTurn
                                   ? () {
                                       audio.isSoundOn
-                                          ? audio.playSound('assets/pop.wav')
+                                          ? audio.playSound('assets/click.wav')
                                           : '';
                                       _tapped(
                                         index: index,
@@ -324,7 +328,7 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
                                   decoration: BoxDecoration(
                                     color: matchedIndexes.contains(index)
                                         ? Colors.green.withOpacity(0.5)
-                                        : const Color.fromARGB(255, 0, 7, 38),
+                                        : const Color(0xFF1A1148),
                                     border: matchedIndexes.contains(index)
                                         ? Border.all(
                                             color: Colors.green,
@@ -416,8 +420,12 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
                         padding: const EdgeInsets.all(5),
                         width: 300,
                         height: 300,
-                        decoration: const BoxDecoration(
-                          color: Color.fromARGB(255, 32, 40, 73),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF29197A),
+                          border: Border.all(
+                            color: const Color(0xFFFDC101),
+                            width: 2.5,
+                          ),
                         ),
                         child: GridView.builder(
                           physics: const NeverScrollableScrollPhysics(),
@@ -430,7 +438,7 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
                               onTap: ohTurn
                                   ? () {
                                       audio.isSoundOn
-                                          ? audio.playSound('assets/pop.wav')
+                                          ? audio.playSound('assets/click.wav')
                                           : '';
 
                                       _tapped(

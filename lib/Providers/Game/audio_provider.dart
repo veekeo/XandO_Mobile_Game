@@ -13,6 +13,16 @@ class AudioProvider extends ChangeNotifier {
 
   void toggleSound() async {
     _isSoundOn = !_isSoundOn;
+    pauseAndPlay();
     notifyListeners();
+  }
+
+  void pauseAndPlay() {
+    AudioPlayer player = AudioPlayer();
+    if (_isSoundOn) {
+      player.play();
+    } else {
+      player.pause();
+    }
   }
 }

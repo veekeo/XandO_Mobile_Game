@@ -19,7 +19,7 @@ class Player1Container extends StatelessWidget {
       width: 80,
       height: 130,
       decoration: BoxDecoration(
-        color: const Color(0xFF202849),
+        color: const Color(0xFF1A1148),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(50),
           bottomRight: Radius.circular(50),
@@ -91,7 +91,7 @@ class Player2Container extends StatelessWidget {
       width: 80,
       height: 130,
       decoration: BoxDecoration(
-        color: const Color(0xFF202849),
+        color: const Color(0xFF1A1148),
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(50),
           bottomRight: Radius.circular(50),

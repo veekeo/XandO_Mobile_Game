@@ -26,6 +26,7 @@ class XandOGameScreen extends StatefulWidget {
 class _XandOGameScreenState extends State<XandOGameScreen> {
   late UserModel userData;
   late Future _userDataFuture;
+
   Future<UserModel> fetchUserData() async {
     userData = await EditProfileProvider().getUserProfileData();
     return userData;
@@ -35,8 +36,24 @@ class _XandOGameScreenState extends State<XandOGameScreen> {
   void initState() {
     userData = UserModel();
     _userDataFuture = fetchUserData();
+    // _playBackgroundSound();
     super.initState();
   }
+
+  // void _playBackgroundSound() {
+  //   final audio = context.read<AudioProvider>();
+  //   if (audio.isSoundOn) {
+  //     audio.playSound('assets/background.mp3');
+  //   } else {
+  //     '';
+  //   }
+  // }
+
+  // @override
+  // void dispose() {
+  //   _playBackgroundSound();
+  //   super.dispose();
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -129,9 +146,14 @@ class _XandOGameScreenState extends State<XandOGameScreen> {
           ),
         ),
       ),
-      body: SafeArea(
-        top: true,
-        child: FutureBuilder<void>(
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(
+            'assets/images/background.png', // Replace with your image asset path
+            fit: BoxFit.cover,
+          ),
+          FutureBuilder<void>(
             future: _userDataFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.done) {
@@ -144,7 +166,9 @@ class _XandOGameScreenState extends State<XandOGameScreen> {
               } else {
                 return const NoConnectionWidget(message: 'Loading...');
               }
-            }),
+            },
+          ),
+        ],
       ),
     );
   }

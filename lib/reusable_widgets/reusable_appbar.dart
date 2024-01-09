@@ -276,11 +276,11 @@ class _ReusableAppBarState extends State<ReusableAppBar> {
                         icon: const Icon(Icons.search),
                       ),
                       Text(
-                        'Search Game by ID, Title...',
+                        'Search Game by ID, Title, Username...',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.5),
                           fontFamily: 'Medium',
-                          fontSize: 13,
+                          fontSize: 14,
                         ),
                       )
                     ],
