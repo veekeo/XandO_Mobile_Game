@@ -11,7 +11,6 @@ import 'package:xando/Providers/Auth_providers/phone_auth_provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/main_page.dart';
-import 'package:xando/models/add_phonenumber_model.dart';
 import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
 import 'package:xando/utils/routers.dart';
 import 'package:xando/utils/snackbar_message.dart';
