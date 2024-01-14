@@ -16,6 +16,7 @@ class DatabaseProvider extends ChangeNotifier {
   String _dateOfBirth = '';
   String _deviceToken = '';
   bool? _rememberUser = false;
+  bool? _hasUserGoneThroughOtp = false;
 
   String get userId => _userId;
   String get userName => _userName;
@@ -27,6 +28,7 @@ class DatabaseProvider extends ChangeNotifier {
   String get avatar => _avatar;
   String get dateOfBirth => _dateOfBirth;
   bool? get rememberUser => _rememberUser;
+  bool? get hasUserGoneThroughOtp => _hasUserGoneThroughOtp;
   String get deviceToken => _deviceToken;
 
 //save user data starts here
@@ -105,6 +107,13 @@ class DatabaseProvider extends ChangeNotifier {
     SharedPreferences value = await _pref;
 
     value.setBool('remember_user', rememberUser!);
+  }
+
+  //.
+  void saveUserOtpRemembrance(bool? hasUserGoneThroughOtp) async {
+    SharedPreferences value = await _pref;
+
+    value.setBool('hasUserGoneThroughOtp', hasUserGoneThroughOtp!);
   }
   //.
 
@@ -268,6 +277,21 @@ class DatabaseProvider extends ChangeNotifier {
       return data;
     } else {
       _rememberUser = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> getUserOtpRemembrance() async {
+    SharedPreferences value = await _pref;
+
+    if (value.containsKey('hasUserGoneThroughOtp')) {
+      bool data = value.getBool('hasUserGoneThroughOtp')!;
+      _hasUserGoneThroughOtp = data;
+      notifyListeners();
+      return data;
+    } else {
+      _hasUserGoneThroughOtp = false;
       notifyListeners();
       return false;
     }

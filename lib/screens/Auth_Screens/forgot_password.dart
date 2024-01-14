@@ -384,23 +384,25 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       width: 200,
                       height: 55,
                       onpressed: () async {
-                        await auth.verifyEmailOTP(otpController).then((value) {
-                          if (value == true) {
-                            showSuccessSnackBarMessage(
-                                message: auth.resMessage,
-                                context: context,
-                                status: true);
-                            _pageController.nextPage(
-                              duration: const Duration(milliseconds: 500),
-                              curve: Curves.easeInOut,
-                            );
-                          } else {
-                            showErrorSnackBarMessage(
-                                message: auth.resMessage,
-                                context: context,
-                                status: true);
-                          }
-                        });
+                        await auth.verifyEmailOTP(otpController).then(
+                          (value) {
+                            if (value == true) {
+                              showSuccessSnackBarMessage(
+                                  message: auth.resMessage,
+                                  context: context,
+                                  status: true);
+                              _pageController.nextPage(
+                                duration: const Duration(milliseconds: 500),
+                                curve: Curves.easeInOut,
+                              );
+                            } else {
+                              showErrorSnackBarMessage(
+                                  message: auth.resMessage,
+                                  context: context,
+                                  status: true);
+                            }
+                          },
+                        );
                       },
                       isLoading: false,
                     )),

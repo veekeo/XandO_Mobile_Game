@@ -25,8 +25,8 @@ class WinnerDailog extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.network(
-            'https://res.cloudinary.com/dbofcawb1/image/upload/v1704497083/winner_vwcmfn.png',
+          Image.asset(
+            'assets/images/winner.png',
           ).animate().fade(duration: 500.ms).scale(delay: 500.ms),
           const SizedBox(height: 15),
           const Text(

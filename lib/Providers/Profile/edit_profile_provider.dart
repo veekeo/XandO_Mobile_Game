@@ -252,13 +252,18 @@ class EditProfileProvider extends ChangeNotifier {
       );
 
       if (req.statusCode == 200 || req.statusCode == 201) {
+        _isLoading = false;
         final res = json.decode(req.body);
         _initialBalance = res['gamedata']['coin'];
         notifyListeners();
         if (json.decode(req.body) == null) {
+          _isLoading = false;
+          notifyListeners();
           return UserModel();
         } else {
+          _isLoading = false;
           final userModel = userModelFromJson(req.body);
+          notifyListeners();
           return userModel;
         }
       } else {

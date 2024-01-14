@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 
@@ -8,15 +11,14 @@ import 'package:xando/Providers/Auth_providers/phone_auth_provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/main_page.dart';
+import 'package:xando/models/add_phonenumber_model.dart';
+import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
 import 'package:xando/utils/routers.dart';
 import 'package:xando/utils/snackbar_message.dart';
 
 class OTPScreen extends StatefulWidget {
-  final String verificationId;
   final String phoneNumber;
-  const OTPScreen(
-      {Key? key, required this.verificationId, required this.phoneNumber})
-      : super(key: key);
+  const OTPScreen({Key? key, required this.phoneNumber}) : super(key: key);
 
   @override
   // ignore: library_private_types_in_public_api
@@ -27,6 +29,23 @@ class _OTPScreenState extends State<OTPScreen> {
   TextEditingController otpController = TextEditingController();
   String? otpCode;
   late String _deviceToken;
+
+  Timer? _timer;
+  int _countDown = 30;
+  bool _isCountdownDone = false;
+
+  void startTimer() {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      setState(() {
+        if (_countDown > 0) {
+          _countDown--;
+        } else {
+          _timer?.cancel();
+          _isCountdownDone = true;
+        }
+      });
+    });
+  }
 
   _loadUserData() async {
     String? deviceToken = await DatabaseProvider().getDeviceToken();
@@ -40,8 +59,15 @@ class _OTPScreenState extends State<OTPScreen> {
   @override
   void initState() {
     super.initState();
+    startTimer();
     _deviceToken = '';
     _loadUserData();
+  }
+
+  @override
+  void dispose() {
+    _timer!.cancel();
+    super.dispose();
   }
 
   @override
@@ -187,13 +213,20 @@ class _OTPScreenState extends State<OTPScreen> {
                         onTap: isLoading
                             ? null
                             : () {
-                                Navigator.pop(context);
+                                if (_isCountdownDone) {
+                                  Navigator.pushReplacement(context,
+                                      CupertinoPageRoute(builder: (context) {
+                                    return const AddPhoneNumberScreen();
+                                  }));
+                                }
                               },
                         child: Padding(
                           padding:
                               const EdgeInsetsDirectional.fromSTEB(5, 0, 20, 5),
                           child: Text(
-                            'RESEND CODE',
+                            _isCountdownDone
+                                ? 'RESEND CODE'
+                                : ' 00:${_countDown.toString()}',
                             textAlign: TextAlign.center,
                             style: FlutterFlowTheme.of(context)
                                 .bodySmall
@@ -201,8 +234,8 @@ class _OTPScreenState extends State<OTPScreen> {
                                   fontFamily: 'Plus Jakarta Sans',
                                   color: isLoading
                                       ? Colors.grey.withOpacity(0.5)
-                                      : FlutterFlowTheme.of(context).primary,
-                                  fontSize: 12,
+                                      : const Color(0xFF3B4FFE),
+                                  fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                   useGoogleFonts: GoogleFonts.asMap()
                                       .containsKey(FlutterFlowTheme.of(context)
@@ -244,24 +277,42 @@ class _OTPScreenState extends State<OTPScreen> {
     final userId = await dbProvider.getUserId();
 
     // ignore: use_build_context_synchronously
-    ap.verifyOtp(
-        context: context,
-        verificationId: widget.verificationId,
-        userOtp: userOtp,
-        onSuccess: () async {
-          //check DB
-          ap.saveUserPhoneNumber(context, userId, {
-            'contact': widget.phoneNumber,
-            'devicetoken': _deviceToken,
-          }).then((value) {
-            if (ap.hasError == true) {
-                          showErrorSnackBarMessage(
-                  message: ap.errorCode, context: context, status: true);
-            } else {
-              PageNavigator(ctx: context).nextPageOnly(page: const MainPage());
-            }
-          });
-          // ignore: use_build_context_synchronously
+    await ap.verifyOtp(context, userOtp).then((value) {
+      if (ap.hasError == true) {
+        showErrorSnackBarMessage(
+            message: ap.errorCode, context: context, status: true);
+      } else if (ap.isVerified) {
+        ap.saveUserPhoneNumber(context, userId, {
+          'contact': widget.phoneNumber,
+          'devicetoken': _deviceToken,
+        }).then((value) async {
+          await ap.rememberUserOtp(context, true).then((value) =>
+              PageNavigator(ctx: context).nextPageOnly(page: const MainPage()));
         });
+      } else {
+        showErrorSnackBarMessage(
+            message: 'OTP Verification failed', context: context, status: true);
+      }
+    });
+
+    // ignore: use_build_context_synchronously
+    // ap.verifyOtp(
+    //     context: context,
+    //     userOtp: userOtp,
+    //     onSuccess: () async {
+    //       //check DB
+    //       ap.saveUserPhoneNumber(context, userId, {
+    //         'contact': widget.phoneNumber,
+    //         'devicetoken': _deviceToken,
+    //       }).then((value) {
+    //         if (ap.hasError == true) {
+    //           showErrorSnackBarMessage(
+    //               message: ap.errorCode, context: context, status: true);
+    //         } else {
+    //           PageNavigator(ctx: context).nextPageOnly(page: const MainPage());
+    //         }
+    //       });
+    //       // ignore: use_build_context_synchronously
+    //     });
   }
 }

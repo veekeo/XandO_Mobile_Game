@@ -66,7 +66,8 @@ class CreateGameProvider extends ChangeNotifier {
         _stake = res['stake'];
         _username = res['user']['username'];
         _userId = res['user']['id'];
-        _userAvatar = res['user']['avatar'];
+        _userAvatar = res['user']['avatar'] ??
+            'https://api.multiavatar.com/5b1271f9320afc278a.png';
         _userDeviceToken = res['user']['devicetoken'];
         _resMessage = 'Game created successfully';
         _hasError = false;

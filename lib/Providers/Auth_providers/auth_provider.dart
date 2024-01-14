@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:xando/Providers/Database/db_provider.dart';
+import 'package:xando/main_page.dart';
 import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
 import 'package:xando/screens/Auth_Screens/signin_screen.dart';
 import 'package:xando/utils/routers.dart';
@@ -140,8 +140,21 @@ class AuthenticationProvider extends ChangeNotifier {
         _resMessage = 'Login Successful';
         notifyListeners();
         // ignore: use_build_context_synchronously
-        PageNavigator(ctx: context)
-            .nextPageOnly(page: const AddPhoneNumberScreen());
+        dbProvider.getUserOtpRemembrance().then(
+          (value) {
+            if (value == true) {
+              Navigator.of(context)
+                  .pushReplacement(CupertinoPageRoute(builder: (context) {
+                return const MainPage();
+              }));
+            } else {
+              Navigator.of(context)
+                  .pushReplacement(CupertinoPageRoute(builder: (context) {
+                return const AddPhoneNumberScreen();
+              }));
+            }
+          },
+        );
       } else {
         _resMessage = 'Invalid Email or Password';
         _isLoading = false;

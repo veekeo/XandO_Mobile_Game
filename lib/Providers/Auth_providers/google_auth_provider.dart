@@ -8,6 +8,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
+import 'package:xando/main_page.dart';
 import 'package:xando/screens/Auth_Screens/add_phone_number_screen.dart';
 
 class GoogleAuthenticationProvider extends ChangeNotifier {
@@ -45,6 +46,7 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
 
   // sign in with google
   Future signInWithGoogle(BuildContext context) async {
+    final dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
     _isLoading = true;
     notifyListeners();
 
@@ -79,18 +81,43 @@ class GoogleAuthenticationProvider extends ChangeNotifier {
         // ignore: use_build_context_synchronously
         await isUserSignedUp(context).then((value) async {
           if (value == true) {
-            await signInUserWithData(context).then((value) =>
-                Navigator.of(context)
-                    .pushReplacement(CupertinoPageRoute(builder: (_) {
-                  return const AddPhoneNumberScreen();
-                })));
-          } else {
-            await saveUserData(context, _email).then((value) =>
-                signInUserWithData(context).then((value) =>
+            await signInUserWithData(context).then((value) async {
+              await dbProvider.getUserOtpRemembrance().then(
+                (value) {
+                  if (value == true) {
                     Navigator.of(context)
-                        .pushReplacement(CupertinoPageRoute(builder: (_) {
+                        .pushReplacement(CupertinoPageRoute(builder: (context) {
+                      return const MainPage();
+                    }));
+                  } else {
+                    Navigator.of(context)
+                        .pushReplacement(CupertinoPageRoute(builder: (context) {
                       return const AddPhoneNumberScreen();
-                    }))));
+                    }));
+                  }
+                },
+              );
+            });
+          } else {
+            await saveUserData(context, _email).then(
+              (value) => signInUserWithData(context).then((value) async {
+                await dbProvider.getUserOtpRemembrance().then(
+                  (value) {
+                    if (value == true) {
+                      Navigator.of(context).pushReplacement(
+                          CupertinoPageRoute(builder: (context) {
+                        return const MainPage();
+                      }));
+                    } else {
+                      Navigator.of(context).pushReplacement(
+                          CupertinoPageRoute(builder: (context) {
+                        return const AddPhoneNumberScreen();
+                      }));
+                    }
+                  },
+                );
+              }),
+            );
           }
         });
       } on FirebaseAuthException catch (e) {
