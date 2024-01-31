@@ -324,6 +324,8 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
                                         gameState: gameState,
                                         hostAvatar: hostAvatar,
                                         player2Avatar: player2Avatar,
+                                        hasHostPlayed: hasHostPlayed,
+                                        hasPlayer2Played: hasPlayer2Played,
                                       );
                                     }
                                   : null,
@@ -489,6 +491,8 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
                                         filledBoxes: filledBoxes,
                                         attempts: attempts,
                                         gameState: gameState,
+                                        hasHostPlayed: hasHostPlayed,
+                                        hasPlayer2Played: hasPlayer2Played,
                                       );
                                     }
                                   : null,
@@ -626,12 +630,12 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
             return PrimaryButton(
               backgroundColor: const Color(0xFF3B4FFE),
               title: hasHostPlayed == false && hasPlayer2Played == false
-                  ? 'Start'
+                  ? 'Begin'
                   : hasHostPlayed && hasPlayer2Played == false
                       ? 'Waiting for player 2...'
                       : hasHostPlayed == false && hasPlayer2Played
                           ? 'Waiting for player 2'
-                          : '',
+                          : 'Start Game',
               width: 200,
               height: 55,
               onpressed: () {
@@ -699,6 +703,8 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
 
   //int index, bool exTurn, bool ohTurn, int filledBoxes
   void _tapped({
+    required bool hasHostPlayed,
+    required bool hasPlayer2Played,
     required String documentID,
     required bool hostState,
     required bool player2State,
@@ -719,7 +725,11 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
   }) {
     final isRunning = timer == null ? false : timer!.isActive;
 
-    if (isRunning && displayExOh.isNotEmpty && displayExOh[index] == '') {
+    if (isRunning &&
+        displayExOh.isNotEmpty &&
+        displayExOh[index] == '' &&
+        hasHostPlayed == true &&
+        hasPlayer2Played == true) {
       setState(
         () {
           if (exTurn && ohTurn == false) {
