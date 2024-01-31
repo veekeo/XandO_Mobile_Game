@@ -1,9 +1,12 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:easy_debounce/easy_debounce.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pay_with_paystack/pay_with_paystack.dart';
 import 'package:provider/provider.dart';
 import 'package:xando/Providers/Database/db_provider.dart';
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
@@ -11,7 +14,7 @@ import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/Providers/paystack_provider.dart';
 import 'package:xando/components/primary_button.dart';
 import 'package:xando/models/user_profile_model.dart';
-import 'package:xando/screens/paystack_checkout_screen.dart';
+
 import 'package:xando/utils/snackbar_message.dart';
 
 class Deposit extends StatefulWidget {
@@ -373,36 +376,60 @@ class _DepositState extends State<Deposit> {
   // handle paystack deposit
   Future handlePaystackDeposit() async {
     final paystack = context.read<PaystackProvider>();
+    UserModel initialUserBalance =
+        await EditProfileProvider().getUserProfileData();
+
+    int paymentAmount = int.parse(_stakeAmountController.text.trim()) * 100;
     //internet provider
     final internetProvider = context.read<InternetProvider>();
 
     await internetProvider.checkInternetConnection();
     if (internetProvider.hasInternet == false) {
-      // ignore: use_build_context_synchronously
       showErrorSnackBarMessage(
         message: 'Please check your internet connection',
         context: context,
         status: false,
       );
     } else {
-      await paystack
-          .getPaystackCheckoutUrl(
-              _emailController.text.trim(), _stakeAmountController.text.trim())
-          .then((value) {
-        if (paystack.hasError == true) {
-          // ignore: use_build_context_synchronously
-          showErrorSnackBarMessage(
-            message: paystack.resMessage,
-            context: context,
-            status: false,
-          );
-        } else {
-          Navigator.of(context)
-              .pushReplacement(CupertinoPageRoute(builder: (_) {
-            return PaystackCheckoutScreen(url: paystack.authorizationUrl);
-          }));
-        }
-      });
+      PayWithPayStack().now(
+          context: context,
+          secretKey: "sk_live_c0b3015a647d231ca553ed1d5ea2d417560e420c",
+          customerEmail: _emailController.text.trim(),
+          reference: DateTime.now().microsecondsSinceEpoch.toString(),
+          callbackUrl: "https://google.com",
+          currency: "NGN",
+          amount: paymentAmount.toString(),
+          transactionCompleted: () async {
+            await paystack
+                .calcUserTotalAmount(context, initialUserBalance.gamedata!.coin,
+                    int.parse(_stakeAmountController.text.trim()))
+                .then((value) => Navigator.pop(context));
+          },
+          transactionNotCompleted: () {
+            showErrorSnackBarMessage(
+              message: 'Transaction not successful.',
+              context: context,
+              status: false,
+            );
+          });
+      // await paystack
+      //     .getPaystackCheckoutUrl(
+      //         _emailController.text.trim(), _stakeAmountController.text.trim())
+      //     .then((value) {
+      //   if (paystack.hasError == true) {
+      //     // ignore: use_build_context_synchronously
+      //     showErrorSnackBarMessage(
+      //       message: paystack.resMessage,
+      //       context: context,
+      //       status: false,
+      //     );
+      //   } else {
+      //     Navigator.of(context)
+      //         .pushReplacement(CupertinoPageRoute(builder: (_) {
+      //       return PaystackCheckoutScreen(url: paystack.authorizationUrl);
+      //     }));
+      //   }
+      // });
     }
   }
 

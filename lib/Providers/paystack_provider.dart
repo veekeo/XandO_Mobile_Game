@@ -11,7 +11,7 @@ class PaystackProvider extends ChangeNotifier {
   bool _hasError = false;
   String _reference = '';
   int _depositedAmount = 0;
-  int _userInputAmount = 0;
+  // int _userInputAmount = 0;
 
   String _authorizationUrl = '';
 
@@ -41,7 +41,7 @@ class PaystackProvider extends ChangeNotifier {
     String url = 'https://api.paystack.co/transaction/initialize';
 
     final int stake = int.parse(amount) * 100;
-    _userInputAmount = int.parse(amount);
+    // _userInputAmount = int.parse(amount);
     notifyListeners();
 
     final body = {
@@ -133,11 +133,11 @@ class PaystackProvider extends ChangeNotifier {
 
 //Calculate User Balance
   Future<void> calcUserTotalAmount(
-      BuildContext context, int initialAmount) async {
+      BuildContext context, int initialAmount, int userInputAmount) async {
     final userId = await DatabaseProvider().getUserId();
     // ignore: use_build_context_synchronously
     final dbProvider = Provider.of<DatabaseProvider>(context, listen: false);
-    int userTotalAmount = _userInputAmount + initialAmount;
+    int userTotalAmount = userInputAmount + initialAmount;
     _isLoading = true;
     notifyListeners();
 

@@ -4,7 +4,7 @@ description: A new Flutter project.
 publish_to: 'none' 
 
 
-version: 1.0.0+1
+version: 1.0.0+2
 
 environment:
   sdk: '>=3.1.5 <4.0.0'
@@ -18,6 +18,7 @@ dependencies:
   just_audio: ^0.9.36
   badges: ^3.1.2
   rive: 
+  pay_with_paystack:
   email_otp:
   firebase_messaging: ^14.7.9
   onesignal_flutter: ^5.0.4
@@ -25,7 +26,7 @@ dependencies:
   url_launcher: ^6.2.2
   cloud_firestore: ^4.13.6
   webview_flutter: ^4.4.2
-  flutterflow_ui: ^0.2.0+1
+  flutterflow_ui: 
   firebase_auth: ^4.15.0
   connectivity_plus: ^5.0.2
   animated_custom_dropdown: ^2.0.0

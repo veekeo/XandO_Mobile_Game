@@ -65,11 +65,39 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color.fromARGB(255, 1, 77, 40),
       body: Center(
-        child: SizedBox(
-          width: 170,
-          height: 170,
-          child: Image.asset('assets/images/logo.png'),
+        child: Padding(
+          padding: const EdgeInsets.all(15.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(''),
+              SizedBox(
+                width: 170,
+                height: 170,
+                child: Image.asset('assets/images/green_lotto.png'),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 70,
+                    height: 70,
+                    child: Image.asset('assets/images/logo.png'),
+                  ),
+                  const SizedBox(width: 10),
+                  const Text(
+                    'XOXO Powered by\nAnimation Hub',
+                    style: TextStyle(
+                      fontFamily: 'Medium',
+                      fontSize: 14,
+                    ),
+                  )
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );

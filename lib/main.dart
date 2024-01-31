@@ -18,6 +18,7 @@ import 'package:xando/Providers/dependency_injection.dart';
 import 'package:xando/Providers/firestore_service.dart';
 import 'package:xando/Providers/internet_provider.dart';
 import 'package:xando/Providers/paystack_provider.dart';
+import 'package:xando/Providers/snackbar_provider.dart';
 import 'package:xando/screens/splash_screen.dart';
 import 'package:xando/utils/dynamic_links.dart';
 import 'firebase_options.dart';
@@ -47,6 +48,7 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => AuthenticationProvider()),
         ChangeNotifierProvider(create: (_) => AffliateProvider()),
+        ChangeNotifierProvider(create: (_) => PointerSnackbarProvider()),
         ChangeNotifierProvider(create: (_) => PhoneNumberAuthProvider()),
         ChangeNotifierProvider(create: (_) => GoogleAuthenticationProvider()),
         ChangeNotifierProvider(create: (_) => InternetProvider()),
@@ -62,7 +64,7 @@ class MyApp extends StatelessWidget {
       ],
       child: GetMaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'X and O',
+        title: 'XOXO',
         theme: ThemeData.dark().copyWith(
           primaryColor: const Color(0xFF3B4FFE),
           scaffoldBackgroundColor: const Color.fromARGB(255, 0, 7, 38),

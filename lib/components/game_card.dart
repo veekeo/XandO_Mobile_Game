@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutterflow_ui/flutterflow_ui.dart';
 
 class GameCard extends StatelessWidget {
   const GameCard({
@@ -51,7 +51,6 @@ class GameCard extends StatelessWidget {
                       width: 30,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: FlutterFlowTheme.of(context).secondaryBackground,
                         image: DecorationImage(
                           fit: BoxFit.cover,
                           image: Image.network(
@@ -69,16 +68,11 @@ class GameCard extends StatelessWidget {
                         child: Text(
                           username!,
                           maxLines: 1,
-                          style: FlutterFlowTheme.of(context)
-                              .bodyMedium
-                              .override(
-                                fontFamily: 'Plus Jakarta Sans',
-                                fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                    FlutterFlowTheme.of(context)
-                                        .bodyMediumFamily),
-                              ),
+                          style: const TextStyle(
+                            fontFamily: 'Medium',
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
@@ -100,15 +94,12 @@ class GameCard extends StatelessWidget {
                       padding: const EdgeInsetsDirectional.fromSTEB(5, 0, 0, 0),
                       child: Text(
                         price!,
-                        style: FlutterFlowTheme.of(context).bodyMedium.override(
-                              fontFamily: 'Plus Jakarta Sans',
-                              color: Colors.green,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                              useGoogleFonts: GoogleFonts.asMap().containsKey(
-                                  FlutterFlowTheme.of(context)
-                                      .bodyMediumFamily),
-                            ),
+                        style: const TextStyle(
+                          fontFamily: 'Medium',
+                          fontSize: 12,
+                          color: Colors.green,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],

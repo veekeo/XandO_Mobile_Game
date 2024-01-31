@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutterflow_ui/flutterflow_ui.dart';
 
 class AvatarContainer extends StatelessWidget {
   const AvatarContainer({
@@ -26,7 +25,7 @@ class AvatarContainer extends StatelessWidget {
           width: 100,
           height: 100,
           decoration: BoxDecoration(
-            color: FlutterFlowTheme.of(context).secondaryBackground,
+            color: const Color(0xFF3B4FFE),
             image: DecorationImage(
               fit: BoxFit.cover,
               image: Image.network(

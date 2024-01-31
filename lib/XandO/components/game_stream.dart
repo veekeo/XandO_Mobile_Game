@@ -44,6 +44,7 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
   bool shouldUpdateUserState = false;
   bool hostState = true;
   bool player2State = true;
+  int buttonClicked = 0;
 
   void updateUserStateIfNeeded({
     required String documentID,
@@ -62,6 +63,8 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
     required bool gameState,
     String? hostGameId,
     String? gameNumberId,
+    bool? hasHostPlayed,
+    bool? hasPlayer2Played,
   }) async {
     // Your logic to determine when to update user state
     if (shouldUpdateUserState) {
@@ -83,6 +86,8 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
         player2Id: player2Id!,
         hostGameId: hostGameId!,
         gameNumberId: gameNumberId!,
+        hasHostPlayed: hasHostPlayed!,
+        hasPlayer2Played: hasPlayer2Played!,
       );
     }
   }
@@ -113,7 +118,7 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
   bool gameState = true;
 
   Timer? timer;
-  static const maxSeconds = 20;
+  static const maxSeconds = 60;
   int seconds = maxSeconds;
 
   @override
@@ -229,6 +234,8 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
               }
             } else {
               if (isHost) {
+                final hasPlayer2Played = player2Data['hasPlayer2Played'];
+                final hasHostPlayed = hostData['hasHostPlayed'];
                 final hostGameId = gameData['host']['hostGameId'];
                 final gameNumberId = gameData['host']['gameNumberId'];
                 final player2Id = gameData['player2']['player2Id'];
@@ -362,10 +369,33 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
                     }),
                     const SizedBox(height: 20),
                     // Time
-                    _buildTimer(),
+                    _buildTimer(
+                      isHost: true,
+                      isPlayer2: false,
+                      hasHostPlayed: hasHostPlayed,
+                      hasPlayer2Played: hasPlayer2Played,
+                      documentID: widget.gameId,
+                      hostState: hostState,
+                      player2State: player2State,
+                      hostId: hostId,
+                      player2Id: player2Id,
+                      gameNumberId: gameNumberId,
+                      hostGameId: hostGameId,
+                      exTurn: exTurn,
+                      ohTurn: ohTurn,
+                      displayExOh: displayExOh,
+                      matchedIndexes: matchedIndexes,
+                      filledBoxes: filledBoxes,
+                      attempts: attempts,
+                      gameState: gameState,
+                      hostAvatar: hostAvatar,
+                      player2Avatar: player2Avatar,
+                    ),
                   ],
                 );
               } else if (isPlayer2) {
+                final hasPlayer2Played = player2Data['hasPlayer2Played'];
+                final hasHostPlayed = hostData['hasHostPlayed'];
                 final hostGameId = gameData['host']['hostGameId'];
                 final gameNumberId = gameData['host']['gameNumberId'];
                 final player2Id = gameData['player2']['player2Id'];
@@ -504,7 +534,28 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
                     }),
                     const SizedBox(height: 20),
                     // Time
-                    _buildTimer(),
+                    _buildTimer(
+                      isHost: false,
+                      isPlayer2: true,
+                      hasHostPlayed: hasHostPlayed,
+                      hasPlayer2Played: hasPlayer2Played,
+                      documentID: widget.gameId,
+                      hostState: hostState,
+                      player2State: player2State,
+                      hostId: hostId,
+                      player2Id: player2Id,
+                      gameNumberId: gameNumberId,
+                      hostGameId: hostGameId,
+                      exTurn: exTurn,
+                      ohTurn: ohTurn,
+                      displayExOh: displayExOh,
+                      matchedIndexes: matchedIndexes,
+                      filledBoxes: filledBoxes,
+                      attempts: attempts,
+                      gameState: gameState,
+                      hostAvatar: hostAvatar,
+                      player2Avatar: player2Avatar,
+                    ),
                   ],
                 );
               } else if (isHost == false && isPlayer2 == false) {
@@ -519,7 +570,28 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
     );
   }
 
-  Widget _buildTimer() {
+  Widget _buildTimer({
+    required bool hasHostPlayed,
+    required bool hasPlayer2Played,
+    required bool isHost,
+    required bool isPlayer2,
+    required String documentID,
+    required bool hostState,
+    required bool player2State,
+    required bool exTurn,
+    required bool ohTurn,
+    required String hostAvatar,
+    required String player2Avatar,
+    required List<dynamic> displayExOh,
+    required List<dynamic> matchedIndexes,
+    required int filledBoxes,
+    required int attempts,
+    required String hostId,
+    required String player2Id,
+    required bool gameState,
+    required String hostGameId,
+    required String gameNumberId,
+  }) {
     final isRunning = timer == null ? false : timer!.isActive;
 
     return isRunning
@@ -553,12 +625,70 @@ class _GameStreamBuilderWidgetState extends State<GameStreamBuilderWidget> {
         : Consumer<AudioProvider>(builder: (context, audio, child) {
             return PrimaryButton(
               backgroundColor: const Color(0xFF3B4FFE),
-              title: attempts == 0 ? 'Start' : 'Replay',
+              title: hasHostPlayed == false && hasPlayer2Played == false
+                  ? 'Start'
+                  : hasHostPlayed && hasPlayer2Played == false
+                      ? 'Waiting for player 2...'
+                      : hasHostPlayed == false && hasPlayer2Played
+                          ? 'Waiting for player 2'
+                          : '',
               width: 200,
               height: 55,
               onpressed: () {
-                audio.isSoundOn ? audio.playSound('assets/pop.wav') : '';
-                startTimer();
+                if (isHost) {
+                  setState(() {
+                    hasHostPlayed = true;
+                    updateUserStateIfNeeded(
+                      documentID: widget.gameId,
+                      hostState: hostState,
+                      player2State: player2State,
+                      exTurn: exTurn,
+                      ohTurn: ohTurn,
+                      displayExOh: displayExOh,
+                      matchedIndexes: matchedIndexes,
+                      filledBoxes: filledBoxes,
+                      attempts: attempts,
+                      gameState: gameState,
+                      hostId: hostId,
+                      hostAvatar: hostAvatar,
+                      player2Avatar: player2Avatar,
+                      player2Id: player2Id,
+                      hostGameId: hostGameId,
+                      gameNumberId: gameNumberId,
+                      hasHostPlayed: true,
+                      hasPlayer2Played: hasPlayer2Played,
+                    );
+                  });
+                } else if (isPlayer2) {
+                  setState(() {
+                    hasPlayer2Played = true;
+                    updateUserStateIfNeeded(
+                      documentID: widget.gameId,
+                      hostState: hostState,
+                      player2State: player2State,
+                      exTurn: exTurn,
+                      ohTurn: ohTurn,
+                      displayExOh: displayExOh,
+                      matchedIndexes: matchedIndexes,
+                      filledBoxes: filledBoxes,
+                      attempts: attempts,
+                      gameState: gameState,
+                      hostId: hostId,
+                      hostAvatar: hostAvatar,
+                      player2Avatar: player2Avatar,
+                      player2Id: player2Id,
+                      hostGameId: hostGameId,
+                      gameNumberId: gameNumberId,
+                      hasPlayer2Played: true,
+                      hasHostPlayed: hasHostPlayed,
+                    );
+                  });
+                }
+
+                if (hasHostPlayed && hasPlayer2Played) {
+                  audio.isSoundOn ? audio.playSound('assets/pop.wav') : '';
+                  startTimer();
+                }
               },
               isLoading: false,
             )

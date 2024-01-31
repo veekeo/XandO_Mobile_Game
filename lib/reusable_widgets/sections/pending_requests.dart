@@ -262,6 +262,8 @@ class _PendingRequestsState extends State<PendingRequests> {
           gameState: state,
           isHostConnected: true,
           isPlayer2Connected: true,
+          hasHostPlayed: false,
+          hasPlayer2Played: false,
         )
             .then(
           (value) {

@@ -240,6 +240,8 @@ class _UserRequestsState extends State<UserRequests> {
           gameState: state,
           isHostConnected: true,
           isPlayer2Connected: true,
+          hasHostPlayed: false,
+          hasPlayer2Played: false,
         )
             .then(
           (value) {

@@ -54,11 +54,11 @@ class DynamicLinksProvider extends ChangeNotifier {
 
     final DynamicLinkParameters parameters = DynamicLinkParameters(
         androidParameters: const AndroidParameters(
-            packageName: "xando.app", minimumVersion: 21),
+            packageName: "xoxo.app", minimumVersion: 21),
         iosParameters:
-            const IOSParameters(bundleId: "xando.app", minimumVersion: "0"),
+            const IOSParameters(bundleId: "xoxo.app", minimumVersion: "0"),
         socialMetaTagParameters: SocialMetaTagParameters(
-            title: 'Join the Ultimate XandO Showdown!',
+            title: 'Join the Ultimate XOXO Showdown!',
             description:
                 'join our Tic Tac Toe game now and challenge friends or foes. Claim victory, win, and let the games begin!',
             imageUrl: Uri.parse(
@@ -108,11 +108,11 @@ class DynamicLinksProvider extends ChangeNotifier {
 
     final DynamicLinkParameters parameters = DynamicLinkParameters(
         androidParameters: const AndroidParameters(
-            packageName: "xando.app", minimumVersion: 21),
+            packageName: "xoxo.app", minimumVersion: 21),
         iosParameters:
-            const IOSParameters(bundleId: "xando.app", minimumVersion: "0"),
+            const IOSParameters(bundleId: "xoxo.app", minimumVersion: "0"),
         socialMetaTagParameters: SocialMetaTagParameters(
-            title: 'Join the Ultimate XandO Showdown!',
+            title: 'Join the Ultimate XOXO Showdown!',
             description:
                 'join our Tic Tac Toe game now and challenge friends or foes. Claim victory, win, and let the games begin!',
             imageUrl: Uri.parse(

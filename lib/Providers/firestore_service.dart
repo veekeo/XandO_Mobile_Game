@@ -115,15 +115,16 @@ class FireStoreServiceProvider extends ChangeNotifier {
   Stream<List<Map<String, dynamic>>> getAllRequestsStreamForUser(
       String userId) {
     try {
-      return pendingRequests.snapshots().map(
-        (querySnapshot) {
-          return querySnapshot.docs
-              .map(
-                (doc) => doc.data() as Map<String, dynamic>,
-              )
-              .toList();
-        },
-      );
+      return pendingRequests
+          .where('receiverId', isEqualTo: userId)
+          .snapshots()
+          .map((querySnapshot) {
+        return querySnapshot.docs
+            .map(
+              (doc) => doc.data() as Map<String, dynamic>,
+            )
+            .toList();
+      });
     } catch (e) {
       return Stream.value([]); // Return an empty stream in case of error
     }
@@ -236,6 +237,8 @@ class FireStoreServiceProvider extends ChangeNotifier {
     required double stake,
     required bool isHostConnected,
     required bool isPlayer2Connected,
+    required bool hasHostPlayed,
+    required bool hasPlayer2Played,
   }) async {
     try {
       await gamesCollection.doc(gameId).set({
@@ -251,6 +254,7 @@ class FireStoreServiceProvider extends ChangeNotifier {
           'hostAvatar': hostAvatar,
           'player2Avatar': player2Avatar,
           'isHostConnected': isHostConnected,
+          'hasHostPlayed': hasHostPlayed,
         },
         'player2': {
           'ohTurn': ohTurn,
@@ -262,6 +266,7 @@ class FireStoreServiceProvider extends ChangeNotifier {
           'hostAvatar': hostAvatar,
           'player2Avatar': player2Avatar,
           'isPlayer2Connected': isPlayer2Connected,
+          'hasPlayer2Played': hasPlayer2Played,
         },
         'state': gameState,
         'seconds': seconds,
@@ -289,6 +294,8 @@ class FireStoreServiceProvider extends ChangeNotifier {
     required bool gameState,
     required String hostGameId,
     required String gameNumberId,
+    required bool hasHostPlayed,
+    required bool hasPlayer2Played,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -310,6 +317,7 @@ class FireStoreServiceProvider extends ChangeNotifier {
         'gameNumberId': gameNumberId,
         'filledBoxes': filledBoxes,
         'attempts': attempts,
+        'hasHostPlayed': hasHostPlayed,
       },
       'player2': {
         'isPlayer2Connected': player2State,
@@ -320,6 +328,7 @@ class FireStoreServiceProvider extends ChangeNotifier {
         'matchedIndexes': matchedIndexes,
         'filledBoxes': filledBoxes,
         'attempts': attempts,
+        'hasPlayer2Played': hasPlayer2Played,
       }
     });
 

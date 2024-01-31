@@ -3,9 +3,8 @@ import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:webview_flutter/webview_flutter.dart';
-import 'package:xando/Providers/Profile/edit_profile_provider.dart';
+
 import 'package:xando/Providers/paystack_provider.dart';
-import 'package:xando/models/user_profile_model.dart';
 
 class PaystackCheckoutScreen extends StatefulWidget {
   const PaystackCheckoutScreen({super.key, required this.url});
@@ -15,7 +14,20 @@ class PaystackCheckoutScreen extends StatefulWidget {
   State<PaystackCheckoutScreen> createState() => _PaystackCheckoutScreenState();
 }
 
-class _PaystackCheckoutScreenState extends State<PaystackCheckoutScreen> {
+class _PaystackCheckoutScreenState extends State<PaystackCheckoutScreen>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,18 +59,18 @@ class _PaystackCheckoutScreenState extends State<PaystackCheckoutScreen> {
                   NavigationDelegate(
                     onNavigationRequest: (NavigationRequest request) async {
                       final paystack = context.read<PaystackProvider>();
-                      UserModel initialUserBalance =
-                          await EditProfileProvider().getUserProfileData();
+                      // UserModel initialUserBalance =
+                      //     await EditProfileProvider().getUserProfileData();
                       //-----------------
                       if (request.url.startsWith('https://google.com')) {
                         // ignore: use_build_context_synchronously
                         await paystack
                             .verifyTransaction(context)
                             .then((value) async {
-                          await paystack
-                              .calcUserTotalAmount(
-                                  context, initialUserBalance.gamedata!.coin)
-                              .then((value) => Navigator.pop(context));
+                          // await paystack
+                          //     .calcUserTotalAmount(
+                          //         context, initialUserBalance.gamedata!.coin)
+                          //     .then((value) => Navigator.pop(context));
                         });
                       }
                       if (request.url
@@ -83,4 +95,16 @@ class _PaystackCheckoutScreenState extends State<PaystackCheckoutScreen> {
       ),
     );
   }
+
+  // Lifecycle method to handle app lifecycle state changes
+  // @override
+  // void didChangeAppLifecycleState(AppLifecycleState state) {
+  //   if (state == AppLifecycleState.resumed) {
+  //     // App is in the foreground
+  //     // You can perform actions specific to your screen here
+  //   } else if (state == AppLifecycleState.paused) {
+  //     // App is in the background
+  //     // You can handle background tasks or cleanup here
+  //   }
+  // }
 }

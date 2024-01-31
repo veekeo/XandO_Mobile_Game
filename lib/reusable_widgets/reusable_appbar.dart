@@ -2,8 +2,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
 import 'package:google_fonts/google_fonts.dart';
+
 import 'package:xando/Providers/Profile/edit_profile_provider.dart';
-import 'package:xando/Providers/firestore_service.dart';
+import 'package:xando/components/pointer_snackbar.dart';
 import 'package:xando/components/profile_avatar_screen.dart';
 import 'package:xando/models/user_profile_model.dart';
 import 'package:xando/screens/Finance_Screens/wallet_screen.dart';
@@ -18,19 +19,21 @@ class ReusableAppBar extends StatefulWidget {
   ReusableAppBar({
     required this.coin,
     required this.userId,
+    required this.isDataAvailable,
+    required this.requests,
     super.key,
   });
 
   int coin;
   String userId;
+  bool isDataAvailable;
+  List<Map<String, dynamic>> requests;
 
   @override
   State<ReusableAppBar> createState() => _ReusableAppBarState();
 }
 
 class _ReusableAppBarState extends State<ReusableAppBar> {
-  bool isDataAvailable = false;
-
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -68,41 +71,13 @@ class _ReusableAppBarState extends State<ReusableAppBar> {
                   runAlignment: WrapAlignment.center,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    StreamBuilder<List<Map<String, dynamic>>>(
-                      stream: FireStoreServiceProvider()
-                          .getAllRequestsStreamForUser(widget.userId),
-                      builder: (context,
-                          AsyncSnapshot<List<Map<String, dynamic>>> snapshot) {
-                        if (snapshot.hasError) {
-                          return IconButton(
-                            onPressed: () {
-                              Navigator.push(context,
-                                  CupertinoPageRoute(builder: (contect) {
-                                return const GameRequestsScreen();
-                              }));
-                            },
-                            icon: const Icon(Icons.people),
-                          );
-                        } else if (snapshot.data?.isEmpty ?? true) {
-                          return IconButton(
-                            onPressed: () {
-                              Navigator.push(context,
-                                  CupertinoPageRoute(builder: (contect) {
-                                return const GameRequestsScreen();
-                              }));
-                            },
-                            icon: const Icon(Icons.people),
-                          );
-                        } else {
-                          isDataAvailable = true;
-                          List<Map<String, dynamic>> requests =
-                              snapshot.data ?? [];
-                          return badges.Badge(
+                    widget.requests.isNotEmpty
+                        ? badges.Badge(
                             position:
                                 badges.BadgePosition.topEnd(top: 5, end: 5),
                             showBadge: true,
                             badgeContent: Text(
-                              requests.length.toString(),
+                              widget.requests.length.toString(),
                               style: const TextStyle(
                                 fontFamily: 'Medium',
                                 fontSize: 7,
@@ -128,10 +103,16 @@ class _ReusableAppBarState extends State<ReusableAppBar> {
                               },
                               icon: const Icon(Icons.people),
                             ),
-                          );
-                        }
-                      },
-                    ),
+                          )
+                        : IconButton(
+                            onPressed: () {
+                              Navigator.push(context,
+                                  CupertinoPageRoute(builder: (contect) {
+                                return const GameRequestsScreen();
+                              }));
+                            },
+                            icon: const Icon(Icons.people),
+                          ),
                     Container(
                       width: 125,
                       height: 29,
@@ -248,6 +229,20 @@ class _ReusableAppBarState extends State<ReusableAppBar> {
                 ),
               ],
             ),
+            // isDataAvailable
+            //     ? Provider.of<PointerSnackbarProvider>(context).isVisible
+            //         ? const PointerSnackbar()
+            //         : const SizedBox(
+            //             height: 0,
+            //           )
+            //     : const SizedBox(
+            //         height: 0,
+            //       ),
+
+            widget.isDataAvailable
+                ? const PointerSnackbar()
+                : const SizedBox(height: 0),
+
             const SizedBox(height: 10),
             GestureDetector(
               onTap: () {
@@ -276,7 +271,7 @@ class _ReusableAppBarState extends State<ReusableAppBar> {
                         icon: const Icon(Icons.search),
                       ),
                       Text(
-                        'Search Game by ID, Title, Username...',
+                        'Search a game title, username...',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.5),
                           fontFamily: 'Medium',
