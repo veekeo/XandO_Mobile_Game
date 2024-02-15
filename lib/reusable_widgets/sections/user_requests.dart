@@ -182,7 +182,7 @@ class _UserRequestsState extends State<UserRequests> {
                                       .then((value) => game.updateGameState(
                                           true, widget.gameNumberId));
                                 },
-                                isLoading: firestore.isLoading,
+                                isLoading: false,
                               );
                             }),
                           ],
@@ -223,6 +223,8 @@ class _UserRequestsState extends State<UserRequests> {
       (value) async {
         await firestore
             .connectPlayersToGame(
+          isRunning: false,
+          winnerFound: false,
           gameNumberId: gameNumberId,
           gameId: gameId,
           exTurn: true,
@@ -242,6 +244,8 @@ class _UserRequestsState extends State<UserRequests> {
           isPlayer2Connected: true,
           hasHostPlayed: false,
           hasPlayer2Played: false,
+          isHostWinner: false,
+          isPlayer2Winner: false,
         )
             .then(
           (value) {

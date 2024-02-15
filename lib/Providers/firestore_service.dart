@@ -239,6 +239,10 @@ class FireStoreServiceProvider extends ChangeNotifier {
     required bool isPlayer2Connected,
     required bool hasHostPlayed,
     required bool hasPlayer2Played,
+    required bool isRunning,
+    required bool winnerFound,
+    required bool isHostWinner,
+    required bool isPlayer2Winner,
   }) async {
     try {
       await gamesCollection.doc(gameId).set({
@@ -255,6 +259,7 @@ class FireStoreServiceProvider extends ChangeNotifier {
           'player2Avatar': player2Avatar,
           'isHostConnected': isHostConnected,
           'hasHostPlayed': hasHostPlayed,
+          'isHostWinner': isHostWinner,
         },
         'player2': {
           'ohTurn': ohTurn,
@@ -267,7 +272,10 @@ class FireStoreServiceProvider extends ChangeNotifier {
           'player2Avatar': player2Avatar,
           'isPlayer2Connected': isPlayer2Connected,
           'hasPlayer2Played': hasPlayer2Played,
+          'isPlayer2Winner': isPlayer2Winner,
         },
+        'isRunning': isRunning,
+        'winnerFound': winnerFound,
         'state': gameState,
         'seconds': seconds,
         'stake': stake,
@@ -296,6 +304,10 @@ class FireStoreServiceProvider extends ChangeNotifier {
     required String gameNumberId,
     required bool hasHostPlayed,
     required bool hasPlayer2Played,
+    required bool isRunning,
+    required bool winnerFound,
+    required bool isHostWinner,
+    required bool isPlayer2Winner,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -318,6 +330,7 @@ class FireStoreServiceProvider extends ChangeNotifier {
         'filledBoxes': filledBoxes,
         'attempts': attempts,
         'hasHostPlayed': hasHostPlayed,
+        'isHostWinner': isHostWinner
       },
       'player2': {
         'isPlayer2Connected': player2State,
@@ -329,7 +342,105 @@ class FireStoreServiceProvider extends ChangeNotifier {
         'filledBoxes': filledBoxes,
         'attempts': attempts,
         'hasPlayer2Played': hasPlayer2Played,
-      }
+        'isPlayer2Winner': isPlayer2Winner,
+      },
+      'isRunning': isRunning,
+      'winnerFound': winnerFound,
+    });
+
+    _isLoading = false;
+    notifyListeners();
+  }
+
+  Future<void> resetGame({
+    required String gameId,
+    required String hostId,
+    required String gameNumberId,
+    required String player2Id,
+    required bool exTurn,
+    required bool ohTurn,
+    required List<String> displayExOh,
+    required List<int> matchedIndexes,
+    required int filledBoxes,
+    required int attempts,
+    required int seconds,
+    required String hostAvatar,
+    required String player2Avatar,
+    required bool gameState,
+    required double stake,
+    required bool isHostConnected,
+    required bool isPlayer2Connected,
+    required bool hasHostPlayed,
+    required bool hasPlayer2Played,
+    required bool isRunning,
+    required bool winnerFound,
+    required bool isHostWinner,
+    required bool isPlayer2Winner,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    // Get a reference to the 'pendingRequests' collection
+    CollectionReference gamesCollection =
+        FirebaseFirestore.instance.collection('games');
+
+        DocumentReference documentReference = gamesCollection.doc(gameId);
+
+    try {
+      await documentReference.update({
+        'host': {
+          'exTurn': exTurn,
+          'hostId': hostId,
+          'gameNumberId': gameNumberId,
+          'hostGameId': hostId,
+          'displayExOh': displayExOh,
+          'matchedIndexes': matchedIndexes,
+          'filledBoxes': filledBoxes,
+          'attempts': attempts,
+          'hostAvatar': hostAvatar,
+          'player2Avatar': player2Avatar,
+          'isHostConnected': isHostConnected,
+          'hasHostPlayed': hasHostPlayed,
+          'isHostWinner': isHostWinner,
+        },
+        'player2': {
+          'ohTurn': ohTurn,
+          'player2Id': player2Id,
+          'displayExOh': displayExOh,
+          'matchedIndexes': matchedIndexes,
+          'filledBoxes': filledBoxes,
+          'attempts': attempts,
+          'hostAvatar': hostAvatar,
+          'player2Avatar': player2Avatar,
+          'isPlayer2Connected': isPlayer2Connected,
+          'hasPlayer2Played': hasPlayer2Played,
+          'isPlayer2Winner': isPlayer2Winner,
+        },
+        'isRunning': isRunning,
+        'winnerFound': winnerFound,
+        'state': gameState,
+        'seconds': seconds,
+        'stake': stake,
+      });
+    } catch (e) {
+//
+    }
+  }
+
+  //Update Timer--------------------------------->
+  Future<void> updateTimer({
+    required String documentID,
+    required int seconds,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    // Get a reference to the 'pendingRequests' collection
+    CollectionReference gamesCollection =
+        FirebaseFirestore.instance.collection('games');
+
+    DocumentReference documentReference = gamesCollection.doc(documentID);
+
+    await documentReference.update({
+      'seconds': seconds,
     });
 
     _isLoading = false;

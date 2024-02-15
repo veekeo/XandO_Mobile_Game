@@ -143,134 +143,80 @@ class _HomeScreenState extends State<HomeScreen> {
       onTap: () => _model.unfocusNode.canRequestFocus
           ? FocusScope.of(context).requestFocus(_model.unfocusNode)
           : FocusScope.of(context).unfocus(),
-      child: FutureBuilder(
-          future: Future.wait([
-            FireStoreServiceProvider().getRequestsStreamForUser(_userId).first,
-            FireStoreServiceProvider().getRequestsStreamByUser(_userId).first,
-          ]),
-          builder: (context,
-              AsyncSnapshot<List<List<Map<String, dynamic>>>> snapshot) {
-            bool isDataAvailable =
-                snapshot.data?.any((list) => list.isNotEmpty) ?? false;
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              Provider.of<PointerSnackbarProvider>(context, listen: false)
-                  .toggleVisibility(isDataAvailable);
-            });
-            List<Map<String, dynamic>> requests = [];
-            if (snapshot.hasData) {
-              final data = snapshot.data!;
-              for (var streamData in data) {
-                requests.addAll(streamData);
-              }
-            } else {
-              requests = [];
-            }
-            return Scaffold(
-              key: scaffoldKey,
-              appBar: PreferredSize(
-                  preferredSize: Size.fromHeight(
-                      isDataAvailable ? 144 + 55 : 144), // Set this height
-                  child: ReusableAppBar(
-                    requests: requests,
-                    isDataAvailable: isDataAvailable,
-                    userId: _userId,
-                    coin: _coin,
-                  )),
-              body: CustomScrollView(
-                physics: const ClampingScrollPhysics(),
-                slivers: [
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 150,
-                      child: SizedBox(
-                        width: double.infinity,
-                        height: 500,
-                        child: BannerPageViewBuilder(),
-                      ),
-                    ),
-                  ),
-                  StreamBuilder<List<AvailableGamesModel>>(
-                    stream: _streamController.stream,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasData) {
-                        List<AvailableGamesModel> filteredGames = snapshot.data!
-                            .where((game) => game.user?.id != _userId)
-                            .toList();
+      child: StreamBuilder<List<Map<String, dynamic>>>(
+          stream: FireStoreServiceProvider().getRequestsStreamForUser(_userId),
+          builder: (context, snapshot1) {
+            return StreamBuilder<List<Map<String, dynamic>>>(
+              stream:
+                  FireStoreServiceProvider().getRequestsStreamByUser(_userId),
+              builder: (context, snapshot2) {
+                // Combine data from both streams
+                List<Map<String, dynamic>> requests = [];
+                requests.addAll(snapshot1.data ?? []);
+                requests.addAll(snapshot2.data ?? []);
 
-                        if (filteredGames.isNotEmpty) {
-                          return SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsetsDirectional.fromSTEB(
-                                  13, 0, 13, 15),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Row(
+                bool isDataAvailable =
+                    (snapshot1.hasData && snapshot1.data!.isNotEmpty) ||
+                        (snapshot2.hasData && snapshot2.data!.isNotEmpty);
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  Provider.of<PointerSnackbarProvider>(context, listen: false)
+                      .toggleVisibility(isDataAvailable);
+                });
+
+                return Scaffold(
+                  key: scaffoldKey,
+                  appBar: PreferredSize(
+                      preferredSize: Size.fromHeight(
+                          isDataAvailable ? 144 + 55 : 144), // Set this height
+                      child: ReusableAppBar(
+                        requests: requests,
+                        isDataAvailable: isDataAvailable,
+                        userId: _userId,
+                        coin: _coin,
+                      )),
+                  body: CustomScrollView(
+                    physics: const ClampingScrollPhysics(),
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: 150,
+                          child: SizedBox(
+                            width: double.infinity,
+                            height: 500,
+                            child: BannerPageViewBuilder(),
+                          ),
+                        ),
+                      ),
+                      StreamBuilder<List<AvailableGamesModel>>(
+                        stream: _streamController.stream,
+                        builder: (context, snapshot) {
+                          if (snapshot.hasData) {
+                            List<AvailableGamesModel> filteredGames = snapshot
+                                .data!
+                                .where((game) => game.user?.id != _userId)
+                                .toList();
+
+                            if (filteredGames.isNotEmpty) {
+                              return SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: const EdgeInsetsDirectional.fromSTEB(
+                                      13, 0, 13, 15),
+                                  child: Row(
                                     mainAxisSize: MainAxisSize.max,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        'Available Games',
-                                        style: FlutterFlowTheme.of(context)
-                                            .bodyMedium
-                                            .override(
-                                              fontFamily: 'Plus Jakarta Sans',
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.bold,
-                                              useGoogleFonts: GoogleFonts
-                                                      .asMap()
-                                                  .containsKey(
-                                                      FlutterFlowTheme.of(
-                                                              context)
-                                                          .bodyMediumFamily),
-                                            ),
-                                      ),
-                                      Container(
-                                        width: 15,
-                                        height: 15,
-                                        decoration: const BoxDecoration(),
-                                        child: ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(8),
-                                          child: Image.asset(
-                                            'assets/images/fire_emoji.png',
-                                            width: 300,
-                                            height: 200,
-                                            fit: BoxFit.cover,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  filteredGames.length > 10
-                                      ? GestureDetector(
-                                          onTap: () {
-                                            Navigator.push(
-                                                context,
-                                                CupertinoPageRoute(
-                                                    builder: (context) =>
-                                                        ShowAllGames(
-                                                          filteredGames:
-                                                              filteredGames,
-                                                          senderAvatar:
-                                                              _userAvatar,
-                                                          userId: _userId,
-                                                          username: _username,
-                                                          deviceToken:
-                                                              _deviceToken,
-                                                        )));
-                                          },
-                                          child: Text(
-                                            'Show All (${filteredGames.length})',
+                                      Row(
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: [
+                                          Text(
+                                            'Available Games',
                                             style: FlutterFlowTheme.of(context)
                                                 .bodyMedium
                                                 .override(
                                                   fontFamily:
                                                       'Plus Jakarta Sans',
-                                                  color:
-                                                      const Color(0xFFB1B1B1),
-                                                  fontSize: 11,
+                                                  fontSize: 13,
                                                   fontWeight: FontWeight.bold,
                                                   useGoogleFonts: GoogleFonts
                                                           .asMap()
@@ -280,224 +226,293 @@ class _HomeScreenState extends State<HomeScreen> {
                                                               .bodyMediumFamily),
                                                 ),
                                           ),
-                                        )
-                                      : const Text(''),
-                                ],
+                                          Container(
+                                            width: 15,
+                                            height: 15,
+                                            decoration: const BoxDecoration(),
+                                            child: ClipRRect(
+                                              borderRadius:
+                                                  BorderRadius.circular(8),
+                                              child: Image.asset(
+                                                'assets/images/fire_emoji.png',
+                                                width: 300,
+                                                height: 200,
+                                                fit: BoxFit.cover,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      filteredGames.length > 10
+                                          ? GestureDetector(
+                                              onTap: () {
+                                                Navigator.push(
+                                                    context,
+                                                    CupertinoPageRoute(
+                                                        builder: (context) =>
+                                                            ShowAllGames(
+                                                              filteredGames:
+                                                                  filteredGames,
+                                                              senderAvatar:
+                                                                  _userAvatar,
+                                                              userId: _userId,
+                                                              username:
+                                                                  _username,
+                                                              deviceToken:
+                                                                  _deviceToken,
+                                                            )));
+                                              },
+                                              child: Text(
+                                                'Show All (${filteredGames.length})',
+                                                style:
+                                                    FlutterFlowTheme.of(context)
+                                                        .bodyMedium
+                                                        .override(
+                                                          fontFamily:
+                                                              'Plus Jakarta Sans',
+                                                          color: const Color(
+                                                              0xFFB1B1B1),
+                                                          fontSize: 11,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          useGoogleFonts: GoogleFonts
+                                                                  .asMap()
+                                                              .containsKey(
+                                                                  FlutterFlowTheme.of(
+                                                                          context)
+                                                                      .bodyMediumFamily),
+                                                        ),
+                                              ),
+                                            )
+                                          : const Text(''),
+                                    ],
+                                  ),
+                                ),
+                              );
+                            }
+                          }
+                          return SliverToBoxAdapter(child: Container());
+                        },
+                      ),
+                      StreamBuilder<List<AvailableGamesModel>>(
+                        stream: _streamController.stream,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return SliverToBoxAdapter(
+                              child: SizedBox(
+                                height: MediaQuery.of(context).size.height / 2,
+                                child: const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF3B4FFE),
+                                  ),
+                                ),
                               ),
-                            ),
-                          );
-                        }
-                      }
-                      return SliverToBoxAdapter(child: Container());
-                    },
-                  ),
-                  StreamBuilder<List<AvailableGamesModel>>(
-                    stream: _streamController.stream,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return SliverToBoxAdapter(
-                          child: SizedBox(
-                            height: MediaQuery.of(context).size.height / 2,
-                            child: const Center(
-                              child: CircularProgressIndicator(
-                                color: Color(0xFF3B4FFE),
-                              ),
-                            ),
-                          ),
-                        );
-                      } else if (snapshot.hasError) {
-                        return SliverToBoxAdapter(
-                            child: Text('Error: ${snapshot.error}'));
-                      } else if (snapshot.hasData) {
-                        List<AvailableGamesModel> filteredGames = snapshot.data!
-                            .where((game) => game.user?.id != _userId)
-                            .toList();
+                            );
+                          } else if (snapshot.hasError) {
+                            return SliverToBoxAdapter(
+                                child: Text('Error: ${snapshot.error}'));
+                          } else if (snapshot.hasData) {
+                            List<AvailableGamesModel> filteredGames = snapshot
+                                .data!
+                                .where((game) => game.user?.id != _userId)
+                                .toList();
 
-                        //.
-                        if (filteredGames.isEmpty) {
-                          return SliverToBoxAdapter(
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const SizedBox(height: 20),
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.asset(
-                                      'assets/images/tic-tac-toe_black.png',
-                                      width: 100,
-                                      height: 100,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 15),
-                                  const Text(
-                                    'No available games yet',
-                                    style: TextStyle(
-                                      fontFamily: 'Bold',
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  Text(
-                                    'Don\'t worry when there are \ngames available, it will  appear here. \nYou can also create a game to get \nstarted.',
-                                    style: TextStyle(
-                                      fontFamily: 'Regular',
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white.withOpacity(0.5),
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                  const SizedBox(height: 20),
-                                  SecondaryButton(
-                                      title: '+ Create Game',
-                                      width: 180,
-                                      height: 50,
-                                      onpressed: () {
-                                        Navigator.push(
-                                            context,
-                                            MaterialPageRoute(
-                                                builder: (context) =>
-                                                    const CreateGameScreen()));
-                                      },
-                                      isLoading: false),
-                                ],
-                              ).animate().fadeIn(duration: 500.ms),
-                            ),
-                          );
-                        } else {
-                          return SliverList(
-                            delegate: SliverChildBuilderDelegate(
-                              (context, index) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      horizontal: 13),
-                                  child: FutureBuilder<UserModel>(
-                                      future: EditProfileProvider()
-                                          .getUserProfileData(),
-                                      builder: (context, snapshot) {
-                                        return GameCard(
-                                          onCardTap: () {
+                            //.
+                            if (filteredGames.isEmpty) {
+                              return SliverToBoxAdapter(
+                                child: Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      const SizedBox(height: 20),
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: Image.asset(
+                                          'assets/images/tic-tac-toe_black.png',
+                                          width: 100,
+                                          height: 100,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 15),
+                                      const Text(
+                                        'No available games yet',
+                                        style: TextStyle(
+                                          fontFamily: 'Bold',
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        'Don\'t worry when there are \ngames available, it will  appear here. \nYou can also create a game to get \nstarted.',
+                                        style: TextStyle(
+                                          fontFamily: 'Regular',
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white.withOpacity(0.5),
+                                        ),
+                                        textAlign: TextAlign.center,
+                                      ),
+                                      const SizedBox(height: 20),
+                                      SecondaryButton(
+                                          title: '+ Create Game',
+                                          width: 180,
+                                          height: 50,
+                                          onpressed: () {
                                             Navigator.push(
                                                 context,
-                                                CupertinoPageRoute(
+                                                MaterialPageRoute(
                                                     builder: (context) =>
-                                                        GameDetailsScreen(
-                                                          idOfgame:
-                                                              filteredGames[
-                                                                      index]
-                                                                  .id
-                                                                  .toString(),
-                                                          receiverAvatar:
-                                                              filteredGames[
+                                                        const CreateGameScreen()));
+                                          },
+                                          isLoading: false),
+                                    ],
+                                  ).animate().fadeIn(duration: 500.ms),
+                                ),
+                              );
+                            } else {
+                              return SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 13),
+                                      child: FutureBuilder<UserModel>(
+                                          future: EditProfileProvider()
+                                              .getUserProfileData(),
+                                          builder: (context, snapshot) {
+                                            return GameCard(
+                                              onCardTap: () {
+                                                Navigator.push(
+                                                    context,
+                                                    CupertinoPageRoute(
+                                                        builder: (context) =>
+                                                            GameDetailsScreen(
+                                                              idOfgame:
+                                                                  filteredGames[
+                                                                          index]
+                                                                      .id
+                                                                      .toString(),
+                                                              receiverAvatar: filteredGames[
                                                                           index]
                                                                       .user
                                                                       ?.avatar ??
                                                                   'https://api.multiavatar.com/5b1271f9320afc278a.png',
-                                                          senderAvatar: snapshot
-                                                                  .data
-                                                                  ?.avatar ??
-                                                              'https://api.multiavatar.com/5b1271f9320afc278a.png',
-                                                          receiverDeviceToken:
-                                                              filteredGames[
-                                                                      index]
-                                                                  .user
-                                                                  ?.deviceToken,
-                                                          senderUsername:
-                                                              _username,
-                                                          senderDeviceToken:
-                                                              _deviceToken,
-                                                          state: filteredGames[
-                                                                  index]
-                                                              .state,
-                                                          receiverId:
-                                                              filteredGames[
-                                                                      index]
-                                                                  .user
-                                                                  ?.id,
-                                                          senderId: _userId,
-                                                          stake: filteredGames[
-                                                                  index]
-                                                              .stake,
-                                                          potentialWin:
-                                                              filteredGames[
-                                                                      index]
-                                                                  .stake!,
-                                                          gameTitle:
-                                                              filteredGames[
-                                                                      index]
-                                                                  .title,
-                                                          gameId: filteredGames[
-                                                                  index]
-                                                              .gameId,
-                                                          username:
-                                                              filteredGames[
-                                                                      index]
-                                                                  .user
-                                                                  ?.username,
-                                                        )));
-                                          },
-                                          image: filteredGames[index]
-                                                  .user
-                                                  ?.avatar ??
-                                              'https://api.multiavatar.com/5b1271f9320afc278a.png',
-                                          username: filteredGames[index]
-                                              .user
-                                              ?.username,
-                                          price: filteredGames[index].stake,
-                                          buttonText:
-                                              filteredGames[index].state!
-                                                  ? 'Join'
-                                                  : 'Unavailble',
-                                          state: filteredGames[index].state!,
-                                          onTap: () {
-                                            _showCustomDialog(
-                                              context: context,
-                                              stake: filteredGames[index].stake,
-                                              gameId:
-                                                  filteredGames[index].gameId,
-                                              idOfGame: filteredGames[index].id,
-                                              username: filteredGames[index]
-                                                  .user
-                                                  ?.username,
-                                              receiverId:
-                                                  filteredGames[index].user?.id,
-                                              senderId: _userId,
-                                              senderUsername: _username,
-                                              senderDeviceToken: _deviceToken,
-                                              receiverDeviceToken:
-                                                  filteredGames[index]
-                                                      .user
-                                                      ?.deviceToken,
-                                              receiverAvatar: filteredGames[
-                                                          index]
+                                                              senderAvatar: snapshot
+                                                                      .data
+                                                                      ?.avatar ??
+                                                                  'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                                              receiverDeviceToken:
+                                                                  filteredGames[
+                                                                          index]
+                                                                      .user
+                                                                      ?.deviceToken,
+                                                              senderUsername:
+                                                                  _username,
+                                                              senderDeviceToken:
+                                                                  _deviceToken,
+                                                              state:
+                                                                  filteredGames[
+                                                                          index]
+                                                                      .state,
+                                                              receiverId:
+                                                                  filteredGames[
+                                                                          index]
+                                                                      .user
+                                                                      ?.id,
+                                                              senderId: _userId,
+                                                              stake:
+                                                                  filteredGames[
+                                                                          index]
+                                                                      .stake,
+                                                              potentialWin:
+                                                                  filteredGames[
+                                                                          index]
+                                                                      .stake!,
+                                                              gameTitle:
+                                                                  filteredGames[
+                                                                          index]
+                                                                      .title,
+                                                              gameId:
+                                                                  filteredGames[
+                                                                          index]
+                                                                      .gameId,
+                                                              username:
+                                                                  filteredGames[
+                                                                          index]
+                                                                      .user
+                                                                      ?.username,
+                                                            )));
+                                              },
+                                              image: filteredGames[index]
                                                       .user
                                                       ?.avatar ??
                                                   'https://api.multiavatar.com/5b1271f9320afc278a.png',
-                                              senderAvatar: snapshot
-                                                      .data?.avatar ??
-                                                  'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                              username: filteredGames[index]
+                                                  .user
+                                                  ?.username,
+                                              price: filteredGames[index].stake,
+                                              buttonText:
+                                                  filteredGames[index].state!
+                                                      ? 'Join'
+                                                      : 'Unavailble',
+                                              state:
+                                                  filteredGames[index].state!,
+                                              onTap: () {
+                                                _showCustomDialog(
+                                                  context: context,
+                                                  stake: filteredGames[index]
+                                                      .stake,
+                                                  gameId: filteredGames[index]
+                                                      .gameId,
+                                                  idOfGame:
+                                                      filteredGames[index].id,
+                                                  username: filteredGames[index]
+                                                      .user
+                                                      ?.username,
+                                                  receiverId:
+                                                      filteredGames[index]
+                                                          .user
+                                                          ?.id,
+                                                  senderId: _userId,
+                                                  senderUsername: _username,
+                                                  senderDeviceToken:
+                                                      _deviceToken,
+                                                  receiverDeviceToken:
+                                                      filteredGames[index]
+                                                          .user
+                                                          ?.deviceToken,
+                                                  receiverAvatar: filteredGames[
+                                                              index]
+                                                          .user
+                                                          ?.avatar ??
+                                                      'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                                  senderAvatar: snapshot
+                                                          .data?.avatar ??
+                                                      'https://api.multiavatar.com/5b1271f9320afc278a.png',
+                                                );
+                                              },
+                                              cardColor: const Color.fromARGB(
+                                                  255, 15, 22, 44),
                                             );
-                                          },
-                                          cardColor: const Color.fromARGB(
-                                              255, 15, 22, 44),
-                                        );
-                                      }),
-                                );
-                              },
-                              childCount: filteredGames.length > 10
-                                  ? 10
-                                  : filteredGames.length,
-                            ),
-                          );
-                        }
-                      }
-                      return SliverToBoxAdapter(child: Container());
-                    },
+                                          }),
+                                    );
+                                  },
+                                  childCount: filteredGames.length > 10
+                                      ? 10
+                                      : filteredGames.length,
+                                ),
+                              );
+                            }
+                          }
+                          return SliverToBoxAdapter(child: Container());
+                        },
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             );
           }),
     );

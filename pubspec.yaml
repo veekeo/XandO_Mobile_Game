@@ -48,6 +48,7 @@ dependencies:
   firebase_core: ^2.24.0
   firebase_dynamic_links: ^5.4.8
   get: ^4.6.6
+  rxdart: ^0.27.7
 
 dev_dependencies:
   flutter_test:

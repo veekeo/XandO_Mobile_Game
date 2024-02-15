@@ -239,12 +239,14 @@ class _PendingRequestsState extends State<PendingRequests> {
         .sendNotification(
             senderDeviceToken,
             'Game Alert',
-            'Your request was accepted and a game with ${widget.username} is about to start click to join',
+            'Your request was accepted and a game with ${widget.username} is about to start, click to join now',
             widget.receiverAvatar)
         .then(
       (value) async {
         await firestore
             .connectPlayersToGame(
+          isRunning: false,
+          winnerFound: false,
           gameId: gameId,
           gameNumberId: gameNumberId,
           exTurn: true,
@@ -264,6 +266,8 @@ class _PendingRequestsState extends State<PendingRequests> {
           isPlayer2Connected: true,
           hasHostPlayed: false,
           hasPlayer2Played: false,
+          isHostWinner: false,
+          isPlayer2Winner: false,
         )
             .then(
           (value) {

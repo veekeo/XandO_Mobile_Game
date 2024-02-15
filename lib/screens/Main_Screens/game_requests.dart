@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
@@ -257,18 +256,11 @@ class _GameRequestsScreenState extends State<GameRequestsScreen> {
           ),
           // Check if both streams have no data
           SliverToBoxAdapter(
-            child: FutureBuilder(
-              future: Future.wait([
-                FireStoreServiceProvider()
-                    .getRequestsStreamForUser(_userId)
-                    .first,
-                FireStoreServiceProvider()
-                    .getRequestsStreamByUser(_userId)
-                    .first,
-              ]),
-              builder: (context,
-                  AsyncSnapshot<List<List<Map<String, dynamic>>>> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+            child: StreamBuilder<List<Map<String, dynamic>>>(
+              stream:
+                  FireStoreServiceProvider().getRequestsStreamForUser(_userId),
+              builder: (context, snapshot1) {
+                if (snapshot1.connectionState == ConnectionState.waiting) {
                   return const Center(
                     child: SizedBox(
                       height: 30,
@@ -278,57 +270,75 @@ class _GameRequestsScreenState extends State<GameRequestsScreen> {
                       ),
                     ),
                   );
-                } else {
-                  bool isDataAvailable =
-                      snapshot.data?.any((list) => list.isNotEmpty) ?? false;
-
-                  if (!isDataAvailable) {
-                    return SizedBox(
-                      height: MediaQuery.of(context).size.height / 2,
-                      width: MediaQuery.of(context).size.width,
-                      child: Center(
-                        child: Padding(
-                          padding: const EdgeInsets.all(13.0),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(8),
-                                child: Image.asset(
-                                  'assets/images/3d_bell.png',
-                                  width: 136,
-                                  height: 145,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-                              const Text(
-                                'No Game Requests yet',
-                                style: TextStyle(
-                                  fontFamily: 'Bold',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                ' No worries! when new requests come \nin, it will appear here. ',
-                                style: TextStyle(
-                                  fontFamily: 'Regular',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white.withOpacity(0.5),
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
-                          ).animate().fadeIn(duration: 500.ms),
-                        ),
-                      ),
-                    );
-                  } else {
-                    return Container();
-                  }
                 }
+
+                return StreamBuilder<List<Map<String, dynamic>>>(
+                  stream: FireStoreServiceProvider()
+                      .getRequestsStreamByUser(_userId),
+                  builder: (context, snapshot2) {
+                    if (snapshot2.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: SizedBox(
+                      height: 30,
+                      width: 30,
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF3B4FFE),
+                      ),
+                    ),
+                  );
+                }
+                    bool isDataAvailable =
+                        (snapshot1.hasData && snapshot1.data!.isNotEmpty) ||
+                            (snapshot2.hasData && snapshot2.data!.isNotEmpty);
+
+                    if (!isDataAvailable) {
+                      return SizedBox(
+                        height: MediaQuery.of(context).size.height / 2,
+                        width: MediaQuery.of(context).size.width,
+                        child: Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(13.0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.asset(
+                                    'assets/images/3d_bell.png',
+                                    width: 136,
+                                    height: 145,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                const Text(
+                                  'No Game Requests yet',
+                                  style: TextStyle(
+                                    fontFamily: 'Bold',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  ' No worries! when new requests come \nin, it will appear here. ',
+                                  style: TextStyle(
+                                    fontFamily: 'Regular',
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white.withOpacity(0.5),
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ).animate().fadeIn(duration: 500.ms),
+                          ),
+                        ),
+                      );
+                    } else {
+                      return Container();
+                    }
+                  },
+                );
               },
             ),
           ),
